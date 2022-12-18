@@ -1,13 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/aasumitro/pokewar/cmd/cli/command"
+	"github.com/aasumitro/pokewar/pkg/configs"
+	"os"
+)
 
 func init() {
-	// TODO:
-	// LOAD CONFIG
-	// ETC
+	configs.LoadEnv()
+
+	configs.Instance.InitDbConn()
 }
 
 func main() {
-	fmt.Println("hello from cli")
+	if err := command.CliCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

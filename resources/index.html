@@ -37,7 +37,7 @@
 
                 <!-- NAVIGATION  -->
                 <section id="navigation" class="flex flex-row gap-6 mt-8">
-                    <button onclick="alert('not impl yet')" class="font-bold ml-1 my-4 cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400 dark:text-gray-300  flex items-center gap-1">
+                    <button onclick="displaySection('monsters')" class="font-bold ml-1 my-4 cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400 dark:text-gray-300  flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                         </svg>
@@ -64,17 +64,24 @@
                 </section>
 
                 <!-- FOOTER -->
-                <section class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex flex-row gap-2 items-center">
-                    <p class="font-bold">Pokewar™</p> —
-                    <p class="font-medium italic">API Powered by</p>
-                    <a href="https://pokeapi.co/" target="_blank">
-                        <img
-                            class="h-4"
-                            src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png"
-                            alt="pokeapi-logo"
-                        >
-                    </a> —
-                    [<a href="https:/github.com/aasumitro/pokewar" target="_blank" class="font-bold cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400 dark:text-gray-300">source</a>]
+                <section class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 items-center">
+                    <div class="flex flex-row gap-2">
+                        [<a href="https:/github.com/aasumitro/pokewar" target="_blank" class="font-bold cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400 dark:text-gray-300">Source Code</a>]
+                        [<!--suppress HtmlUnknownTarget -->
+                        <a href="/docs/index.html" target="_blank" class="font-bold cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400 dark:text-gray-300">API Spec</a>]
+                    </div>
+                    <div class="flex flex-row gap-2 ">
+                       <p class="font-bold">Pokewar</p> —
+                       <p class="font-medium italic">API Powered by</p>
+                       <a href="https://pokeapi.co/" target="_blank">
+                           <img
+                                   class="h-4"
+                                   src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png"
+                                   alt="pokeapi-logo"
+                           >
+                       </a>
+                   </div>
+
                 </section>
             </div>
 
@@ -100,8 +107,13 @@
                     <h5 id="section-title" class="text-lg font-bold text-black ml-4"></h5>
                 </div>
 
+                <!-- MONSTER SECTION -->
+                <div id="monster-section" class="py-4 md:py-7 px-4 md:px-8 xl:px-10 hidden">
+                    <div class=" flex flex-wrap gap-8" id="monsters-list"></div>
+                </div>
+
                 <!-- BATTLE SECTION -->
-                <div id="battle-section" class="flex flex-col items-center justify-center hidden">
+                <div id="battle-section" class="flex flex-col items-center justify-center w-fit hidden">
                     <div class="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
                         <div class="sm:flex items-center justify-between">
                             <div class="flex items-center">
@@ -137,14 +149,14 @@
                             </div>
                         </div>
                         <div class="mt-7 overflow-x-auto">
-                            <table class="w-full whitespace-nowrap" id="rank-list-table">
+                            <table class="whitespace-nowrap" id="rank-list-table">
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- BATTLE SECTION -->
+                <!-- PLAY SECTION -->
                 <div id="play-section" class="flex flex-col items-center justify-center hidden">
                     <div class="flex flex-wrap gap-4 items-center justify-center">
                         <div class="p-4 max-w-sm mx-auto bg-white rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6">
@@ -175,9 +187,11 @@
         const introComponent = document.getElementById('intro-component')
         const mainComponent = document.getElementById('main-component')
         const sectionTitle = document.getElementById('section-title')
+        const sectionMonster = document.getElementById('monster-section')
         const sectionBattle = document.getElementById('battle-section')
         const sectionRank = document.getElementById('rank-section')
         const sectionPlay = document.getElementById('play-section')
+        const monsterList = document.getElementById('monsters-list')
         const matchList = document.getElementById('match-list')
         const rankTable = document.getElementById('rank-list-table')
 
@@ -193,6 +207,9 @@
             if (section === 'play') sectionTitle.append(" Battleroyale")
 
             switch (section) {
+                case "monsters":
+                    displayMonsters()
+                    break
                 case "battles":
                     displayBattles(5)
                     break
@@ -200,7 +217,7 @@
                     displayRanks(5)
                     break
                 case "play":
-                    startBattle()
+                    displayPlayground()
                     break
                 default:
                     alert("something went wrong!")
@@ -212,6 +229,48 @@
         function onBackPressed() {
             introComponent.classList.remove('hidden')
             mainComponent.classList.add('hidden')
+
+            // data
+            matchList.innerHTML = ""
+            monsterList.innerHTML = ""
+        }
+
+
+        // ================================================================
+        // START MATCH SECTION
+        // ================================================================
+        function  displayMonsters() {
+            sectionMonster.classList.remove('hidden')
+            sectionBattle.classList.add('hidden')
+            sectionRank.classList.add('hidden')
+            sectionPlay.classList.add('hidden')
+
+            monsterList.innerHTML = ""
+            for (let i = 1; i <= 25; i++) {
+                const item = monstersItemComponent(i)
+                monsterList.innerHTML += item
+            }
+        }
+
+        function monstersItemComponent(data) {
+            return `
+            <div class="grow max-w-32 bg-gray-100 rounded">
+                <div class="bg-gray-800 text-white p-4">
+                    <h2 class="text-2xl font-bold">Bulbasaur</h2>
+                </div>
+                <div class="display flex flex-row">
+                <img
+                        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/1.svg"
+                        alt="Bulbasaur"
+                        class="mt-4 w-32 h-32 mx-auto"
+                />
+                </div>
+                <div class="p-4">
+                    <p class="font-bold text-lg">Type: <span class="font-normal">Grass</span></p>
+                    <p class="font-bold text-lg">Ability: <span class="font-normal">Cambukan Lele</span></p>
+                </div>
+            </div>
+            `
         }
 
         // ================================================================
@@ -219,6 +278,7 @@
         // ================================================================
         function displayBattles(total = null) {
             sectionBattle.classList.remove('hidden')
+            sectionMonster.classList.add('hidden')
             sectionRank.classList.add('hidden')
             sectionPlay.classList.add('hidden')
 
@@ -276,32 +336,31 @@
             }
 
             return `
-            <div class="flex flex-col block bg-white border border-gray-200 rounded-lg shadow-md w-80 h-fit divide-y ">
-                <div class="flex flex-row">
-                    <div class="bg-gray-200 w-32 h-32 flex items-center justify-center">
-                        <p class="text-3xl font-bold">#`+data+`</p>
-                    </div>
-                    <div class="grow flex flex-col items-center justify-center text-center px-2">
-                        <h1 class="text-lg font-semibold">Wed, 12/12-2022</h1>
-                        <p class="italic font-light">18:21 - 18.22</p>
-                        <div class="flex flex-row gap-2 mt-4">
-                            <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                12µs
-                            </button>
-                            <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path d="M19.889,12.818l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0s-0.195-0.512,0-0.707l1.414-1.414 c0.195-0.195,0.512-0.195,0.707,0C20.084,12.306,20.084,12.623,19.889,12.818z M16.353,15.647c-0.195-0.195-0.512-0.195-0.707,0
-                                    l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414C16.549,16.158,16.549,15.842,16.353,15.647z M12.818,19.182c-0.195-0.195-0.512-0.195-0.707,0l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414 C13.013,19.694,13.013,19.377,12.818,19.182z M28.374,11.404l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0l-1.736-1.736
-                                    l-14.498,17.26c-0.073,0.087-0.174,0.147-0.285,0.169l-7.071,1.414c-0.164,0.033-0.334-0.019-0.452-0.137 c-0.118-0.118-0.17-0.288-0.137-0.452l1.414-7.071c0.022-0.111,0.082-0.212,0.169-0.285l17.26-14.498l-1.736-1.736
-                                    c-0.195-0.195-0.195-0.512,0-0.707l1.414-1.414c0.195-0.195,0.512-0.195,0.707,0l1.768,1.768l3.182-3.182 c0.195-0.195,0.512-0.195,0.707,0l2.828,2.828c0.195,0.195,0.195,0.512,0,0.707l-3.182,3.182l1.768,1.768 C28.57,10.892,28.57,11.208,28.374,11.404z M23.778,6.101l2.121,2.121l2.828-2.828l-2.121-2.121L23.778,6.101z M23.808,10.373 l-2.18-2.18L4.435,22.634l-1.233,6.164l6.164-1.233L23.808,10.373z M27.314,11.05L20.95,4.686l-0.707,0.707l6.364,6.364
-                                    L27.314,11.05z"/>
-                                </svg>
-                                128x
-                            </button>
-                        </div>
+            <div class="grow flex flex-col block bg-white border border-gray-200 rounded-lg shadow-md h-fit divide-y ">
+                <div class="pokemon-header text-black p-4">
+                    <h2 class="pokemon-name text-2xl font-bold">Battle</h2>
+                    <p class="pokemon-number font-medium">#`+data+`</p>
+                </div>
+                <div class="pokemon-header bg-gray-800 text-white p-4">
+                    <h1 class="text-lg font-semibold">Wed, 12/12-2022</h1>
+                    <p class="italic font-light">18:21 - 18.22</p>
+                    <div class="flex flex-row gap-2 mt-4">
+                        <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            12µs
+                        </button>
+                        <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path d="M19.889,12.818l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0s-0.195-0.512,0-0.707l1.414-1.414 c0.195-0.195,0.512-0.195,0.707,0C20.084,12.306,20.084,12.623,19.889,12.818z M16.353,15.647c-0.195-0.195-0.512-0.195-0.707,0
+                                l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414C16.549,16.158,16.549,15.842,16.353,15.647z M12.818,19.182c-0.195-0.195-0.512-0.195-0.707,0l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414 C13.013,19.694,13.013,19.377,12.818,19.182z M28.374,11.404l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0l-1.736-1.736
+                                l-14.498,17.26c-0.073,0.087-0.174,0.147-0.285,0.169l-7.071,1.414c-0.164,0.033-0.334-0.019-0.452-0.137 c-0.118-0.118-0.17-0.288-0.137-0.452l1.414-7.071c0.022-0.111,0.082-0.212,0.169-0.285l17.26-14.498l-1.736-1.736
+                                c-0.195-0.195-0.195-0.512,0-0.707l1.414-1.414c0.195-0.195,0.512-0.195,0.707,0l1.768,1.768l3.182-3.182 c0.195-0.195,0.512-0.195,0.707,0l2.828,2.828c0.195,0.195,0.195,0.512,0,0.707l-3.182,3.182l1.768,1.768 C28.57,10.892,28.57,11.208,28.374,11.404z M23.778,6.101l2.121,2.121l2.828-2.828l-2.121-2.121L23.778,6.101z M23.808,10.373 l-2.18-2.18L4.435,22.634l-1.233,6.164l6.164-1.233L23.808,10.373z M27.314,11.05L20.95,4.686l-0.707,0.707l6.364,6.364
+                                L27.314,11.05z"/>
+                            </svg>
+                            128x
+                        </button>
                     </div>
                 </div>
                 <div class="p-4">
@@ -323,20 +382,19 @@
                     <div class="flex flex-col pl-2">
                         <p class="text-base font-medium leading-none text-gray-700 mr-2">Monsters Name</p>
                         <div class="flex flex-row gap-2 mt-2">
-                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ point +`</span>
-                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">2µs</span>
+                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ point +` pts</span>
+                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">2 µs</span>
                         </div>
                     </div>
                 </td>
 
-                <!-- TODO DELETE THIS -->
-                <td>
-                    <button class="p-1 text-sm focus:outline-none leading-none text-red-700 bg-red-100 rounded">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </td>
+                <!--<td>-->
+                <!--    <button class="p-1 text-sm focus:outline-none leading-none text-red-700 bg-red-100 rounded">-->
+                <!--        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">-->
+                <!--            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />-->
+                <!--        </svg>-->
+                <!--    </button>-->
+                <!--</td>-->
             </tr>
             <tr class="h-1"></tr>
             `
@@ -349,6 +407,7 @@
         // START RANK SECTION
         // ================================================================
         function displayRanks(total = null) {
+            sectionMonster.classList.add('hidden')
             sectionBattle.classList.add('hidden')
             sectionRank.classList.remove('hidden')
             sectionPlay.classList.add('hidden')
@@ -413,28 +472,27 @@
                     <div class="flex flex-col pl-5">
                         <p class="text-base font-medium leading-none text-gray-700 mr-2">Monsters Name</p>
                         <div class="flex flex-row gap-2 mt-2">
-                            <span class="rounded-full bg-red-100 border border-red-300 text-xs font-extralight px-2 text-red-700">Species</span>
-                            <span class="rounded-full bg-red-100 border border-red-300 text-xs font-extralight px-2 text-red-700">Types</span>
+                            <span class="rounded-full bg-gray-100 border border-gray-300 text-xs font-extralight px-2 text-gray-700">Types</span>
                         </div>
                     </div>
                 </td>
                 <td class="pl-24">
                     <div class="flex items-center">
-                       P[<p class="text-sm leading-none text-yellow-600">245</p>]
+                       Play[<p class="text-sm leading-none text-yellow-600">245x</p>]
                     </div>
                 </td>
                 <td class="pl-5">
                     <div class="flex items-center">
-                        W[<p class="text-sm leading-none text-green-600">4</p>]
+                        Win[<p class="text-sm leading-none text-green-600">4x</p>]
                     </div>
                 </td>
-                <td class="pl-5">
-                    <div class="flex items-center">
-                        L[<p class="text-sm leading-none text-red-600">23</p>]
-                    </div>
-                </td>
+                <!--<td class="pl-5">-->
+                <!--    <div class="flex items-center">-->
+                <!--        L[<p class="text-sm leading-none text-red-600">23</p>]-->
+                <!--    </div>-->
+                <!--</td>-->
                 <td class="px-5">
-                    <button class="py-3 px-3 text-sm focus:outline-none leading-none text-green-700 bg-green-100 rounded">1205 pts</button>
+                    <button class="py-3 px-3 text-sm focus:outline-none leading-none text-gray-700 bg-gray-100 rounded">1205 pts</button>
                 </td>
             </tr>
             <tr class="h-3"></tr>
@@ -447,7 +505,8 @@
         // ================================================================
         // START BATTLE SECTION
         // ================================================================
-        function startBattle() {
+        function displayPlayground() {
+            sectionMonster.classList.add('hidden')
             sectionBattle.classList.add('hidden')
             sectionRank.classList.add('hidden')
             sectionPlay.classList.remove('hidden')

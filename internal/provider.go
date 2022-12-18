@@ -1,28 +1,59 @@
 package internal
 
 import (
-	"fmt"
-	httpDelivery "github.com/aasumitro/pokewar/internal/delivery/handler/http"
-	wsDelivery "github.com/aasumitro/pokewar/internal/delivery/handler/ws"
-	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
-	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
-	"github.com/aasumitro/pokewar/internal/service"
+	"context"
+	"github.com/gin-gonic/gin"
 )
 
-// NewApi Inject-Inject Club
-func NewApi() {
-	// TODO
-	pokeapiRESTRepo := restRepo.NewPokeapiRESTRepository()
-	battleSQLRepo := sqlRepo.NewBattleSQLRepository()
-	monsterSQLRepo := sqlRepo.NewMonsterSQlRepository()
-	rankSQLRepo := sqlRepo.NewRankSQLRepository()
-	pokewarService := service.NewPokewarService()
-	battleHTTPDelivery := httpDelivery.NewBattleHttpHandler()
-	rankHTTPDelivery := httpDelivery.NewRankHttpHandler()
-	matchWSDelivery := wsDelivery.NewMatchWSHandler()
+//var (
+//	pokeapiRESTRepo domain.PokeapiRESTRepository
+//	monsterSQLRepo  domain.ICRUDMonsterRepository[domain.Monster]
+//)
 
-	fmt.Println(
-		pokeapiRESTRepo, battleSQLRepo, monsterSQLRepo,
-		rankSQLRepo, pokewarService, battleHTTPDelivery,
-		rankHTTPDelivery, matchWSDelivery)
+func init() {
+	//pokeapiRESTRepo = restRepo.NewPokeapiRESTRepository()
+	//monsterSQLRepo = sqlRepo.NewMonsterSQlRepository()
+	//
+	//battleSQLRepo := sqlRepo.NewBattleSQLRepository()
+	//rankSQLRepo := sqlRepo.NewRankSQLRepository()
+	//pokewarService := service.NewPokewarService()
+	//battleHTTPDelivery := httpDelivery.NewBattleHttpHandler()
+	//rankHTTPDelivery := httpDelivery.NewRankHttpHandler()
+	//matchWSDelivery := wsDelivery.NewMatchWSHandler()
+	//
+	//fmt.Println(
+	//	pokeapiRESTRepo, battleSQLRepo, monsterSQLRepo,
+	//	rankSQLRepo, pokewarService, battleHTTPDelivery,
+	//	rankHTTPDelivery, matchWSDelivery)
 }
+
+// NewApi Inject-Inject Club
+func NewApi(ctx context.Context, router *gin.Engine) {
+	//if configs.Instance.LastSync == 0 {
+	//	doSync(ctx)
+	//}
+
+	// TODO ADD HANDLER
+}
+
+//func doSync(ctx context.Context) {
+//	var wg sync.WaitGroup
+//
+//	data, _ := pokeapiRESTRepo.Pokemon()
+//
+//	for _, monster := range data {
+//		wg.Add(1)
+//		go func(monster *domain.Monster) {
+//			defer wg.Done()
+//			if err := monsterSQLRepo.Update(ctx, monster); err != nil {
+//				// todo add data error and re update
+//				fmt.Println(err.Error())
+//			}
+//		}(monster)
+//	}
+//
+//	wg.Wait()
+//
+//	configs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
+//	configs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", len(data))
+//}
