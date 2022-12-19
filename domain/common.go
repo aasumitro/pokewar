@@ -16,14 +16,9 @@ type (
 		Create(ctx context.Context, param *T) error
 	}
 
-	// IReadAllRepository - ReadAllNoCondition
+	// IReadAllRepository - ReadAllNoCondition (args: LIMIT, OFFSET, OR WHERE CLAUSE)
 	IReadAllRepository[T any] interface {
-		All(ctx context.Context) (data []*T, err error)
-	}
-
-	// IReadAllWhereInRepository - ReadAllWhereIn
-	IReadAllWhereInRepository[T any] interface {
-		AllWhereIn(ctx context.Context, id []int) (data []*T, err error)
+		All(ctx context.Context, args ...string) (data []*T, err error)
 	}
 
 	// IReadOneRepository - ReadOne/Show
@@ -39,5 +34,9 @@ type (
 	// IDeleteRepository - Delete
 	IDeleteRepository[T any] interface {
 		Delete(ctx context.Context, param *T) error
+	}
+
+	ICountRowRepository interface {
+		Count(ctx context.Context) int
 	}
 )

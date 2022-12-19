@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type (
 	Battle struct {
 		ID        int
@@ -27,9 +29,9 @@ type (
 	}
 
 	IBattleRepository interface {
-		//TODO
-		// Create - Create battle result (battle, players, logs)
-		// Update - Annulled player?
-		// Read - Read all battle with monster rank
+		ICreateRepository[Battle]
+		IReadAllRepository[Battle]
+		ICountRowRepository
+		UpdatePlayer(ctx context.Context, id int) (annulledTime int64, err error)
 	}
 )

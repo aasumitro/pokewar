@@ -6,7 +6,8 @@ type (
 		OriginID     int
 		Name         string
 		Avatar       string
-		Types        string
+		T            string   `json:"-"`
+		Types        []string `json:"types"`
 		TotalBattles int
 		WinBattles   int
 		LoseBattle   int

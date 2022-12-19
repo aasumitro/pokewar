@@ -16,6 +16,7 @@ type (
 		Logs    []Log
 	}
 
+	// Log represent of player action to eliminate other player
 	Log struct {
 		PlayerID    int
 		Description string
@@ -39,3 +40,34 @@ type (
 		Result()
 	}
 )
+
+func (g *Game) Start() {
+
+}
+
+func (g *Game) Moves() {
+
+}
+
+func (g *Game) Eliminate() {
+
+}
+
+func (g *Game) Rank() {
+
+}
+
+func (g *Game) Point() {
+
+}
+
+func (g *Game) Result() {
+
+}
+
+func NewGame(players []*Player, ctx context.Context) IGameAction {
+	return &Game{
+		ctx:     ctx,
+		Players: players,
+	}
+}

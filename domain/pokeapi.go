@@ -61,8 +61,7 @@ type (
 		Url  string `json:"url"`
 	}
 
-	PokeapiRESTRepository interface {
-		Pokemon() ([]*Monster, error)
-		MakeRequest(endpoint string, obj interface{}) error
+	IPokeapiRESTRepository interface {
+		Pokemon(offset int) ([]*Monster, error)
 	}
 )

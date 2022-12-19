@@ -40,7 +40,7 @@ type (
 	IMonsterRepository interface {
 		ICreateRepository[Monster]
 		IReadAllRepository[Monster]
-		IReadAllWhereInRepository[Monster]
 		IUpdateRepository[Monster]
+		ICountRowRepository
 	}
 )

@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/aasumitro/pokewar/cmd/cli/command"
-	"github.com/aasumitro/pokewar/pkg/configs"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"os"
 )
 
 func init() {
-	configs.LoadEnv()
+	appconfigs.LoadEnv()
 
-	configs.Instance.InitDbConn()
+	appconfigs.Instance.InitDbConn()
 }
 
 func main() {

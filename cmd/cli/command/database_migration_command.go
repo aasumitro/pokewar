@@ -2,7 +2,7 @@ package command
 
 import (
 	"fmt"
-	"github.com/aasumitro/pokewar/pkg/configs"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/file"
@@ -21,8 +21,12 @@ var migrateUpCmd = &cobra.Command{
 	Long: `Command to upgrade database migration`,
 	Run: func(cmd *cobra.Command, args []string) {
 		migration, err := initGoMigrate()
+		if err != nil {
+			fmt.Printf("migrate down error: %v \n", err)
+			return
+		}
 
-		if err = migration.Up(); err != nil {
+		if err := migration.Up(); err != nil {
 			fmt.Printf("migrate up error: %v \n", err)
 			return
 		}
@@ -36,8 +40,12 @@ var migrateDownCmd = &cobra.Command{
 	Long: `Command to downgrade database`,
 	Run: func(cmd *cobra.Command, args []string) {
 		migration, err := initGoMigrate()
+		if err != nil {
+			fmt.Printf("migrate down error: %v \n", err)
+			return
+		}
 
-		if err = migration.Down(); err != nil {
+		if err := migration.Down(); err != nil {
 			fmt.Printf("migrate down error: %v \n", err)
 			return
 		}
@@ -51,6 +59,10 @@ var migrateVersionCmd = &cobra.Command{
 	Long: `Command to see database migration version`,
 	Run: func(cmd *cobra.Command, args []string) {
 		migration, err := initGoMigrate()
+		if err != nil {
+			fmt.Printf("migrate down error: %v \n", err)
+			return
+		}
 
 		version, dirty, err := migration.Version()
 		if err != nil {
@@ -70,7 +82,7 @@ func initGoMigrate() (instance *migrate.Migrate, err error) {
 	}
 
 	driver, err := sqlite3.WithInstance(
-		configs.DbPool, &sqlite3.Config{})
+		appconfigs.DbPool, &sqlite3.Config{})
 	if err != nil {
 		return nil, err
 	}

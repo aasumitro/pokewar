@@ -1,4 +1,4 @@
-package configs
+package appconfigs
 
 import (
 	"database/sql"
@@ -20,6 +20,7 @@ type AppConfig struct {
 	DBDriver         string `mapstructure:"DB_DRIVER"`
 	DBDsnUrl         string `mapstructure:"DB_DSN_URL"`
 	LastSync         int    `mapstructure:"LAST_SYNC"`
+	LastMonsterID    int    `mapstructure:"LAST_MONSTER_ID"`
 	TotalMonsterSync int    `mapstructure:"TOTAL_MONSTER_SYNC"`
 }
 
@@ -47,7 +48,7 @@ func LoadEnv() {
 			// specified error message
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				// Config file not found; ignore error if desired
-				panic(".env file not found!, please copy .env.example and paste as .env")
+				panic(".env file not found!, please copy .example.env and paste as .env")
 			}
 			// general error message
 			panic(fmt.Sprintf("ENV_ERROR: %s", err.Error()))

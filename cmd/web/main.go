@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/aasumitro/pokewar/docs"
 	"github.com/aasumitro/pokewar/internal"
-	"github.com/aasumitro/pokewar/pkg/configs"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/aasumitro/pokewar/resources"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -25,21 +25,21 @@ var (
 )
 
 func init() {
-	configs.LoadEnv()
+	appconfigs.LoadEnv()
 
-	configs.Instance.InitDbConn()
+	appconfigs.Instance.InitDbConn()
 
-	if !configs.Instance.AppDebug {
+	if !appconfigs.Instance.AppDebug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	appEngine = gin.Default()
 
 	docs.SwaggerInfo.BasePath = appEngine.BasePath() + "v1/api"
-	docs.SwaggerInfo.Title = configs.Instance.AppName
+	docs.SwaggerInfo.Title = appconfigs.Instance.AppName
 	docs.SwaggerInfo.Description = "Pocket Monster Battleroyale API Spec"
-	docs.SwaggerInfo.Version = configs.Instance.AppVersion
-	docs.SwaggerInfo.Host = configs.Instance.AppUrl
+	docs.SwaggerInfo.Version = appconfigs.Instance.AppVersion
+	docs.SwaggerInfo.Host = appconfigs.Instance.AppUrl
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
@@ -57,5 +57,5 @@ func main() {
 
 	internal.NewApi(ctx, appEngine)
 
-	log.Fatal(appEngine.Run(configs.Instance.AppUrl))
+	log.Fatal(appEngine.Run(appconfigs.Instance.AppUrl))
 }

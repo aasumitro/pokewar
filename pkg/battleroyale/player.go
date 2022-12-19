@@ -24,3 +24,7 @@ type (
 		Attack(other *Player) Log
 	}
 )
+
+func (p *Player) Attack(other *Player) Log {
+	return Log{}
+}

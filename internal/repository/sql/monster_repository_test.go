@@ -7,7 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/aasumitro/pokewar/domain"
 	repoSql "github.com/aasumitro/pokewar/internal/repository/sql"
-	"github.com/aasumitro/pokewar/pkg/configs"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"regexp"
@@ -25,7 +25,7 @@ type monsterSQLRepositoryTestSuite struct {
 func (suite *monsterSQLRepositoryTestSuite) SetupSuite() {
 	var err error
 
-	configs.DbPool, suite.mock, err = sqlmock.New(
+	appconfigs.DbPool, suite.mock, err = sqlmock.New(
 		sqlmock.QueryMatcherOption(
 			sqlmock.QueryMatcherRegexp))
 
@@ -51,10 +51,10 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnDat
 		NewRows([]string{"id", "origin_id", "name", "base_exp", "height", "weight", "avatar", "types", "stats", "skills"}).
 		AddRow(1, 1, "test1", 1, 1, 1, "lorem.png", "[\"grass\",\"poison\"]", "[{\"base_stat\":45,\"name\":\"hp\"}]", "[{\"pp\":15,\"name\":\"echoed-voice\"}]").
 		AddRow(2, 2, "test2", 2, 2, 2, "lorem.png", "[\"grass\",\"poison\"]", "[{\"base_stat\":45,\"name\":\"hp\"}]", "[{\"pp\":15,\"name\":\"echoed-voice\"}]")
-	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills FROM monsters"
+	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills FROM monsters LIMIT 1"
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
-	res, err := suite.repo.All(context.TODO())
+	res, err := suite.repo.All(context.TODO(), "LIMIT 1")
 	require.Nil(suite.T(), err)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), res)
@@ -76,44 +76,6 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErr
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO())
-	require.Nil(suite.T(), res)
-	require.NotNil(suite.T(), err)
-}
-
-// =========== ALL_WHERE_ID
-func (suite *monsterSQLRepositoryTestSuite) TestRepository_AllWhereIn_ExpectedReturnData() {
-	data := suite.mock.
-		NewRows([]string{"id", "origin_id", "name", "base_exp", "height", "weight", "avatar", "types", "stats", "skills"}).
-		AddRow(1, 1, "test1", 1, 1, 1, "lorem.png", "[\"grass\",\"poison\"]", "[{\"base_stat\":45,\"name\":\"hp\"}]", "[{\"pp\":15,\"name\":\"echoed-voice\"}]").
-		AddRow(2, 2, "test2", 2, 2, 2, "lorem.png", "[\"grass\",\"poison\"]", "[{\"base_stat\":45,\"name\":\"hp\"}]", "[{\"pp\":15,\"name\":\"echoed-voice\"}]")
-	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, "
-	q += "stats, skills FROM monsters WHERE origin_id IN (?,?,?,?,?) LIMIT 5"
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
-	res, err := suite.repo.AllWhereIn(context.TODO(), []int{1, 2, 3, 4, 5})
-	require.Nil(suite.T(), err)
-	require.NoError(suite.T(), err)
-	require.NotNil(suite.T(), res)
-}
-func (suite *monsterSQLRepositoryTestSuite) TestRepository_AllWhereIn_ExpectedReturnErrorFromQuery() {
-	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, "
-	q += "stats, skills FROM monsters WHERE origin_id IN (?,?,?,?,?) LIMIT 5"
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
-	res, err := suite.repo.AllWhereIn(context.TODO(), []int{1, 2, 3, 4, 5})
-	require.NotNil(suite.T(), err)
-	require.Nil(suite.T(), res)
-}
-func (suite *monsterSQLRepositoryTestSuite) TestRepository_AllWhereIn_ExpectedReturnErrorFromScan() {
-	data := suite.mock.
-		NewRows([]string{"id", "origin_id", "name", "base_exp", "height", "weight", "avatar", "types", "stats", "skills"}).
-		AddRow(1, 1, "test1", 1, 1, 1, "lorem.png", "[\"grass\",\"poison\"]", "[{\"base_stat\":45,\"name\":\"hp\"}]", "[{\"pp\":15,\"name\":\"echoed-voice\"}]").
-		AddRow(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, "
-	q += "stats, skills FROM monsters WHERE origin_id IN (?,?,?,?,?) LIMIT 5"
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
-	res, err := suite.repo.AllWhereIn(context.TODO(), []int{1, 2, 3, 4, 5})
 	require.Nil(suite.T(), res)
 	require.NotNil(suite.T(), err)
 }
@@ -180,6 +142,26 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Update_ExpectedError(
 		WillReturnError(errors.New(""))
 	err := suite.repo.Update(context.TODO(), suite.data)
 	require.NotNil(suite.T(), err)
+}
+
+// =========== COUNT
+func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnData() {
+	data := suite.mock.
+		NewRows([]string{"count"}).
+		AddRow(50)
+	q := "SELECT COUNT(*) FROM monsters"
+	expectedQuery := regexp.QuoteMeta(q)
+	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
+	res := suite.repo.Count(context.TODO())
+	require.NotNil(suite.T(), res)
+	require.EqualValues(suite.T(), res, 50)
+}
+func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnErrorFromQuery() {
+	q := "SELECT COUNT(*) FROM monsters"
+	expectedQuery := regexp.QuoteMeta(q)
+	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
+	res := suite.repo.Count(context.TODO())
+	require.EqualValues(suite.T(), res, 0)
 }
 
 func TestMonsterRepository(t *testing.T) {

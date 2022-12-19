@@ -2,40 +2,37 @@ package internal
 
 import (
 	"context"
+	"github.com/aasumitro/pokewar/domain"
+	"github.com/aasumitro/pokewar/internal/delivery/handler/http"
+	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
+	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
+	"github.com/aasumitro/pokewar/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
-//var (
-//	pokeapiRESTRepo domain.PokeapiRESTRepository
-//	monsterSQLRepo  domain.ICRUDMonsterRepository[domain.Monster]
-//)
+var (
+	pokeapiRESTRepo domain.IPokeapiRESTRepository
+	monsterSQLRepo  domain.IMonsterRepository
+	rankSQLRepo     domain.IRankRepository
+	battleSQLRepo   domain.IBattleRepository
+)
 
-func init() {
-	//pokeapiRESTRepo = restRepo.NewPokeapiRESTRepository()
-	//monsterSQLRepo = sqlRepo.NewMonsterSQlRepository()
-	//
-	//battleSQLRepo := sqlRepo.NewBattleSQLRepository()
-	//rankSQLRepo := sqlRepo.NewRankSQLRepository()
-	//pokewarService := service.NewPokewarService()
-	//battleHTTPDelivery := httpDelivery.NewBattleHttpHandler()
-	//rankHTTPDelivery := httpDelivery.NewRankHttpHandler()
-	//matchWSDelivery := wsDelivery.NewMatchWSHandler()
-	//
-	//fmt.Println(
-	//	pokeapiRESTRepo, battleSQLRepo, monsterSQLRepo,
-	//	rankSQLRepo, pokewarService, battleHTTPDelivery,
-	//	rankHTTPDelivery, matchWSDelivery)
-}
-
-// NewApi Inject-Inject Club
 func NewApi(ctx context.Context, router *gin.Engine) {
-	//if configs.Instance.LastSync == 0 {
-	//	doSync(ctx)
-	//}
+	pokeapiRESTRepo = restRepo.NewPokeapiRESTRepository()
+	monsterSQLRepo = sqlRepo.NewMonsterSQlRepository()
+	rankSQLRepo = sqlRepo.NewRankSQLRepository()
+	battleSQLRepo = sqlRepo.NewBattleSQLRepository()
 
-	// TODO ADD HANDLER
+	pokewarService := service.NewPokewarService(ctx,
+		pokeapiRESTRepo, monsterSQLRepo, rankSQLRepo, battleSQLRepo)
+
+	v1 := router.Group("/api/v1")
+
+	http.NewMonsterHttpHandler(pokewarService, v1)
+	http.NewRankHttpHandler(pokewarService, v1)
 }
 
+// FIRST TIME BOOT
 //func doSync(ctx context.Context) {
 //	var wg sync.WaitGroup
 //
@@ -57,3 +54,7 @@ func NewApi(ctx context.Context, router *gin.Engine) {
 //	configs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
 //	configs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", len(data))
 //}
+
+// TODO
+// MONSTER LIST WITH PAGINATION
+// MONSTER SYNC
