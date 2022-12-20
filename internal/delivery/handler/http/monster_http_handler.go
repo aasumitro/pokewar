@@ -33,12 +33,12 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 	utils.NewHttpRespond(ctx, http.StatusOK, data)
 }
 
-func (handler *MonsterHTTPHandler) sync(ctx *gin.Context) {
+func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
 	// TODO SYNC UPDATE OR ADD NEW DATA
 }
 
 func NewMonsterHttpHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
 	handler := &MonsterHTTPHandler{Svc: svc}
 	router.GET("/monsters", handler.Fetch)
-	router.GET("/monsters/sync", handler.sync)
+	router.GET("/monsters/sync", handler.Sync)
 }

@@ -6,6 +6,8 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Pokewar - Pocket Monster Battleroyale</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
         <script>window.onbeforeunload = () => "Do you really want to close?"</script>
     </head>
 
@@ -178,215 +180,242 @@
                 </div>
             </div>
         </main>
-    </body>
 
-    <script>
-        // const apiUrl  = 'http://localhost:8000/v1'
+        <script>
+            const apiUrl  = 'http://localhost:8000/api/v1'
 
-        const loaderComponent = document.getElementById('loader-component')
-        const introComponent = document.getElementById('intro-component')
-        const mainComponent = document.getElementById('main-component')
-        const sectionTitle = document.getElementById('section-title')
-        const sectionMonster = document.getElementById('monster-section')
-        const sectionBattle = document.getElementById('battle-section')
-        const sectionRank = document.getElementById('rank-section')
-        const sectionPlay = document.getElementById('play-section')
-        const monsterList = document.getElementById('monsters-list')
-        const matchList = document.getElementById('match-list')
-        const rankTable = document.getElementById('rank-list-table')
+            const loaderComponent = document.getElementById('loader-component')
+            const introComponent = document.getElementById('intro-component')
+            const mainComponent = document.getElementById('main-component')
+            const sectionTitle = document.getElementById('section-title')
+            const sectionMonster = document.getElementById('monster-section')
+            const sectionBattle = document.getElementById('battle-section')
+            const sectionRank = document.getElementById('rank-section')
+            const sectionPlay = document.getElementById('play-section')
+            const monsterList = document.getElementById('monsters-list')
+            const matchList = document.getElementById('match-list')
+            const rankTable = document.getElementById('rank-list-table')
 
-        setTimeout(() => {
-            loaderComponent.classList.add('hidden')
-            introComponent.classList.remove('hidden')
-        }, 1000)
+            setTimeout(() => {
+                loaderComponent.classList.add('hidden')
+                introComponent.classList.remove('hidden')
+            }, 1000)
 
-        function displaySection(section) {
-            introComponent.classList.add('hidden')
-            mainComponent.classList.remove('hidden')
-            sectionTitle.innerText = section[0].toUpperCase() + section.slice(1)
-            if (section === 'play') sectionTitle.append(" Battleroyale")
+            function displaySection(section) {
+                introComponent.classList.add('hidden')
+                mainComponent.classList.remove('hidden')
+                sectionTitle.innerText = section[0].toUpperCase() + section.slice(1)
+                if (section === 'play') sectionTitle.append(" Battleroyale")
 
-            switch (section) {
-                case "monsters":
-                    displayMonsters()
-                    break
-                case "battles":
-                    displayBattles(5)
-                    break
-                case "ranks":
-                    displayRanks(5)
-                    break
-                case "play":
-                    displayPlayground()
-                    break
-                default:
-                    alert("something went wrong!")
-                    onBackPressed()
-                    break
-            }
-        }
-
-        function onBackPressed() {
-            introComponent.classList.remove('hidden')
-            mainComponent.classList.add('hidden')
-
-            // data
-            matchList.innerHTML = ""
-            monsterList.innerHTML = ""
-        }
-
-
-        // ================================================================
-        // START MATCH SECTION
-        // ================================================================
-        function  displayMonsters() {
-            sectionMonster.classList.remove('hidden')
-            sectionBattle.classList.add('hidden')
-            sectionRank.classList.add('hidden')
-            sectionPlay.classList.add('hidden')
-
-            monsterList.innerHTML = ""
-            for (let i = 1; i <= 25; i++) {
-                const item = monstersItemComponent(i)
-                monsterList.innerHTML += item
-            }
-        }
-
-        function monstersItemComponent(data) {
-            return `
-            <div class="grow max-w-32 bg-gray-100 rounded">
-                <div class="bg-gray-800 text-white p-4">
-                    <h2 class="text-2xl font-bold">Bulbasaur</h2>
-                </div>
-                <div class="display flex flex-row">
-                <img
-                        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/1.svg"
-                        alt="Bulbasaur"
-                        class="mt-4 w-32 h-32 mx-auto"
-                />
-                </div>
-                <div class="p-4">
-                    <p class="font-bold text-lg">Type: <span class="font-normal">Grass</span></p>
-                    <p class="font-bold text-lg">Ability: <span class="font-normal">Cambukan Lele</span></p>
-                </div>
-            </div>
-            `
-        }
-
-        // ================================================================
-        // START MATCH SECTION
-        // ================================================================
-        function displayBattles(total = null) {
-            sectionBattle.classList.remove('hidden')
-            sectionMonster.classList.add('hidden')
-            sectionRank.classList.add('hidden')
-            sectionPlay.classList.add('hidden')
-
-            const displayData = total ?? 40
-
-            loadMatchData(displayData)
-
-            applyBadgeMatchFilter(total)
-        }
-
-        function applyBadgeMatchFilter(total) {
-            const last5FilterBadge = document.getElementById('last5rank')
-            const last10FilterBadge = document.getElementById('last10rank')
-            const allMatchFilterBadge = document.getElementById('all-match')
-            last5FilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700', 'text-gray-600',
-                'hover:text-red-700', 'hover:bg-red-100')
-            last10FilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700',
-                'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-            allMatchFilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700',
-                'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-            switch (total) {
-                case 5:
-                    last5FilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    last10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    allMatchFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    break;
-                case 10:
-                    last5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    last10FilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    allMatchFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    break;
-                default:
-                    last5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    last10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    allMatchFilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    break;
-            }
-        }
-
-        function loadMatchData(displayData) {
-            matchList.innerHTML = ""
-            for (let i = 1; i <= displayData; i++) {
-                const item = matchItemComponent(i)
-                matchList.innerHTML += item
-            }
-        }
-
-        function matchItemComponent(data) {
-            let players = ""
-            for (let i = 1; i <= 5; i++) {
-                players += matchPlayerComponent(i, 6-i)
+                switch (section) {
+                    case "monsters":
+                        displayMonsters()
+                        break
+                    case "battles":
+                        displayBattles(5)
+                        break
+                    case "ranks":
+                        displayRanks(5)
+                        break
+                    case "play":
+                        displayPlayground()
+                        break
+                    default:
+                        alert("something went wrong!")
+                        onBackPressed()
+                        break
+                }
             }
 
-            return `
-            <div class="grow flex flex-col block bg-white border border-gray-200 rounded-lg shadow-md h-fit divide-y ">
-                <div class="pokemon-header text-black p-4">
-                    <h2 class="pokemon-name text-2xl font-bold">Battle</h2>
-                    <p class="pokemon-number font-medium">#`+data+`</p>
-                </div>
-                <div class="pokemon-header bg-gray-800 text-white p-4">
-                    <h1 class="text-lg font-semibold">Wed, 12/12-2022</h1>
-                    <p class="italic font-light">18:21 - 18.22</p>
-                    <div class="flex flex-row gap-2 mt-4">
-                        <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            12µs
-                        </button>
-                        <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path d="M19.889,12.818l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0s-0.195-0.512,0-0.707l1.414-1.414 c0.195-0.195,0.512-0.195,0.707,0C20.084,12.306,20.084,12.623,19.889,12.818z M16.353,15.647c-0.195-0.195-0.512-0.195-0.707,0
-                                l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414C16.549,16.158,16.549,15.842,16.353,15.647z M12.818,19.182c-0.195-0.195-0.512-0.195-0.707,0l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414 C13.013,19.694,13.013,19.377,12.818,19.182z M28.374,11.404l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0l-1.736-1.736
-                                l-14.498,17.26c-0.073,0.087-0.174,0.147-0.285,0.169l-7.071,1.414c-0.164,0.033-0.334-0.019-0.452-0.137 c-0.118-0.118-0.17-0.288-0.137-0.452l1.414-7.071c0.022-0.111,0.082-0.212,0.169-0.285l17.26-14.498l-1.736-1.736
-                                c-0.195-0.195-0.195-0.512,0-0.707l1.414-1.414c0.195-0.195,0.512-0.195,0.707,0l1.768,1.768l3.182-3.182 c0.195-0.195,0.512-0.195,0.707,0l2.828,2.828c0.195,0.195,0.195,0.512,0,0.707l-3.182,3.182l1.768,1.768 C28.57,10.892,28.57,11.208,28.374,11.404z M23.778,6.101l2.121,2.121l2.828-2.828l-2.121-2.121L23.778,6.101z M23.808,10.373 l-2.18-2.18L4.435,22.634l-1.233,6.164l6.164-1.233L23.808,10.373z M27.314,11.05L20.95,4.686l-0.707,0.707l6.364,6.364
-                                L27.314,11.05z"/>
-                            </svg>
-                            128x
-                        </button>
+            function onBackPressed() {
+                introComponent.classList.remove('hidden')
+                mainComponent.classList.add('hidden')
+                matchList.innerHTML = ""
+                monsterList.innerHTML = ""
+            }
+
+            // ================================================================
+            // START MONSTER SECTION
+            // ================================================================
+            function displayMonsters() {
+                sectionMonster.classList.remove('hidden')
+                sectionBattle.classList.add('hidden')
+                sectionRank.classList.add('hidden')
+                sectionPlay.classList.add('hidden')
+
+                monsterList.innerHTML = ""
+
+                // TODO: ADD PAGINATION
+                this.fetchData('monsters').then((resp) => {
+                    const monsters = resp.data.data
+
+                    if (monsters === null) {
+                        monsterList.innerHTML +=
+                            "<div class='text-center'>" +
+                            " Data Not Available </div>"
+                    } else {
+                        sectionTitle.innerText += ` (${monsters.length})`
+
+                        monsters.forEach(monster => {
+                            const item = monstersItemComponent(monster)
+                            monsterList.innerHTML += item
+                        })
+                    }
+                }).catch((_) => onBackPressed())
+            }
+
+            function monstersItemComponent(data) {
+                const types = data.types.map(item => capitalize(item))
+                let hp = ""
+                data.stats.forEach(item => {
+                    if (item.name === "hp") {
+                        hp = item.name.toUpperCase()
+                            + `(${item.base_stat})`
+                    }
+                })
+                const skills = data.skills.map((item, i) => '<br>' + (i+1) + `. ${capitalize(item.name)} (${item.pp})`)
+                return `
+                <div class="w-72 border border-gray-200 rounded-lg shadow-md">
+                    <div class="bg-gray-800 text-white p-4">
+                        <h2 class="text-2xl font-bold">`+capitalize(data.name)+` - `+hp+`</h2>
+                    </div>
+                    <div class="display flex flex-row">
+                    <img
+                            src="`+data.avatar+`"
+                            alt="`+data.name+`"
+                            class="mt-4 w-32 h-32 mx-auto"
+                    />
+                    </div>
+                    <div class="p-4">
+                        <p class="font-bold text-lg">Type: <span class="font-normal">`+types+`</span></p>
+                        <p class="font-bold text-lg">Skills:
+                            <span class="font-normal">`+skills+`</span>
+                        </p>
                     </div>
                 </div>
-                <div class="p-4">
-                    <table class="w-full whitespace-nowrap">
-                        <tbody>`+players+`</tbody>
-                    </table>
-                </div>
-            </div>
-            `
-        }
+                `
+            }
+            // ================================================================
+            // END MONSTER SECTION
+            // ================================================================
 
-        function matchPlayerComponent(rank, point) {
-            return `
-            <tr tabindex="0" class="focus:outline-none h-16 border border-gray-100 rounded">
-                <td class="pl-2">
-                    <p class="mx-auto">#`+rank+`</p>
-                </td>
-                <td>
-                    <div class="flex flex-col pl-2">
-                        <p class="text-base font-medium leading-none text-gray-700 mr-2">Monsters Name</p>
-                        <div class="flex flex-row gap-2 mt-2">
-                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ point +` pts</span>
-                            <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">2 µs</span>
+            // ================================================================
+            // START MATCH SECTION
+            // ================================================================
+            function displayBattles(total = null) {
+                sectionBattle.classList.remove('hidden')
+                sectionMonster.classList.add('hidden')
+                sectionRank.classList.add('hidden')
+                sectionPlay.classList.add('hidden')
+
+                matchList.innerHTML = ""
+                const path = total ? `battles?limit=${total}` : 'battles'
+
+                this.fetchData(path).then((resp) => {
+                    const battles = resp.data.data
+
+                    if (battles === null) {
+                        matchList.innerHTML +=
+                            "<div class='text-center'>" +
+                            " Data Not Available </div>"
+                    } else {
+                        battles.forEach((rank, i) => {
+                            const item = matchItemComponent(rank, i+1)
+                            matchList.innerHTML += item
+                        })
+                    }
+                }).catch((_) => onBackPressed())
+
+                applyBadgeMatchFilter(total)
+            }
+
+            function applyBadgeMatchFilter(total) {
+                const last5FilterBadge = document.getElementById('last5rank')
+                const last10FilterBadge = document.getElementById('last10rank')
+                const allMatchFilterBadge = document.getElementById('all-match')
+                last5FilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700', 'text-gray-600',
+                    'hover:text-red-700', 'hover:bg-red-100')
+                last10FilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700',
+                    'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                allMatchFilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700',
+                    'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                switch (total) {
+                    case 5:
+                        last5FilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        last10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        allMatchFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        break;
+                    case 10:
+                        last5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        last10FilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        allMatchFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        break;
+                    default:
+                        last5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        last10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        allMatchFilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        break;
+                }
+            }
+
+            function matchItemComponent(data) {
+                let players = ""
+                data.players.forEach(player => players += matchPlayerComponent(player, data.started_at))
+                return `
+                <div class="grow flex flex-col block bg-white border border-gray-200 rounded-lg shadow-md h-fit divide-y ">
+                    <div class="pokemon-header text-black p-4">
+                        <h2 class="pokemon-name text-2xl font-bold">Battle</h2>
+                        <p class="pokemon-number font-medium">#`+data.id+`</p>
+                    </div>
+                    <div class="pokemon-header bg-gray-800 text-white p-4">
+                        <h1 class="text-lg font-semibold">`+ formatDate(data.started_at) +`</h1>
+                        <p class="italic font-light">`+ formatTime(data.started_at) +` - `+ formatTime(data.ended_at)+`</p>
+                        <div class="flex flex-row gap-2 mt-4">
+                            <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                `+ diffTime(data.ended_at, data.started_at) +`
+                            </button>
+                            <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-100 hover:border-gray-200 rounded-lg flex gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path d="M19.889,12.818l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0s-0.195-0.512,0-0.707l1.414-1.414 c0.195-0.195,0.512-0.195,0.707,0C20.084,12.306,20.084,12.623,19.889,12.818z M16.353,15.647c-0.195-0.195-0.512-0.195-0.707,0
+                                    l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414C16.549,16.158,16.549,15.842,16.353,15.647z M12.818,19.182c-0.195-0.195-0.512-0.195-0.707,0l-1.414,1.414c-0.195,0.195-0.195,0.512,0,0.707s0.512,0.195,0.707,0l1.414-1.414 C13.013,19.694,13.013,19.377,12.818,19.182z M28.374,11.404l-1.414,1.414c-0.195,0.195-0.512,0.195-0.707,0l-1.736-1.736
+                                    l-14.498,17.26c-0.073,0.087-0.174,0.147-0.285,0.169l-7.071,1.414c-0.164,0.033-0.334-0.019-0.452-0.137 c-0.118-0.118-0.17-0.288-0.137-0.452l1.414-7.071c0.022-0.111,0.082-0.212,0.169-0.285l17.26-14.498l-1.736-1.736
+                                    c-0.195-0.195-0.195-0.512,0-0.707l1.414-1.414c0.195-0.195,0.512-0.195,0.707,0l1.768,1.768l3.182-3.182 c0.195-0.195,0.512-0.195,0.707,0l2.828,2.828c0.195,0.195,0.195,0.512,0,0.707l-3.182,3.182l1.768,1.768 C28.57,10.892,28.57,11.208,28.374,11.404z M23.778,6.101l2.121,2.121l2.828-2.828l-2.121-2.121L23.778,6.101z M23.808,10.373 l-2.18-2.18L4.435,22.634l-1.233,6.164l6.164-1.233L23.808,10.373z M27.314,11.05L20.95,4.686l-0.707,0.707l6.364,6.364
+                                    L27.314,11.05z"/>
+                                </svg>
+                                `+data.logs.length+`x
+                            </button>
                         </div>
                     </div>
-                </td>
+                    <div class="p-4">
+                        <table class="w-full whitespace-nowrap">
+                            <tbody>`+players+`</tbody>
+                        </table>
+                    </div>
+                </div>
+                `
+            }
+
+            function matchPlayerComponent(player, battleStart) {
+                return `
+                <tr tabindex="0" class="focus:outline-none h-16 border border-gray-100 rounded">
+                    <td class="pl-2">
+                        <p class="mx-auto">#`+player.rank+`</p>
+                    </td>
+                    <td>
+                        <div class="flex flex-col pl-2">
+                            <p class="text-base font-medium leading-none text-gray-700 mr-2">`+ capitalize(player.name) +`</p>
+                            <div class="flex flex-row gap-2 mt-2">
+                                <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ player.point +` pts</span>
+                                <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ diffTime(player.eliminated_at, battleStart, true) +`</span>
+                            </div>
+                        </div>
+                    </td>
 
                 <!--<td>-->
                 <!--    <button class="p-1 text-sm focus:outline-none leading-none text-red-700 bg-red-100 rounded">-->
@@ -395,124 +424,175 @@
                 <!--        </svg>-->
                 <!--    </button>-->
                 <!--</td>-->
-            </tr>
-            <tr class="h-1"></tr>
-            `
-        }
-        // ================================================================
-        // END MATCH SECTION
-        // ================================================================
-
-        // ================================================================
-        // START RANK SECTION
-        // ================================================================
-        function displayRanks(total = null) {
-            sectionMonster.classList.add('hidden')
-            sectionBattle.classList.add('hidden')
-            sectionRank.classList.remove('hidden')
-            sectionPlay.classList.add('hidden')
-
-            const displayData = total ?? 40
-
-            loadRankData(displayData)
-
-            applyBadgeRankFilterStyle(total)
-        }
-
-        function applyBadgeRankFilterStyle(total) {
-            const top5FilterBadge = document.getElementById('top5rank')
-            const top10FilterBadge = document.getElementById('top10rank')
-            const allFilterBadge = document.getElementById('all-rank')
-            top5FilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700', 'text-gray-600',
-                'hover:text-red-700', 'hover:bg-red-100')
-            top10FilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700',
-                'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-            allFilterBadge.classList.remove(
-                'bg-red-100', 'text-red-700',
-                'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-            switch (total) {
-                case 5:
-                    top5FilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    top10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    allFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    break;
-                case 10:
-                    top5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    top10FilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    allFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    break;
-                default:
-                    top5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    top10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
-                    allFilterBadge.classList.add('bg-red-100', 'text-red-700')
-                    break;
+                </tr>
+                <tr class="h-1"></tr>
+                `
             }
-        }
+            // ================================================================
+            // END MATCH SECTION
+            // ================================================================
 
-        function loadRankData(displayData) {
-            const rankTableBody = rankTable.getElementsByTagName('tbody')[0]
-            rankTableBody.innerHTML = ""
-            for (let i = 1; i <= displayData; i++) {
-                const item = rankItemComponent(i)
-                rankTableBody.innerHTML += item
+            // ================================================================
+            // START RANK SECTION
+            // ================================================================
+            function displayRanks(total = null) {
+                sectionMonster.classList.add('hidden')
+                sectionBattle.classList.add('hidden')
+                sectionRank.classList.remove('hidden')
+                sectionPlay.classList.add('hidden')
+
+                const rankTableBody = rankTable.getElementsByTagName('tbody')[0]
+                rankTableBody.innerHTML = ""
+                const path = total ? `ranks?limit=${total}` : 'ranks'
+
+                this.fetchData(path).then((resp) => {
+                    const ranks = resp.data.data
+
+                    if (ranks === null) {
+                        monsterList.innerHTML +=
+                            "<div class='text-center'>" +
+                            " Data Not Available </div>"
+                    } else {
+                        ranks.forEach((rank, i) => {
+                            const item = rankItemComponent(rank, i+1)
+                            rankTableBody.innerHTML += item
+                        })
+                    }
+                }).catch((_) => onBackPressed())
+
+                applyBadgeRankFilterStyle(total)
             }
-        }
 
-        function rankItemComponent(data) {
-            return `
-            <tr tabindex="0" class="focus:outline-none h-16 border border-gray-100 rounded">
-                <td class="pl-5">
-                    <div class="bg-gray-50 rounded-sm p-2">
-                        <p class="mx-auto">#`+ (data) +`</p>
-                    </div>
-                </td>
-                <td>
-                    <div class="flex flex-col pl-5">
-                        <p class="text-base font-medium leading-none text-gray-700 mr-2">Monsters Name</p>
-                        <div class="flex flex-row gap-2 mt-2">
-                            <span class="rounded-full bg-gray-100 border border-gray-300 text-xs font-extralight px-2 text-gray-700">Types</span>
+            function applyBadgeRankFilterStyle(total) {
+                const top5FilterBadge = document.getElementById('top5rank')
+                const top10FilterBadge = document.getElementById('top10rank')
+                const allFilterBadge = document.getElementById('all-rank')
+                top5FilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700', 'text-gray-600',
+                    'hover:text-red-700', 'hover:bg-red-100')
+                top10FilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700',
+                    'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                allFilterBadge.classList.remove(
+                    'bg-red-100', 'text-red-700',
+                    'text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                switch (total) {
+                    case 5:
+                        top5FilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        top10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        allFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        break;
+                    case 10:
+                        top5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        top10FilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        allFilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        break;
+                    default:
+                        top5FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        top10FilterBadge.classList.add('text-gray-600', 'hover:text-red-700', 'hover:bg-red-100')
+                        allFilterBadge.classList.add('bg-red-100', 'text-red-700')
+                        break;
+                }
+            }
+
+            function rankItemComponent(data, no) {
+                let types = ""
+                data.types.forEach(type => {
+                    types += `<span class="rounded-full bg-gray-100 border border-gray-300 text-xs font-extralight px-2 text-gray-700">`+capitalize(type)+`</span>`
+                })
+                return `
+                <tr tabindex="0" class="focus:outline-none h-16 border border-gray-100 rounded">
+                    <td class="pl-5">
+                        <div class="bg-gray-50 rounded-sm p-2">
+                            <p class="mx-auto">#`+ (data.total_battles > 0 ? no : '') +`</p>
                         </div>
-                    </div>
-                </td>
-                <td class="pl-24">
-                    <div class="flex items-center">
-                       Play[<p class="text-sm leading-none text-yellow-600">245x</p>]
-                    </div>
-                </td>
-                <td class="pl-5">
-                    <div class="flex items-center">
-                        Win[<p class="text-sm leading-none text-green-600">4x</p>]
-                    </div>
-                </td>
-                <!--<td class="pl-5">-->
-                <!--    <div class="flex items-center">-->
-                <!--        L[<p class="text-sm leading-none text-red-600">23</p>]-->
-                <!--    </div>-->
-                <!--</td>-->
-                <td class="px-5">
-                    <button class="py-3 px-3 text-sm focus:outline-none leading-none text-gray-700 bg-gray-100 rounded">1205 pts</button>
-                </td>
-            </tr>
-            <tr class="h-3"></tr>
-            `
-        }
-        // ================================================================
-        // END RANK SECTION
-        // ================================================================
+                    </td>
+                    <td>
+                        <div class="flex flex-col pl-5">
+                            <p class="text-base font-medium leading-none text-gray-700 mr-2">`+capitalize(data.name)+`</p>
+                            <div class="flex flex-row gap-2 mt-2">`+types+`</div>
+                        </div>
+                    </td>
+                    <td class="pl-24">
+                        <div class="flex items-center">
+                           Play[<p class="text-sm leading-none text-yellow-600">`+data.total_battles+`x</p>]
+                        </div>
+                    </td>
+                    <td class="pl-5">
+                        <div class="flex items-center">
+                            Win[<p class="text-sm leading-none text-green-600">`+data.win_battles+`x</p>]
+                        </div>
+                    </td>
+                    <td class="pl-5">
+                        <div class="flex items-center">
+                            L[<p class="text-sm leading-none text-red-600">`+data.lose_battles+`x</p>]
+                        </div>
+                    </td>
+                    <td class="px-5">
+                        <button class="py-3 px-3 text-sm focus:outline-none leading-none text-gray-700 bg-gray-100 rounded">`+data.points+` pts</button>
+                    </td>
+                </tr>
+                <tr class="h-3"></tr>
+                `
+            }
+            // ================================================================
+            // END RANK SECTION
+            // ================================================================
 
-        // ================================================================
-        // START BATTLE SECTION
-        // ================================================================
-        function displayPlayground() {
-            sectionMonster.classList.add('hidden')
-            sectionBattle.classList.add('hidden')
-            sectionRank.classList.add('hidden')
-            sectionPlay.classList.remove('hidden')
-        }
-        // ================================================================
-        // END BATTLE SECTION
-        //================================================================
-    </script>
+            // ================================================================
+            // TODO: START BATTLE SECTION
+            // ================================================================
+            function displayPlayground() {
+                sectionMonster.classList.add('hidden')
+                sectionBattle.classList.add('hidden')
+                sectionRank.classList.add('hidden')
+                sectionPlay.classList.remove('hidden')
+            }
+            // ================================================================
+            // END BATTLE SECTION
+            //================================================================
+
+
+            // ================================================================
+            // API CALL SECTION
+            // ================================================================
+            async function fetchData(path) {
+                try {
+                    return await axios.get(`${apiUrl}/${path}`)
+                } catch (error) {
+                    alert(error)
+                }
+            }
+
+            // ================================================================
+            // HELPER SECTION
+            // ================================================================
+            function capitalize(s) {
+                return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase() })
+            }
+
+            function formatDate(time) {
+                const date = dayjs.unix(time)
+                return date.format('ddd, MM/DD-YYYY')
+            }
+
+            function formatTime(time) {
+                const date = dayjs.unix(time)
+                return  date.format('hh:mm:ss')
+            }
+
+            function diffTime(start, end, eliminate = false) {
+                if (start === 0) {
+                    return "-"
+                }
+
+                const pref = eliminate ? 'eliminated in: ' : ''
+
+                return pref +
+                    dayjs(dayjs.unix(start))
+                        .diff(dayjs.unix(end), 'second')
+                    + 's'
+            }
+        </script>
+    </body>
 </html>

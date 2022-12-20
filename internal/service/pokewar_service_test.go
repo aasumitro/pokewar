@@ -20,6 +20,7 @@ type pokewarServiceTestSuite struct {
 	suite.Suite
 	monsters []*domain.Monster
 	ranks    []*domain.Rank
+	battle   []*domain.Battle
 	svcErr   *utils.ServiceError
 }
 
@@ -55,6 +56,34 @@ func (suite *pokewarServiceTestSuite) SetupSuite() {
 			WinBattles:   1,
 			LoseBattle:   0,
 			Points:       5,
+		},
+	}
+
+	suite.battle = []*domain.Battle{
+		{
+			ID:        1,
+			StartedAt: 1,
+			EndedAt:   1,
+			Players: []domain.Player{
+				{
+					ID:           1,
+					Name:         "asd",
+					BattleID:     1,
+					MonsterID:    1,
+					EliminatedAt: 1,
+					AnnulledAt:   1,
+					Rank:         1,
+					Point:        1,
+				},
+			},
+			Logs: []domain.Log{
+				{
+					ID:          1,
+					BattleID:    1,
+					Description: "asd",
+					CreatedAt:   1,
+				},
+			},
 		},
 	}
 
@@ -194,8 +223,38 @@ func (suite *pokewarServiceTestSuite) TestService_BattlesCount_ShouldError() {
 	repo.AssertExpectations(suite.T())
 }
 
-//func (suite *pokewarServiceTestSuite) TestService_FetchBattles_ShouldSuccess() {}
-//func (suite *pokewarServiceTestSuite) TestService_FetchBattles_ShouldError()   {}
+func (suite *pokewarServiceTestSuite) TestService_FetchBattles_ShouldSuccess() {
+	repo := new(mocks.IBattleRepository)
+	svc := service.NewPokewarService(
+		context.TODO(), new(mocks.IPokeapiRESTRepository),
+		new(mocks.IMonsterRepository),
+		new(mocks.IRankRepository), repo)
+	repo.
+		On("All", mock.Anything).
+		Once().
+		Return(suite.battle, nil)
+	data, err := svc.FetchBattles()
+	require.Nil(suite.T(), err)
+	require.NotNil(suite.T(), data)
+	require.Equal(suite.T(), data, suite.battle)
+	repo.AssertExpectations(suite.T())
+}
+func (suite *pokewarServiceTestSuite) TestService_FetchBattles_ShouldError() {
+	repo := new(mocks.IBattleRepository)
+	svc := service.NewPokewarService(
+		context.TODO(), new(mocks.IPokeapiRESTRepository),
+		new(mocks.IMonsterRepository),
+		new(mocks.IRankRepository), repo)
+	repo.
+		On("All", mock.Anything).
+		Once().
+		Return(nil, errors.New("UNEXPECTED"))
+	data, err := svc.FetchBattles()
+	require.Nil(suite.T(), data)
+	require.NotNil(suite.T(), err)
+	require.Equal(suite.T(), err, suite.svcErr)
+	repo.AssertExpectations(suite.T())
+}
 
 func (suite *pokewarServiceTestSuite) TestService_PrepareMonstersForBattle_ShouldSuccess() {
 	repo := new(mocks.IMonsterRepository)

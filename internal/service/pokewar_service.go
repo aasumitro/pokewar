@@ -44,11 +44,9 @@ func (service *pokewarService) BattlesCount() int {
 }
 
 func (service *pokewarService) FetchBattles(args ...string) (ranks []*domain.Battle, error *utils.ServiceError) {
-	// TODO IMPL REPO AND TEST THIS
-	//data, err := service.battleRepo.All(service.ctx, args...)
-	//
-	//return utils.ValidateDataRows[domain.Battle](data, err)
-	return nil, nil
+	data, err := service.battleRepo.All(service.ctx, args...)
+
+	return utils.ValidateDataRows[domain.Battle](data, err)
 }
 
 func (service *pokewarService) PrepareMonstersForBattle() (monsters []*domain.Monster, error *utils.ServiceError) {

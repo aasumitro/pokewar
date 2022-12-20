@@ -27,9 +27,9 @@ func NewApi(ctx context.Context, router *gin.Engine) {
 		pokeapiRESTRepo, monsterSQLRepo, rankSQLRepo, battleSQLRepo)
 
 	v1 := router.Group("/api/v1")
-
 	http.NewMonsterHttpHandler(pokewarService, v1)
 	http.NewRankHttpHandler(pokewarService, v1)
+	http.NewBattleHttpHandler(pokewarService, v1)
 }
 
 // FIRST TIME BOOT

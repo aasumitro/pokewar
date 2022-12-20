@@ -3,29 +3,38 @@ package domain
 import "context"
 
 type (
-	Battle struct {
+	BattleEntity struct {
 		ID        int
-		StartedAt int
-		EndedAt   int
-		Players   []Player
-		Logs      []Log
+		StartedAt int64
+		EndedAt   int64
+		Players   string
+		Logs      string
+	}
+
+	Battle struct {
+		ID        int      `json:"id"`
+		StartedAt int64    `json:"started_at"`
+		EndedAt   int64    `json:"ended_at"`
+		Players   []Player `json:"players"`
+		Logs      []Log    `json:"logs"`
 	}
 
 	Player struct {
-		ID           int
-		BattleID     int
-		MonsterID    int
-		EliminatedAt int
-		AnnulledAt   int
-		Rank         int
-		Point        int
+		ID           int    `json:"id"`
+		Name         string `json:"name"`
+		BattleID     int    `json:"battle_id"`
+		MonsterID    int    `json:"monster_id"`
+		EliminatedAt int64  `json:"eliminated_at"`
+		AnnulledAt   int64  `json:"annulled_at"`
+		Rank         int    `json:"rank"`
+		Point        int    `json:"point"`
 	}
 
 	Log struct {
-		ID          int
-		BattleID    int
-		Description string
-		CreatedAt   int
+		ID          int    `json:"id"`
+		BattleID    int    `json:"battle_id"`
+		Description string `json:"description"`
+		CreatedAt   int64  `json:"created_at"`
 	}
 
 	IBattleRepository interface {

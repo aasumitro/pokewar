@@ -19,16 +19,6 @@ type pokeapiRESTRepository struct {
 // TODO: Optimize
 // BENCH RESULT wg is better than ch
 // STILL TO SLOW SOMETIMES TOOK 3s TO LOAD AND PROCEED THE DATA
-//
-//	appEngine.GET("/test", func(context *gin.Context) {
-//		restApi := rest.NewPokeapiRESTRepository()
-//		data, err := restApi.Pokemon()
-//		if err != nil {
-//			context.JSON(http.StatusBadRequest, gin.H{"err": err})
-//			return
-//		}
-//		context.JSON(http.StatusOK, gin.H{"data": data})
-//	})
 func (repo *pokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error) {
 	var pokemons *domain.PokemonResult
 	var wg sync.WaitGroup

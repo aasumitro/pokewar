@@ -7,11 +7,11 @@ import (
 	"net/http"
 )
 
-type RankHandler struct {
+type RankHTTPHandler struct {
 	Svc domain.IPokewarService
 }
 
-func (handler *RankHandler) Fetch(ctx *gin.Context) {
+func (handler *RankHTTPHandler) Fetch(ctx *gin.Context) {
 	paging, args := utils.ParseParam(ctx)
 
 	data, err := handler.Svc.FetchRanks(args...)
@@ -34,6 +34,6 @@ func (handler *RankHandler) Fetch(ctx *gin.Context) {
 }
 
 func NewRankHttpHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
-	handler := &RankHandler{Svc: svc}
+	handler := &RankHTTPHandler{Svc: svc}
 	router.GET("/ranks", handler.Fetch)
 }

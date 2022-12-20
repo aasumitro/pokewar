@@ -3,6 +3,7 @@ package sql
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
@@ -25,8 +26,49 @@ func (repo *battleSQLRepository) Count(ctx context.Context) int {
 }
 
 func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data []*domain.Battle, err error) {
-	//TODO implement me
-	panic("implement me")
+	q := "SELECT b.id as id, b.started_at as started_at, b.ended_at as ended_at, "
+	q += "CAST((SELECT json_group_array(json_object('id', bl.id, 'battle_id', bl.battle_id, 'description', bl.description, "
+	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
+	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
+	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
+	q += "'name', m.name)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
+	if len(args) > 0 {
+		for _, arg := range args {
+			q += fmt.Sprintf("%s ", arg)
+		}
+	}
+
+	rows, err := repo.db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) { _ = rows.Close() }(rows)
+
+	for rows.Next() {
+		var battle domain.BattleEntity
+		var battleLogs []domain.Log
+		var battlePlayers []domain.Player
+
+		if err := rows.Scan(
+			&battle.ID, &battle.StartedAt, &battle.EndedAt,
+			&battle.Logs, &battle.Players,
+		); err != nil {
+			return nil, err
+		}
+
+		_ = json.Unmarshal([]byte(battle.Logs), &battleLogs)
+		_ = json.Unmarshal([]byte(battle.Players), &battlePlayers)
+		data = append(data, &domain.Battle{
+			ID:        battle.ID,
+			StartedAt: battle.StartedAt,
+			EndedAt:   battle.EndedAt,
+			Logs:      battleLogs,
+			Players:   battlePlayers,
+		})
+	}
+
+	return data, nil
 }
 
 func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battle) error {
@@ -83,6 +125,9 @@ func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battl
 	return nil
 }
 
+// UpdatePlayer
+// When annulled make point 0
+// update from rank ...2 add + 1
 func (repo *battleSQLRepository) UpdatePlayer(ctx context.Context, id int) (annulledAt int64, err error) {
 	var annulledTime int64
 

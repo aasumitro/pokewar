@@ -51,7 +51,7 @@ func (suite *rankHTTPHandlerTestSuite) TestHandler_Fetch_ShouldSuccess() {
 	ctx, _ := gin.CreateTestContext(writer)
 	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
 	ctx.Request = req
-	handler := httpHandler.RankHandler{Svc: svcMock}
+	handler := httpHandler.RankHTTPHandler{Svc: svcMock}
 	handler.Fetch(ctx)
 	var got utils.SuccessRespond
 	_ = json.Unmarshal(writer.Body.Bytes(), &got)
@@ -72,7 +72,7 @@ func (suite *rankHTTPHandlerTestSuite) TestHandler_Fetch_ShouldError() {
 	ctx, _ := gin.CreateTestContext(writer)
 	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
 	ctx.Request = req
-	handler := httpHandler.RankHandler{Svc: svcMock}
+	handler := httpHandler.RankHTTPHandler{Svc: svcMock}
 	handler.Fetch(ctx)
 	var got utils.ErrorRespond
 	_ = json.Unmarshal(writer.Body.Bytes(), &got)

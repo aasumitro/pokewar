@@ -15,8 +15,6 @@ type rankSQLRepository struct {
 
 // All
 // TODO ADD:
-// PAGINATION MAYBE?
-// LIMIT? ORDER? etc.
 //
 // ALTERNATE QUERY -> need to use sql.NullType && need to validate data (return)
 //
@@ -56,9 +54,9 @@ func (repo *rankSQLRepository) All(ctx context.Context, args ...string) (data []
 	q += "monsters.avatar as avatar, monsters.types as types, "
 	q += "count(p.monster_id) as total_battles, sum(IFNULL(p.point, 0)) as points, "
 	q += "(SELECT count(w.rank) FROM battle_players as w where rank = 1  "
-	q += "AND monster_id = monsters.id AND annulled_at = null) as win_battles, "
+	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as win_battles, "
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
-	q += "AND monster_id = monsters.id AND annulled_at = null) as lose_battles "
+	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
 	q += "ON monsters.id = p.monster_id GROUP BY monsters.id "
 	if len(args) > 0 {
