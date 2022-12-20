@@ -47,6 +47,18 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 	utils.NewHttpRespond(ctx, http.StatusOK, data)
 }
 
+// Sync godoc
+// @Schemes
+// @Summary 	 Sync Local Monster
+// @Description  Get Monster From Pokeapi and Sync with Local Data.
+// @Tags 		 Monsters
+// @Accept       json
+// @Produce      json
+// @Success 200 {object} utils.SuccessRespond{data=[]domain.Monster} "BASIC RESPOND"
+// @Failure 404 {object} utils.ErrorRespond "NOT FOUND"
+// @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
+// @Router /api/v1/sync [GET]
+// TODO: validate request -> update current data | add new data
 func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
 	data, err := handler.Svc.SyncMonsters()
 	if err != nil {

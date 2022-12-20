@@ -1,8 +1,6 @@
 package domain
 
 type (
-	// PokedexResult struct{}
-
 	PokemonResult struct {
 		Count    int              `json:"count"`
 		Next     string           `json:"next"`

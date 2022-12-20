@@ -47,4 +47,14 @@ func TestParseParam(t *testing.T) {
 			t.Errorf("ParseParam: expected empty args slice, got %v", args)
 		}
 	})
+
+	//t.Run("Check that between is parsed correctly", func(t *testing.T) {
+	//	req, _ := http.NewRequest("GET", "/?between=10-10-2022,11-10-2022", nil)
+	//	ctx, _ := gin.CreateTestContext(nil)
+	//	ctx.Request = req
+	//	_, args := utils.ParseParam(ctx)
+	//	if !reflect.DeepEqual(args, []string{"WHERE started_at BETWEEN 10-10-2022 AND 11-10-2022"}) {
+	//		t.Errorf("ParseParam: expected args slice [WHERE started_at BETWEEN 10-10-2022 AND 11-10-2022], got %v", args)
+	//	}
+	//})
 }

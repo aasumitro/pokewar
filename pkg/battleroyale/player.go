@@ -1,6 +1,10 @@
 package battleroyale
 
-import "time"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type (
 	// Skill represents a skill that a player can use in the game.
@@ -26,5 +30,19 @@ type (
 )
 
 func (p *Player) Attack(other *Player) Log {
-	return Log{}
+	// Choose a random skill to use in the attack.
+	var skill *Skill
+	if len(p.Skills) > 0 {
+		idx := rand.Intn(len(p.Skills))
+		skill = p.Skills[idx]
+	}
+
+	other.Health -= skill.Power
+
+	return Log{
+		Description: fmt.Sprintf(
+			"%s uses %s to attack %s, reducing their health to %d\n",
+			p.Name, skill.Name, other.Name, other.Health,
+		),
+	}
 }

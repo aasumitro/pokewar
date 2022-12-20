@@ -55,7 +55,7 @@ func main() {
 		ginSwagger.WrapHandler(swaggerFiles.Handler,
 			ginSwagger.DefaultModelsExpandDepth(3)))
 
-	internal.NewApi(ctx, appEngine)
+	internal.NewApiProvider(ctx, appEngine)
 
 	log.Fatal(appEngine.Run(appconfigs.Instance.AppUrl))
 }

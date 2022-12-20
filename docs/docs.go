@@ -215,6 +215,56 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/sync": {
+            "get": {
+                "description": "Get Monster From Pokeapi and Sync with Local Data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Monsters"
+                ],
+                "summary": "Sync Local Monster",
+                "responses": {
+                    "200": {
+                        "description": "BASIC RESPOND",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.SuccessRespond"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.Monster"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "NOT FOUND",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorRespond"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

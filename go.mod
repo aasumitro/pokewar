@@ -7,6 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/gorilla/websocket v1.5.0
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
@@ -30,7 +31,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

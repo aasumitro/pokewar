@@ -13,6 +13,14 @@ func ParseParam(ctx *gin.Context) ([]int, []string) {
 	var args []string
 
 	if len(params) > 0 {
+		//between := params.Get("between")
+		//if between != "" {
+		//	date := strings.SplitAfter(between, ",")
+		//	args = append(args, fmt.Sprintf(
+		//		"WHERE b.started_at BETWEEN %s AND %s",
+		//		strings.Replace(date[0], ",", "", -1), date[1]))
+		//}
+
 		if limit, err := strconv.Atoi(params.Get("limit")); err == nil && limit > 0 {
 			args = append(args, fmt.Sprintf("LIMIT %d", limit))
 			paging = append(paging, limit)

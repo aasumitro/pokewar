@@ -4,14 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
+	"github.com/aasumitro/pokewar/pkg/battleroyale"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"sync"
 )
 
 type MatchWSHandler struct {
-	Svc      domain.IPokewarService
-	Monsters []*domain.Monster
-	wsConn   *websocket.Conn
+	playground  string
+	Svc         domain.IPokewarService
+	Monsters    []*domain.Monster
+	GamePlayers []*battleroyale.Player
+	wsConn      *websocket.Conn
+	mu          sync.Mutex
 }
 
 var wsUpgraded = websocket.Upgrader{
@@ -22,28 +27,134 @@ var wsUpgraded = websocket.Upgrader{
 func (handler *MatchWSHandler) prepareBattle(msgType int) {
 	monsterData, errorData := handler.Svc.PrepareMonstersForBattle()
 	if errorData != nil {
+		handler.mu.Lock()
 		message, _ := json.Marshal(map[string]any{
 			"status":  "error",
 			"message": errorData.Message,
 		})
 		_ = handler.wsConn.WriteMessage(msgType, message)
+		handler.mu.Unlock()
 	}
 
 	handler.Monsters = monsterData
+	handler.transformMonsterAsPlayer()
 
+	handler.mu.Lock()
 	message, _ := json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "monsters",
 		"data":      monsterData,
 	})
 	_ = handler.wsConn.WriteMessage(msgType, message)
+	handler.mu.Unlock()
+}
+
+func (handler *MatchWSHandler) transformMonsterAsPlayer() {
+	var players []*battleroyale.Player
+	for _, monster := range handler.Monsters {
+		var hp int
+		for _, stat := range monster.Stats {
+			if stat.Name == "hp" {
+				hp = stat.BaseStat
+			}
+		}
+
+		players = append(players, &battleroyale.Player{
+			ID:     monster.ID,
+			Name:   monster.Name,
+			Health: hp,
+			Score:  0,
+			Rank:   0,
+			Skills: []*battleroyale.Skill{
+				{Power: monster.Skills[0].PP, Name: monster.Skills[0].Name},
+				{Power: monster.Skills[1].PP, Name: monster.Skills[0].Name},
+				{Power: monster.Skills[2].PP, Name: monster.Skills[0].Name},
+				{Power: monster.Skills[3].PP, Name: monster.Skills[0].Name},
+			},
+		})
+	}
+	handler.GamePlayers = players
 }
 
 func (handler *MatchWSHandler) startBattle(msgType int) {
-	fmt.Println(handler.Monsters)
-	err := handler.wsConn.WriteMessage(msgType, []byte("start"))
-	if err != nil {
-		fmt.Println(err)
+	handler.mu.Lock()
+	message, _ := json.Marshal(map[string]any{
+		"status":    "success",
+		"data_type": "players",
+		"data":      handler.GamePlayers,
+	})
+	_ = handler.wsConn.WriteMessage(msgType, message)
+	handler.mu.Unlock()
+
+	result := make(chan *battleroyale.Game)
+	log := make(chan string, 100)
+	eliminated := make(chan string, 5)
+
+	game := battleroyale.NewGame(handler.GamePlayers)
+	go game.Start(result, log, eliminated)
+	_ = handler.transformPlayerAsMonster(<-result)
+
+	go func() {
+		for logMessage := range log {
+			handler.mu.Lock()
+			message, _ = json.Marshal(map[string]any{
+				"status":    "success",
+				"data_type": "battle_logs",
+				"data":      logMessage,
+			})
+			_ = handler.wsConn.WriteMessage(msgType, message)
+			handler.mu.Unlock()
+		}
+	}()
+
+	go func() {
+		for eliminatedPlayer := range eliminated {
+			handler.mu.Lock()
+			message, _ = json.Marshal(map[string]any{
+				"status":    "success",
+				"data_type": "eliminated_player",
+				"data":      eliminatedPlayer,
+			})
+			_ = handler.wsConn.WriteMessage(msgType, message)
+			handler.mu.Unlock()
+		}
+	}()
+
+	//close(result)
+	//close(log)
+	//close(eliminated)
+	game.Reset()
+}
+
+func (handler *MatchWSHandler) transformPlayerAsMonster(game *battleroyale.Game) domain.Battle {
+	var logs []domain.Log
+	for _, log := range game.Logs {
+		logs = append(logs, domain.Log{
+			Description: log.Description,
+		})
+	}
+
+	var players []domain.Player
+	for _, player := range game.Players {
+		players = append(players, domain.Player{
+			MonsterID: player.ID,
+			Name:      player.Name,
+			EliminatedAt: func() int64 {
+				if player.EliminatedAt != nil {
+					return player.EliminatedAt.Unix()
+				}
+				return 0
+			}(),
+			Rank:  player.Rank,
+			Point: player.Score,
+		})
+	}
+
+	return domain.Battle{
+		StartedAt: (*game).StartAt.Unix(),
+		EndedAt:   (*game).EndAt.Unix(),
+		Players:   players,
+		Logs:      logs,
 	}
 }
 
@@ -52,34 +163,30 @@ func (handler *MatchWSHandler) annulledPlayer(playerId int) {
 }
 
 func (handler *MatchWSHandler) Run(ctx *gin.Context) {
-	//idParams := ctx.Param("id")
-	ws, err := wsUpgraded.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	idParams := ctx.Param("id")
+	handler.playground = idParams
+	ws, _ := wsUpgraded.Upgrade(ctx.Writer, ctx.Request, nil)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(ws)
 	handler.wsConn = ws
 
 	for {
-		mt, message, err := ws.ReadMessage()
-		if err != nil {
-			message = []byte("something went wrong")
-			_ = ws.WriteMessage(mt, message)
-		}
+		mt, message, _ := ws.ReadMessage()
+		//if err != nil {
+		//handler.mu.Lock()
+		//message = []byte("something went wrong")
+		//_ = ws.WriteMessage(mt, message)
+		//handler.mu.Unlock()
+		//}
 
 		var msg map[string]any
 		_ = json.Unmarshal(message, &msg)
 		switch msg["action"] {
 		case "prepare":
 			handler.prepareBattle(mt)
-			break
 		case "start":
 			handler.startBattle(mt)
-			break
 		case "annulled":
 			handler.annulledPlayer(msg["data"].(int))
-			break
 		}
 	}
 }
