@@ -12,13 +12,13 @@ type IPokeapiRESTRepository struct {
 	mock.Mock
 }
 
-// Pokemon provides a mock function with given fields: offset
-func (_m *IPokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error) {
-	ret := _m.Called(offset)
+// Pokemon provides a mock function with given fields: offset, limit
+func (_m *IPokeapiRESTRepository) Pokemon(offset int, limit int) ([]*domain.Monster, error) {
+	ret := _m.Called(offset, limit)
 
 	var r0 []*domain.Monster
-	if rf, ok := ret.Get(0).(func(int) []*domain.Monster); ok {
-		r0 = rf(offset)
+	if rf, ok := ret.Get(0).(func(int, int) []*domain.Monster); ok {
+		r0 = rf(offset, limit)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*domain.Monster)
@@ -26,8 +26,8 @@ func (_m *IPokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(offset)
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(offset, limit)
 	} else {
 		r1 = ret.Error(1)
 	}

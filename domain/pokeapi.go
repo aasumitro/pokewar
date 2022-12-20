@@ -62,6 +62,6 @@ type (
 	}
 
 	IPokeapiRESTRepository interface {
-		Pokemon(offset int) ([]*Monster, error)
+		Pokemon(offset, limit int) ([]*Monster, error)
 	}
 )

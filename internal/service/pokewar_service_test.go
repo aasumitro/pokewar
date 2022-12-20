@@ -29,6 +29,8 @@ func (suite *pokewarServiceTestSuite) SetupSuite() {
 
 	appconfigs.LoadEnv()
 
+	appconfigs.Instance.TotalMonsterSync = 10
+
 	suite.monsters = []*domain.Monster{
 		{
 			ID:       1,

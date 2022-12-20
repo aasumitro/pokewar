@@ -11,6 +11,20 @@ type MonsterHTTPHandler struct {
 	Svc domain.IPokewarService
 }
 
+// Fetch godoc
+// @Schemes
+// @Summary 	 Monster List
+// @Description  Get Monster List.
+// @Tags 		 Monsters
+// @Accept       json
+// @Produce      json
+// @Param        limit    query     string  false  "data limit"
+// @Param        offset   query    string  false  "data offset"
+// @Success 200 {object} utils.SuccessRespond{data=[]domain.Monster} "BASIC RESPOND"
+// @Success 200 {object} utils.SuccessRespondWithPagination{data=[]domain.Monster} "PAGINATION RESPOND"
+// @Failure 404 {object} utils.ErrorRespond "NOT FOUND"
+// @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
+// @Router /api/v1/monsters [GET]
 func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 	paging, args := utils.ParseParam(ctx)
 
@@ -34,7 +48,13 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 }
 
 func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
-	// TODO SYNC UPDATE OR ADD NEW DATA
+	data, err := handler.Svc.SyncMonsters()
+	if err != nil {
+		utils.NewHttpRespond(ctx, err.Code, err.Message)
+		return
+	}
+
+	utils.NewHttpRespond(ctx, http.StatusOK, data)
 }
 
 func NewMonsterHttpHandler(svc domain.IPokewarService, router *gin.RouterGroup) {

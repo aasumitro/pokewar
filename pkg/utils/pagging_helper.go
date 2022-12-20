@@ -19,7 +19,7 @@ func Paginate(limit, offset, total int, host, path string) (totalPages, currentP
 		}
 	}
 
-	if totalPages != currentPage {
+	if totalPages != currentPage && totalPages != 0 {
 		nextOffset := offset + limit
 		nextPath := fmt.Sprintf("%s?offset=%d&limit=%d", path, nextOffset, limit)
 		nextLink := fmt.Sprintf("%s://%s/%s", "http", host, nextPath)

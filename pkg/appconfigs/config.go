@@ -19,7 +19,8 @@ type AppConfig struct {
 	Pokedex          string `mapstructure:"POKEDEX"`
 	DBDriver         string `mapstructure:"DB_DRIVER"`
 	DBDsnUrl         string `mapstructure:"DB_DSN_URL"`
-	LastSync         int    `mapstructure:"LAST_SYNC"`
+	LastSync         int64  `mapstructure:"LAST_SYNC"`
+	LimitSync        int    `mapstructure:"LIMIT_SYNC"`
 	LastMonsterID    int    `mapstructure:"LAST_MONSTER_ID"`
 	TotalMonsterSync int    `mapstructure:"TOTAL_MONSTER_SYNC"`
 }

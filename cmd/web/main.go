@@ -35,7 +35,7 @@ func init() {
 
 	appEngine = gin.Default()
 
-	docs.SwaggerInfo.BasePath = appEngine.BasePath() + "v1/api"
+	docs.SwaggerInfo.BasePath = appEngine.BasePath()
 	docs.SwaggerInfo.Title = appconfigs.Instance.AppName
 	docs.SwaggerInfo.Description = "Pocket Monster Battleroyale API Spec"
 	docs.SwaggerInfo.Version = appconfigs.Instance.AppVersion

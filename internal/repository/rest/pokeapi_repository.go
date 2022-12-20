@@ -11,31 +11,43 @@ import (
 	"time"
 )
 
-type pokeapiRESTRepository struct {
-	httpClient httpclient.IHttpClient
-}
+type pokeapiRESTRepository struct{}
 
 // Pokemon
 // TODO: Optimize
 // BENCH RESULT wg is better than ch
 // STILL TO SLOW SOMETIMES TOOK 3s TO LOAD AND PROCEED THE DATA
-func (repo *pokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error) {
-	var pokemons *domain.PokemonResult
-	var wg sync.WaitGroup
-	var monsters []*domain.Monster
-
+// NOW BETTER its took  1.428834833s - 2.828187625s for 25 data
+func (repo *pokeapiRESTRepository) Pokemon(offset, limit int) ([]*domain.Monster, error) {
 	client := &httpclient.HttpClient{
 		Endpoint: fmt.Sprintf(
-			"%s/pokemon?offset=%d&limit=25",
-			appconfigs.Instance.PokeapiUrl, offset,
+			"%s/pokemon?offset=%d&limit=%d",
+			appconfigs.Instance.PokeapiUrl, offset, limit,
 		),
 		Timeout: 10 * time.Second,
 		Method:  http.MethodGet,
 	}
+
+	monsters, err := proceedData(client, transformData)
+	if err != nil {
+		return nil, err
+	}
+
+	return monsters, nil
+}
+
+// helper function to proceed data
+func proceedData(
+	client *httpclient.HttpClient,
+	transformData func(*httpclient.HttpClient, *domain.Pokemon) *domain.Monster,
+) ([]*domain.Monster, error) {
+	var pokemons *domain.PokemonResult
+	var wg sync.WaitGroup
+	var monsters []*domain.Monster
+
 	if err := client.MakeRequest(&pokemons); err != nil {
 		return nil, err
 	}
-	httpClientTest(repo) // FOR TEST PURPOSE (MOCK)
 
 	for _, pokemon := range pokemons.Results {
 		wg.Add(1)
@@ -43,18 +55,13 @@ func (repo *pokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error
 			defer wg.Done()
 			var pokemon *domain.Pokemon
 
-			client = &httpclient.HttpClient{
-				Endpoint: url,
-				Timeout:  10 * time.Second,
-				Method:   http.MethodGet,
-			}
+			client.Endpoint = url
 			err := client.MakeRequest(&pokemon)
-			httpClientTest(repo) // FOR TEST PURPOSE (MOCK)
 
 			if err != nil {
 				monsters = append(monsters, nil)
 			} else {
-				monsters = append(monsters, transformData(repo, pokemon))
+				monsters = append(monsters, transformData(client, pokemon))
 			}
 		}(pokemon.URL)
 	}
@@ -65,7 +72,10 @@ func (repo *pokeapiRESTRepository) Pokemon(offset int) ([]*domain.Monster, error
 }
 
 // helper function to transform origin data
-func transformData(repo *pokeapiRESTRepository, pokemon *domain.Pokemon) *domain.Monster {
+func transformData(
+	client *httpclient.HttpClient,
+	pokemon *domain.Pokemon,
+) *domain.Monster {
 	types := make([]string, 0, len(pokemon.Types))
 	for _, pokemon := range pokemon.Types {
 		types = append(types, pokemon.Type.Name)
@@ -79,17 +89,7 @@ func transformData(repo *pokeapiRESTRepository, pokemon *domain.Pokemon) *domain
 		})
 	}
 
-	max := len(pokemon.Moves)
-	movesUrls := make([]string, 0, 4)
-	generatedKey := make(map[int]bool)
-	for len(movesUrls) < 4 {
-		n := rand.Intn(max)
-		if _, found := generatedKey[n]; !found {
-			movesUrls = append(movesUrls, pokemon.Moves[n].Move.Url)
-			generatedKey[n] = true
-		}
-	}
-
+	movesUrls := randomSubset(pokemon.Moves, 4)
 	var wgMove sync.WaitGroup
 	var skills []*domain.Skill
 	for _, moveUrl := range movesUrls {
@@ -97,17 +97,12 @@ func transformData(repo *pokeapiRESTRepository, pokemon *domain.Pokemon) *domain
 		go func(moveUrl string) {
 			defer wgMove.Done()
 			var skill *domain.Skill
-			client := httpclient.HttpClient{
-				Endpoint: moveUrl,
-				Timeout:  10 * time.Second,
-				Method:   http.MethodGet,
-			}
+			client.Endpoint = moveUrl
 			if err := client.MakeRequest(&skill); err != nil {
 				skills = append(skills, nil)
 			} else {
 				skills = append(skills, skill)
 			}
-			httpClientTest(repo) // FOR TEST PURPOSE (MOCK)
 		}(moveUrl)
 	}
 	wgMove.Wait()
@@ -125,20 +120,22 @@ func transformData(repo *pokeapiRESTRepository, pokemon *domain.Pokemon) *domain
 	}
 }
 
+// helper function to get random skills/moves
+func randomSubset(slice []domain.Moves, size int) []string {
+	max := len(slice)
+	result := make([]string, 0, 4)
+	generatedKey := make(map[int]bool)
+	for len(result) < size {
+		n := rand.Intn(max)
+		if _, found := generatedKey[n]; !found {
+			result = append(result, slice[n].Move.Url)
+			generatedKey[n] = true
+		}
+	}
+	return result
+}
+
 // NewPokeapiRESTRepository use in main app
 func NewPokeapiRESTRepository() domain.IPokeapiRESTRepository {
 	return &pokeapiRESTRepository{}
-}
-
-// helper function to help unit test
-func httpClientTest(repo *pokeapiRESTRepository) {
-	if repo.httpClient != nil {
-		var obj interface{}
-		_ = repo.httpClient.MakeRequest(obj)
-	}
-}
-
-// NewPokeapiRESTRepositoryTest - use for tests with httpclient mock (inject)
-func NewPokeapiRESTRepositoryTest(httpclient httpclient.IHttpClient) domain.IPokeapiRESTRepository {
-	return &pokeapiRESTRepository{httpClient: httpclient}
 }

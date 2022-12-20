@@ -111,7 +111,28 @@
 
                 <!-- MONSTER SECTION -->
                 <div id="monster-section" class="py-4 md:py-7 px-4 md:px-8 xl:px-10 hidden">
-                    <div class=" flex flex-wrap gap-8" id="monsters-list"></div>
+                    <div class="flex flex-row items-center justify-center mb-12 gap-2">
+                        <div class="relative text-gray-400 focus-within:text-gray-600">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 p-1 focus:outline-none focus:shadow-outline">
+                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                           </span>
+                            <label for="search"></label>
+                            <input type="search" name="search" id="search" class="py-2 text-sm text-black bg-white rounded-md pl-10 pr-2 border-solid border-2 border-gray-400 focus:bg-white focus:border-gray-600 focus:outline-none" placeholder="Search..." autocomplete="off">
+                        </div>
+                        <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" onclick="alert('not implement yet -> TODO: call /api/v1/sync - update local')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                            Sync
+                        </button>
+                        <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" onclick="alert('not implement yet -> TODO: call /api/v1/sync - load more from remote resources')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                            More (+25)
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-8" id="monsters-list"></div>
                 </div>
 
                 <!-- BATTLE SECTION -->
@@ -160,29 +181,28 @@
 
                 <!-- PLAY SECTION -->
                 <div id="play-section" class="flex flex-col items-center justify-center hidden">
-                    <div class="flex flex-wrap gap-4 items-center justify-center">
-                        <div class="p-4 max-w-sm mx-auto bg-white rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6">
-                            <div class="text-center space-y-2 sm:text-left">
-                                <img class="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/216.png" alt="Woman's Face">
-                                <div class="space-y-0.5">
-                                    <p class="text-lg text-black text-center font-semibold">
-                                        Teddiursa
-                                    </p>
-                                    <p class="text-slate-500 font-normal">HP: <b>40</b></p>
-                                    <p class="text-slate-500 font-normal">Attract PP: <b>15</b></p>
-                                    <p class="text-slate-500 font-normal">Body-slam PP: <b>15</b></p>
-                                    <p class="text-slate-500 font-normal">Rollout PP: <b>20</b></p>
-                                    <p class="text-slate-500 font-normal">Counter PP: <b>20</b></p>
-                                </div>
-                            </div>
+                    <div class="flex flex-col gap-4 items-center justify-center">
+                        <div class="flex flex-row items-center justify-center mb-12 gap-2">
+                            <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" onclick="sendMessageToWsServer('prepare')">
+                                RANDOM PLAYER
+                            </button>
+                            <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" onclick="sendMessageToWsServer('start')">
+                               PLAY BATTLE
+                            </button>
                         </div>
+                        <div id="battleroyale-player"></div>
+                        <div id="battleroyale-logs"></div>
+                        <div id="battleroyale-last-winner"></div>
                     </div>
                 </div>
             </div>
         </main>
 
         <script>
-            const apiUrl  = 'http://localhost:8000/api/v1'
+            const restUrl  = 'http://localhost:8000/api/v1'
+            const wsUrl  = 'ws://localhost:8000/api/v1/ws'
+            let wsConn = null
+            let isWsConnReady = false
 
             const loaderComponent = document.getElementById('loader-component')
             const introComponent = document.getElementById('intro-component')
@@ -232,36 +252,57 @@
                 mainComponent.classList.add('hidden')
                 matchList.innerHTML = ""
                 monsterList.innerHTML = ""
+
+                if (isWsConnReady) {
+                    wsConn.close()
+                }
             }
 
             // ================================================================
             // START MONSTER SECTION
             // ================================================================
+            let monsters = []
+            let monstersTemp = []
             function displayMonsters() {
                 sectionMonster.classList.remove('hidden')
                 sectionBattle.classList.add('hidden')
                 sectionRank.classList.add('hidden')
                 sectionPlay.classList.add('hidden')
 
-                monsterList.innerHTML = ""
-
                 // TODO: ADD PAGINATION
                 this.fetchData('monsters').then((resp) => {
-                    const monsters = resp.data.data
-
-                    if (monsters === null) {
-                        monsterList.innerHTML +=
-                            "<div class='text-center'>" +
-                            " Data Not Available </div>"
-                    } else {
-                        sectionTitle.innerText += ` (${monsters.length})`
-
-                        monsters.forEach(monster => {
-                            const item = monstersItemComponent(monster)
-                            monsterList.innerHTML += item
-                        })
-                    }
+                    monsters = resp.data.data
+                    monstersTemp = monsters
+                    showListOfMonsters()
                 }).catch((_) => onBackPressed())
+            }
+
+            document.getElementById('search').addEventListener('input', function(event) {
+                const inputValue = event.target.value;
+
+                monsters = (inputValue !== "")
+                    ? monsters.filter(monster =>
+                        monster.name.toLowerCase()
+                            .includes(inputValue.toLowerCase()))
+                    : monstersTemp
+
+                showListOfMonsters()
+            })
+
+            function showListOfMonsters () {
+                monsterList.innerHTML = ""
+                sectionTitle.innerText = ` Monsters (${monsters.length})`
+
+                if (monsters.length === 0) {
+                    monsterList.innerHTML +=
+                        "<div class='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>" +
+                        " Data Not Available </div>"
+                } else {
+                    monsters.forEach(monster => {
+                        const item = monstersItemComponent(monster)
+                        monsterList.innerHTML += item
+                    })
+                }
             }
 
             function monstersItemComponent(data) {
@@ -408,11 +449,14 @@
                         <p class="mx-auto">#`+player.rank+`</p>
                     </td>
                     <td>
-                        <div class="flex flex-col pl-2">
-                            <p class="text-base font-medium leading-none text-gray-700 mr-2">`+ capitalize(player.name) +`</p>
-                            <div class="flex flex-row gap-2 mt-2">
-                                <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ player.point +` pts</span>
-                                <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ diffTime(player.eliminated_at, battleStart, true) +`</span>
+                        <div class="flex flex-row gap-2 items-center">
+                            <img class="h-6 w-6 ml-2" src="`+player.avatar+`" alt="`+player.name+`">
+                            <div class="flex flex-col pl-2">
+                                <p class="text-base font-medium leading-none text-gray-700 mr-2">`+ capitalize(player.name) +`</p>
+                                <div class="flex flex-row gap-2 mt-2">
+                                    <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ player.point +` pts</span>
+                                    <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ diffTime(player.eliminated_at, battleStart, true) +`</span>
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -508,9 +552,12 @@
                         </div>
                     </td>
                     <td>
-                        <div class="flex flex-col pl-5">
-                            <p class="text-base font-medium leading-none text-gray-700 mr-2">`+capitalize(data.name)+`</p>
-                            <div class="flex flex-row gap-2 mt-2">`+types+`</div>
+                        <div class="flex flex-row gap-2 items-center">
+                            <img class="h-6 w-6 ml-4" src="`+data.avatar+`" alt="`+data.name+`">
+                            <div class="flex flex-col ml-2">
+                                <p class="text-base font-medium leading-none text-gray-700 mr-2">`+capitalize(data.name)+`</p>
+                                <div class="flex flex-row gap-2 mt-2">`+types+`</div>
+                            </div>
                         </div>
                     </td>
                     <td class="pl-24">
@@ -542,12 +589,108 @@
             // ================================================================
             // TODO: START BATTLE SECTION
             // ================================================================
+            const monsterSectionUI = document.getElementById("battleroyale-player")
+            const logsSectionUI = document.getElementById("battleroyale-logs")
+            const lastWinnerSectionUI = document.getElementById("battleroyale-last-winner")
             function displayPlayground() {
                 sectionMonster.classList.add('hidden')
                 sectionBattle.classList.add('hidden')
                 sectionRank.classList.add('hidden')
                 sectionPlay.classList.remove('hidden')
+
+                wsConn = new WebSocket(`${wsUrl}/${generateRandomId()}`);
+
+                wsConn.onopen = () => {
+                    isWsConnReady = true
+                    monsterSectionUI.innerHTML = ""
+                    logsSectionUI.innerHTML = ""
+                    lastWinnerSectionUI.innerHTML = ""
+                    console.log("ws conn open");
+                }
+
+                wsConn.onmessage = (event) =>  proceedWsData(event)
+
+                wsConn.onclose = () => {
+                    isWsConnReady = false
+                    monsterSectionUI.innerHTML = ""
+                    logsSectionUI.innerHTML = ""
+                    lastWinnerSectionUI.innerHTML = ""
+                    console.log("ws conn closed")
+                }
             }
+
+            function sendMessageToWsServer(message, data = 0) {
+                if (!isWsConnReady) {
+                    alert("Websocket connection is closed")
+                    onBackPressed()
+                }
+
+                wsConn.send(JSON.stringify({
+                    'action': message,
+                    'data': data
+                }))
+            }
+
+            function proceedWsData(event) {
+                if (!isJsonString(event.data)) {
+                    console.log(event.data)
+                    return;
+                }
+
+                const callback = JSON.parse(event.data)
+
+                if (callback.status === "error") {
+                    alert(callback.message)
+                    return
+                }
+
+                switch (callback.data_type) {
+                    case "battle_histories":
+                        proceedBattleHistoryUI(callback.data)
+                        break;
+                    case "monsters":
+                        proceedMonsterUI(callback.data)
+                        break;
+                    case "battle_logs":
+                        proceedLogsUI(callback.data)
+                        break;
+                    case "eliminated_player":
+                        proceedEliminatedPlayer(callback.data)
+                        break;
+                    case "match_result":
+                        proceedMatchResultUI(callback.data)
+                        break;
+                }
+            }
+
+            function proceedBattleHistoryUI(battles) {
+                console.log(battles);
+            }
+
+            function proceedMonsterUI(monsters) {
+                monsterSectionUI.innerHTML = ""
+                monsters.forEach(monster => {
+                    monsterSectionUI.innerHTML += `
+                        <div>
+                          <img class="h-6 w-6" src="`+monster.avatar+`" alt="`+monster.name+`">
+                          <p>`+monster.name+`</p>
+                        </div>
+                    `
+                })
+            }
+
+            function proceedLogsUI(log) {
+                console.log(log);
+            }
+
+            function proceedEliminatedPlayer(player) {
+                console.log(player)
+            }
+
+            function proceedMatchResultUI(battle) {
+                console.log(battle);
+            }
+
             // ================================================================
             // END BATTLE SECTION
             //================================================================
@@ -558,7 +701,7 @@
             // ================================================================
             async function fetchData(path) {
                 try {
-                    return await axios.get(`${apiUrl}/${path}`)
+                    return await axios.get(`${restUrl}/${path}`)
                 } catch (error) {
                     alert(error)
                 }
@@ -586,12 +729,26 @@
                     return "-"
                 }
 
-                const pref = eliminate ? 'eliminated in: ' : ''
+                const pref = eliminate ? 'Stand: ' : ''
 
                 return pref +
                     dayjs(dayjs.unix(start))
                         .diff(dayjs.unix(end), 'second')
                     + 's'
+            }
+
+            function generateRandomId() {
+                const randLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                return  randLetter + Date.now();
+            }
+
+            function isJsonString(str) {
+                try {
+                    JSON.parse(str)
+                    return true
+                } catch (e) {
+                    return false
+                }
             }
         </script>
     </body>

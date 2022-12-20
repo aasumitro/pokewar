@@ -49,7 +49,7 @@ func (suite *monsterHTTPHandlerTestSuite) TestHandler_Fetch_ShouldSuccess() {
 		Once()
 	writer := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(writer)
-	req, _ := http.NewRequest("GET", "/api/v1/ranks?limit=1", nil)
+	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
 	ctx.Request = req
 	handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
 	handler.Fetch(ctx)
@@ -74,6 +74,47 @@ func (suite *monsterHTTPHandlerTestSuite) TestHandler_Fetch_ShouldError() {
 	ctx.Request = req
 	handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
 	handler.Fetch(ctx)
+	var got utils.ErrorRespond
+	_ = json.Unmarshal(writer.Body.Bytes(), &got)
+	assert.Equal(suite.T(), http.StatusInternalServerError, writer.Code)
+	assert.Equal(suite.T(), http.StatusInternalServerError, got.Code)
+	assert.Equal(suite.T(), http.StatusText(http.StatusInternalServerError), got.Status)
+	assert.Equal(suite.T(), "UNEXPECTED_ERROR", got.Data)
+}
+
+func (suite *monsterHTTPHandlerTestSuite) TestHandler_Sync_ShouldSuccess() {
+	svcMock := new(mocks.IPokewarService)
+	svcMock.
+		On("SyncMonsters", mock.Anything).
+		Return(suite.monsters, nil).
+		Once()
+	writer := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(writer)
+	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
+	ctx.Request = req
+	handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
+	handler.Sync(ctx)
+	var got utils.SuccessRespond
+	_ = json.Unmarshal(writer.Body.Bytes(), &got)
+	assert.Equal(suite.T(), http.StatusOK, writer.Code)
+	assert.Equal(suite.T(), http.StatusOK, got.Code)
+	assert.Equal(suite.T(), http.StatusText(http.StatusOK), got.Status)
+}
+
+func (suite *monsterHTTPHandlerTestSuite) TestHandler_Sync_ShouldError() {
+	svcMock := new(mocks.IPokewarService)
+	svcMock.
+		On("SyncMonsters", mock.Anything).
+		Return(nil, &utils.ServiceError{
+			Code:    http.StatusInternalServerError,
+			Message: "UNEXPECTED_ERROR",
+		}).Once()
+	writer := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(writer)
+	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
+	ctx.Request = req
+	handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
+	handler.Sync(ctx)
 	var got utils.ErrorRespond
 	_ = json.Unmarshal(writer.Body.Bytes(), &got)
 	assert.Equal(suite.T(), http.StatusInternalServerError, writer.Code)

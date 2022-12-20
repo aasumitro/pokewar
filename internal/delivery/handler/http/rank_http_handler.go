@@ -11,6 +11,20 @@ type RankHTTPHandler struct {
 	Svc domain.IPokewarService
 }
 
+// Fetch godoc
+// @Schemes
+// @Summary 	 Rank List
+// @Description  Get Rank List.
+// @Tags 		 Ranks
+// @Accept       json
+// @Produce      json
+// @Param        limit    query     string  false  "data limit"
+// @Param        offset   query    string  false  "data offset"
+// @Success 200 {object} utils.SuccessRespond{data=[]domain.Rank} "BASIC RESPOND"
+// @Success 200 {object} utils.SuccessRespondWithPagination{data=[]domain.Rank} "PAGINATION RESPOND"
+// @Failure 404 {object} utils.ErrorRespond "NOT FOUND"
+// @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
+// @Router /api/v1/ranks [GET]
 func (handler *RankHTTPHandler) Fetch(ctx *gin.Context) {
 	paging, args := utils.ParseParam(ctx)
 

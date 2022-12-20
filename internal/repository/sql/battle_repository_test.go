@@ -63,7 +63,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData
 	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
-	q += "'name', m.name)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
 	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b LIMIT 1"
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
@@ -78,7 +78,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
-	q += "'name', m.name)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
 	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
@@ -96,7 +96,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
-	q += "'name', m.name)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
 	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)

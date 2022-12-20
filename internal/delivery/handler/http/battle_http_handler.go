@@ -11,6 +11,20 @@ type BattleHTTPHandler struct {
 	Svc domain.IPokewarService
 }
 
+// Fetch godoc
+// @Schemes
+// @Summary 	 Battle List
+// @Description  Get Battle List.
+// @Tags 		 Battles
+// @Accept       json
+// @Produce      json
+// @Param        limit    query     string  false  "data limit"
+// @Param        offset   query    string  false  "data offset"
+// @Success 200 {object} utils.SuccessRespond{data=[]domain.Battle} "BASIC RESPOND"
+// @Success 200 {object} utils.SuccessRespondWithPagination{data=[]domain.Battle} "PAGINATION RESPOND"
+// @Failure 404 {object} utils.ErrorRespond "NOT FOUND"
+// @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
+// @Router /api/v1/battles [GET]
 func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
 	paging, args := utils.ParseParam(ctx)
 

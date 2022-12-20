@@ -22,6 +22,7 @@ type (
 	Player struct {
 		ID           int    `json:"id"`
 		Name         string `json:"name"`
+		Avatar       string `json:"avatar"`
 		BattleID     int    `json:"battle_id"`
 		MonsterID    int    `json:"monster_id"`
 		EliminatedAt int64  `json:"eliminated_at"`

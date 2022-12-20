@@ -31,7 +31,7 @@ func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data 
 	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
-	q += "'name', m.name)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
 	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
 	if len(args) > 0 {
 		for _, arg := range args {
@@ -72,56 +72,56 @@ func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data 
 }
 
 func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battle) error {
-	tx, err := repo.db.Begin()
-	if err != nil {
-		return err
-	}
-
-	qb := "INSERT INTO battles (started_at, ended_at) VALUES (?, ?) RETURNING id"
-	newBattle, err := tx.Exec(qb, param.StartedAt, param.EndedAt)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	battleId, err := newBattle.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	ql := "INSERT INTO battle_logs (battle_id, description, created_at) VALUES"
-	now := time.Now().Unix()
-	for i, log := range param.Logs {
-		ql += fmt.Sprintf(" (%d, %s, %d)", battleId, log.Description, now)
-		if i != (len(param.Logs) - 1) {
-			ql += ","
-		}
-	}
-	_, err = tx.Exec(ql)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	qp := "INSERT INTO battle_players (battle_id, monster_id, eliminated_at, rank, point) VALUES"
-	for i, player := range param.Players {
-		ql += fmt.Sprintf(" (%d, %d, %d, %d, %d)",
-			battleId, player.MonsterID, player.EliminatedAt,
-			player.Rank, player.Point)
-		if i != (len(param.Logs) - 1) {
-			ql += ","
-		}
-	}
-	_, err = tx.Exec(qp)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-
+	//tx, err := repo.db.Begin()
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//qb := "INSERT INTO battles (started_at, ended_at) VALUES (?, ?) RETURNING id"
+	//newBattle, err := tx.Exec(qb, param.StartedAt, param.EndedAt)
+	//if err != nil {
+	//	_ = tx.Rollback()
+	//	return err
+	//}
+	//battleId, err := newBattle.LastInsertId()
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//ql := "INSERT INTO battle_logs (battle_id, description, created_at) VALUES"
+	//now := time.Now().Unix()
+	//for i, log := range param.Logs {
+	//	ql += fmt.Sprintf(" (%d, %s, %d)", battleId, log.Description, now)
+	//	if i != (len(param.Logs) - 1) {
+	//		ql += ","
+	//	}
+	//}
+	//_, err = tx.Exec(ql)
+	//if err != nil {
+	//	_ = tx.Rollback()
+	//	return err
+	//}
+	//
+	//qp := "INSERT INTO battle_players (battle_id, monster_id, eliminated_at, rank, point) VALUES"
+	//for i, player := range param.Players {
+	//	ql += fmt.Sprintf(" (%d, %d, %d, %d, %d)",
+	//		battleId, player.MonsterID, player.EliminatedAt,
+	//		player.Rank, player.Point)
+	//	if i != (len(param.Logs) - 1) {
+	//		ql += ","
+	//	}
+	//}
+	//_, err = tx.Exec(qp)
+	//if err != nil {
+	//	_ = tx.Rollback()
+	//	return err
+	//}
+	//
+	//err = tx.Commit()
+	//if err != nil {
+	//	return err
+	//}
+	//
 	return nil
 }
 

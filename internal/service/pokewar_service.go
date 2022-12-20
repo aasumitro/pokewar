@@ -7,6 +7,7 @@ import (
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"math/rand"
+	"time"
 )
 
 type pokewarService struct {
@@ -27,10 +28,54 @@ func (service *pokewarService) FetchMonsters(args ...string) (monsters []*domain
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-func (service *pokewarService) SyncMonsters(args ...string) (data []*domain.Monster, err *utils.ServiceError) {
-	//TODO implement me
-	panic("implement me")
-	// call pokemonRepo -> do update or insert
+func (service *pokewarService) SyncMonsters(_ ...string) (data []*domain.Monster, error *utils.ServiceError) {
+	offset := appconfigs.Instance.TotalMonsterSync
+	limit := appconfigs.Instance.LimitSync
+	lastId := appconfigs.Instance.LastMonsterID
+
+	data, err := service.pokemonRepo.Pokemon(offset, limit)
+
+	var maxID int
+	for _, d := range data {
+		fmt.Println()
+		if d.OriginID > maxID {
+			maxID = d.OriginID
+		}
+	}
+
+	done := make(chan bool)
+
+	if lastId == maxID || maxID < lastId {
+		go func() {
+			for _, d := range data {
+				if err := service.monsterRepo.Update(service.ctx, d); err != nil {
+					// todo retry mechanism
+					fmt.Println(err.Error())
+				}
+			}
+			done <- true
+		}()
+	}
+
+	if maxID > lastId {
+		go func() {
+			for _, d := range data {
+				if err := service.monsterRepo.Create(service.ctx, d); err != nil {
+					// todo retry mechanism
+					fmt.Println(err.Error())
+				}
+			}
+			done <- true
+		}()
+	}
+
+	<-done
+
+	appconfigs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
+	appconfigs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
+	appconfigs.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
+
+	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
 func (service *pokewarService) FetchRanks(args ...string) (ranks []*domain.Rank, error *utils.ServiceError) {
@@ -76,9 +121,9 @@ func (service *pokewarService) AddBattle(param domain.Battle) *utils.ServiceErro
 }
 
 func (service *pokewarService) AnnulledPlayer(playerId int) (data int64, error *utils.ServiceError) {
-	time, err := service.battleRepo.UpdatePlayer(service.ctx, playerId)
+	annulledTime, err := service.battleRepo.UpdatePlayer(service.ctx, playerId)
 
-	return utils.ValidatePrimitiveValue[int64](time, err)
+	return utils.ValidatePrimitiveValue[int64](annulledTime, err)
 }
 
 func NewPokewarService(
