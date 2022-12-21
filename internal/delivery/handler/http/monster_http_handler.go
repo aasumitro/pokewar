@@ -58,7 +58,6 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 // @Failure 404 {object} utils.ErrorRespond "NOT FOUND"
 // @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
 // @Router /api/v1/monsters/sync [GET]
-// TODO: validate request -> update current data | add new data
 func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
 	data, err := handler.Svc.SyncMonsters()
 	if err != nil {

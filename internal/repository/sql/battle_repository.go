@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type battleSQLRepository struct {
 func (repo *battleSQLRepository) Count(ctx context.Context) int {
 	var total int
 
-	q := "SELECT COUNT(*) FROM battles"
+	q := "SELECT COUNT(*) AS total FROM battles"
 	if err := repo.db.QueryRowContext(ctx, q).Scan(&total); err != nil {
 		total = 0
 	}
@@ -32,10 +33,18 @@ func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data 
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
 	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
 	if len(args) > 0 {
 		for _, arg := range args {
-			q += fmt.Sprintf("%s ", arg)
+			if strings.Contains(arg, "WHERE") {
+				q += fmt.Sprintf("%s ", arg)
+				q += "ORDER BY b.id DESC "
+			} else {
+				if !strings.Contains(q, "ORDER BY") {
+					q += "ORDER BY b.id DESC "
+				}
+				q += fmt.Sprintf("%s ", arg)
+			}
 		}
 	}
 
@@ -83,10 +92,9 @@ func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle)
 		_ = tx.Rollback()
 		return err
 	}
-	battleId, err := newBattle.LastInsertId()
-	if err != nil {
-		return err
-	}
+	// doesn't need to validate err, because
+	// the database table has an auto-incrementing primary key
+	battleId, _ := newBattle.LastInsertId()
 
 	ql := "INSERT INTO battle_logs (battle_id, description, created_at) VALUES"
 	now := time.Now().UnixMicro()

@@ -115,7 +115,7 @@ func (repo *monsterSQLRepository) Update(ctx context.Context, param *domain.Mons
 func (repo *monsterSQLRepository) Count(ctx context.Context) int {
 	var total int
 
-	q := "SELECT COUNT(*) FROM monsters"
+	q := "SELECT COUNT(*) AS total FROM monsters"
 	if err := repo.db.QueryRowContext(ctx, q).Scan(&total); err != nil {
 		total = 0
 	}

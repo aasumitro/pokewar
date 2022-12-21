@@ -13,30 +13,29 @@ import (
 )
 
 type MatchWSHandler struct {
-	playground  string
 	Svc         domain.IPokewarService
-	Monsters    []*domain.Monster
-	GamePlayers []*battleroyale.Player
-	BattleData  *domain.Battle
-	wsConn      *websocket.Conn
+	Monsters    map[string][]*domain.Monster
+	GamePlayers map[string][]*battleroyale.Player
+	BattleData  map[string]*domain.Battle
+	clients     map[string]*websocket.Conn
 	mu          sync.Mutex
 }
+
+var isLastBattleSaved map[string]bool
 
 var wsUpgraded = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
-func (handler *MatchWSHandler) battleHistory(msgType int) {
+func (handler *MatchWSHandler) battleHistory(msgType int, clientId string) {
 	data, errorData := handler.Svc.FetchBattles("LIMIT 5")
 	if errorData != nil {
-		handler.mu.Lock()
 		message, _ := json.Marshal(map[string]any{
 			"status":  "error",
 			"message": errorData.Message,
 		})
-		_ = handler.wsConn.WriteMessage(msgType, message)
-		handler.mu.Unlock()
+		handler.sendMessageToClient(msgType, clientId, message)
 	}
 
 	var histories []string
@@ -53,44 +52,38 @@ func (handler *MatchWSHandler) battleHistory(msgType int) {
 		histories = append(histories, history)
 	}
 
-	handler.mu.Lock()
 	message, _ := json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "battle_histories",
 		"data":      histories,
 	})
-	_ = handler.wsConn.WriteMessage(msgType, message)
-	handler.mu.Unlock()
+	handler.sendMessageToClient(msgType, clientId, message)
 }
 
-func (handler *MatchWSHandler) prepareBattle(msgType int) {
+func (handler *MatchWSHandler) prepareBattle(msgType int, clientId string) {
 	monsterData, errorData := handler.Svc.PrepareMonstersForBattle()
 	if errorData != nil {
-		handler.mu.Lock()
 		message, _ := json.Marshal(map[string]any{
 			"status":  "error",
 			"message": errorData.Message,
 		})
-		_ = handler.wsConn.WriteMessage(msgType, message)
-		handler.mu.Unlock()
+		handler.sendMessageToClient(msgType, clientId, message)
 	}
 
-	handler.Monsters = monsterData
-	handler.transformMonsterAsPlayer()
+	handler.Monsters[clientId] = monsterData
+	handler.transformMonsterAsPlayer(clientId)
 
-	handler.mu.Lock()
 	message, _ := json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "monsters",
 		"data":      monsterData,
 	})
-	_ = handler.wsConn.WriteMessage(msgType, message)
-	handler.mu.Unlock()
+	handler.sendMessageToClient(msgType, clientId, message)
 }
 
-func (handler *MatchWSHandler) transformMonsterAsPlayer() {
+func (handler *MatchWSHandler) transformMonsterAsPlayer(clientId string) {
 	var players []*battleroyale.Player
-	for _, monster := range handler.Monsters {
+	for _, monster := range handler.Monsters[clientId] {
 		var hp int
 		for _, stat := range monster.Stats {
 			if stat.Name == "hp" {
@@ -112,62 +105,54 @@ func (handler *MatchWSHandler) transformMonsterAsPlayer() {
 			},
 		})
 	}
-	handler.GamePlayers = players
+	handler.GamePlayers[clientId] = players
 }
 
-func (handler *MatchWSHandler) startBattle(msgType int) {
-	handler.mu.Lock()
+func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
 	message, _ := json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "players",
-		"data":      handler.GamePlayers,
+		"data":      handler.GamePlayers[clientId],
 	})
-	_ = handler.wsConn.WriteMessage(msgType, message)
-	handler.mu.Unlock()
+	handler.sendMessageToClient(msgType, clientId, message)
 
 	result := make(chan *battleroyale.Game)
 	log := make(chan string, 100)
 	eliminated := make(chan string, 5)
 
-	game := battleroyale.NewGame(handler.GamePlayers)
+	game := battleroyale.NewGame(handler.GamePlayers[clientId])
 	go game.Start(result, log, eliminated)
 	gameResult := handler.transformBattleResult(<-result)
 
 	go func() {
 		for logMessage := range log {
-			handler.mu.Lock()
 			message, _ = json.Marshal(map[string]any{
 				"status":    "success",
 				"data_type": "battle_logs",
 				"data":      logMessage,
 			})
-			_ = handler.wsConn.WriteMessage(msgType, message)
-			handler.mu.Unlock()
+			handler.sendMessageToClient(msgType, clientId, message)
 		}
 	}()
 
 	go func() {
 		for eliminatedPlayer := range eliminated {
-			handler.mu.Lock()
 			message, _ = json.Marshal(map[string]any{
 				"status":    "success",
 				"data_type": "eliminated_player",
 				"data":      strings.ToUpper(eliminatedPlayer),
 			})
-			_ = handler.wsConn.WriteMessage(msgType, message)
-			handler.mu.Unlock()
+			handler.sendMessageToClient(msgType, clientId, message)
 		}
 	}()
 
-	handler.BattleData = &gameResult
-	handler.mu.Lock()
+	handler.BattleData[clientId] = &gameResult
 	message, _ = json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "battle_result",
 		"data":      gameResult,
 	})
-	_ = handler.wsConn.WriteMessage(msgType, message)
-	handler.mu.Unlock()
+	handler.sendMessageToClient(msgType, clientId, message)
 
 	close(result)
 	close(log)
@@ -207,19 +192,19 @@ func (handler *MatchWSHandler) transformBattleResult(game *battleroyale.Game) do
 	}
 }
 
-func (handler *MatchWSHandler) annulledPlayer(msgType int, data any) {
+func (handler *MatchWSHandler) annulledPlayer(msgType int, clientId string, data any) {
 	var annulledPlayer *domain.Player
-	for i := range handler.BattleData.Players {
-		if handler.BattleData.Players[i].MonsterID == int(data.(float64)) {
-			annulledPlayer = &handler.BattleData.Players[i]
+	for i := range handler.BattleData[clientId].Players {
+		if handler.BattleData[clientId].Players[i].MonsterID == int(data.(float64)) {
+			annulledPlayer = &handler.BattleData[clientId].Players[i]
 			break
 		}
 	}
 
-	for i := range handler.BattleData.Players {
-		if handler.BattleData.Players[i].Rank > annulledPlayer.Rank {
-			handler.BattleData.Players[i].Rank--
-			handler.BattleData.Players[i].Point++
+	for i := range handler.BattleData[clientId].Players {
+		if handler.BattleData[clientId].Players[i].Rank > annulledPlayer.Rank {
+			handler.BattleData[clientId].Players[i].Rank--
+			handler.BattleData[clientId].Players[i].Point++
 		}
 	}
 
@@ -227,57 +212,83 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, data any) {
 	annulledPlayer.Rank = 0
 	annulledPlayer.Point = 0
 
-	handler.mu.Lock()
 	message, _ := json.Marshal(map[string]any{
 		"status":    "success",
 		"data_type": "eliminated_result",
-		"data":      handler.BattleData,
+		"data":      handler.BattleData[clientId],
 	})
-	_ = handler.wsConn.WriteMessage(msgType, message)
-	handler.mu.Unlock()
+	handler.sendMessageToClient(msgType, clientId, message)
+
+	isLastBattleSaved[clientId] = false
+	time.Sleep(10 * time.Second)
+	if !isLastBattleSaved[clientId] && handler.BattleData[clientId] != nil {
+		handler.save(clientId)
+	}
 }
 
-func (handler *MatchWSHandler) save(msgType int) {
-	err := handler.Svc.AddBattle(handler.BattleData)
+func (handler *MatchWSHandler) save(clientId string) {
+	if isLastBattleSaved[clientId] && handler.BattleData[clientId] == nil {
+		return
+	}
+
+	err := handler.Svc.AddBattle(handler.BattleData[clientId])
 	if err != nil {
 		fmt.Println(err.Message)
+	}
+
+	isLastBattleSaved[clientId] = true
+	handler.BattleData[clientId] = nil
+	handler.Monsters[clientId] = nil
+	handler.GamePlayers[clientId] = nil
+}
+
+func (handler *MatchWSHandler) sendMessageToClient(msgType int, clientId string, message []byte) {
+	if conn, ok := handler.clients[clientId]; ok {
+		handler.mu.Lock()
+		_ = conn.WriteMessage(msgType, message)
+		handler.mu.Unlock()
 	}
 }
 
 func (handler *MatchWSHandler) Run(ctx *gin.Context) {
 	idParams := ctx.Param("id")
-	handler.playground = idParams
+	isLastBattleSaved[idParams] = true
+
 	ws, _ := wsUpgraded.Upgrade(ctx.Writer, ctx.Request, nil)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(ws)
-	handler.wsConn = ws
+	handler.clients[idParams] = ws
 
 	for {
-		mt, message, _ := ws.ReadMessage()
-		//if err != nil {
-		//handler.mu.Lock()
-		//message = []byte("something went wrong")
-		//_ = ws.WriteMessage(mt, message)
-		//handler.mu.Unlock()
-		//}
+		mt, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+		}
 
 		var msg map[string]any
 		_ = json.Unmarshal(message, &msg)
 		switch msg["action"] {
 		case "histories":
-			handler.battleHistory(mt)
+			handler.battleHistory(mt, msg["id"].(string))
 		case "prepare":
-			handler.prepareBattle(mt)
+			handler.prepareBattle(mt, msg["id"].(string))
 		case "start":
-			handler.startBattle(mt)
+			handler.startBattle(mt, msg["id"].(string))
 		case "annulled":
-			handler.annulledPlayer(mt, msg["data"])
+			handler.annulledPlayer(mt, msg["id"].(string), msg["data"])
 		case "save":
-			handler.save(mt)
+			handler.save(msg["id"].(string))
 		}
 	}
 }
 
 func NewMatchWSHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
-	handler := MatchWSHandler{Svc: svc}
+	isLastBattleSaved = make(map[string]bool)
+	handler := MatchWSHandler{
+		Svc:         svc,
+		Monsters:    make(map[string][]*domain.Monster),
+		GamePlayers: make(map[string][]*battleroyale.Player),
+		BattleData:  make(map[string]*domain.Battle),
+		clients:     make(map[string]*websocket.Conn),
+	}
 	router.GET("/ws/:id", handler.Run)
 }

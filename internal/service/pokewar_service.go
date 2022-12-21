@@ -35,6 +35,12 @@ func (service *pokewarService) SyncMonsters(_ ...string) (data []*domain.Monster
 	lastId := appconfigs.Instance.LastMonsterID
 
 	data, err := service.pokemonRepo.Pokemon(offset, limit)
+	if err != nil {
+		return nil, &utils.ServiceError{
+			Code:    500,
+			Message: err.Error(),
+		}
+	}
 
 	var maxID int
 	for _, d := range data {
