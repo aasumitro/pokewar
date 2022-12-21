@@ -120,11 +120,11 @@
                     <label for="search"></label>
                     <input type="search" name="search" id="search" class="py-2 text-sm text-black bg-white rounded-md pl-10 pr-2 border-solid border-2 border-gray-400 focus:bg-white focus:border-gray-600 focus:outline-none" placeholder="Search..." autocomplete="off">
                 </div>
-                <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" onclick="syncMoreData()">
+                <button class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" id="sync-monster-button" onclick="syncMoreData()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                     </svg>
-                    More (+25)
+                    More (+10)
                 </button>
             </div>
             <div class="flex flex-wrap gap-8 w-full items-center justify-center" id="monsters-list"></div>
@@ -207,8 +207,8 @@
                 <div id="battleroyale-instruction">
                     <h5>INSTRUCTION</h5>
                     <p>
-                        Click [RANDOM PLAY BUTTON]  <br> to get random player, after random player displayed.
-                        <br>Click [PLAY BATTLE] <br> to play the battleroyale round. Enjoy your game!
+                        Click [RANDOM PLAYER] Button <br> to get random player, after random player displayed.
+                        <br>Click [PLAY BATTLE] Button <br> to play the battleroyale round. Enjoy your game!
                     </p>
                 </div>
                 <div class="flex flex-row justify-center items-center w-full my-6 gap-2 hidden" id="battleroyale-player"></div>
@@ -314,6 +314,10 @@
         this.fetchData('monsters').then((resp) => {
             monsters = resp.data.data
             monstersTemp = monsters
+            if (monstersTemp.length >= 50) {
+                document.getElementById("sync-monster-button")
+                    .classList.add("hidden")
+            }
             showListOfMonsters()
         }).catch((_) => onBackPressed())
     }
@@ -422,8 +426,8 @@
         matchList.innerHTML = ""
         let path = total ? `battles?limit=${total}` : 'battles'
         if (endBetween?.value?.length > 0 && startBetween?.value?.length > 0) {
-            const start = dayjs(startBetween.value).unix() ?? null
-            const end = dayjs(endBetween.value).unix() ?? null
+            const start = dayjs(startBetween.value).unix() * 1000000 ?? null
+            const end = dayjs(endBetween.value).unix() * 1000000 ?? null
             path = `${path}?between=${start},${end}`
         }
 
@@ -479,7 +483,7 @@
 
     function matchItemComponent(data) {
         let players = ""
-        data.players.forEach(player => players += matchPlayerComponent(player, data.started_at))
+        data.players.forEach(player => players += matchPlayerComponent(player, data.started_at, data.ended_at))
         return `
                 <div class="flex flex-col block bg-white border border-gray-200 rounded-lg shadow-md h-fit divide-y ">
                     <div class="pokemon-header text-black p-4">
@@ -517,7 +521,7 @@
                 `
     }
 
-    function matchPlayerComponent(player, battleStart) {
+    function matchPlayerComponent(player, battleStart, battleEnd) {
         const rank = player.annulled_at > 0 ? "X" : `#${player.rank}`
         const color = player.annulled_at > 0 ? 'bg-red-100' : ""
         return `
@@ -532,7 +536,7 @@
                                 <p class="text-base font-medium leading-none text-gray-700 mr-2">`+ capitalize(player.name) +`</p>
                                 <div class="flex flex-row gap-2 mt-2">
                                     <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ player.point +` pts</span>
-                                    <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ diffTime(player.eliminated_at, battleStart, true) +`</span>
+                                    <span class="inline-flex items-center px-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg">`+ diffTime(player.eliminated_at === 0 ? battleEnd : player.eliminated_at, battleStart, true) +`</span>
                                 </div>
                             </div>
                         </div>
@@ -709,6 +713,7 @@
         }
 
         wsConn.send(JSON.stringify({
+            'id': connId,
             'action': message,
             'data': data
         }))

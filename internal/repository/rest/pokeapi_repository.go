@@ -13,11 +13,7 @@ import (
 
 type pokeapiRESTRepository struct{}
 
-// Pokemon
-// TODO: Optimize
-// BENCH RESULT wg is better than ch
-// STILL TO SLOW SOMETIMES TOOK 3s TO LOAD AND PROCEED THE DATA
-// NOW BETTER its took  1.428834833s - 2.828187625s for 25 data
+// Pokemon retrieves a list of monsters from the PokeAPI REST API.
 func (repo *pokeapiRESTRepository) Pokemon(offset, limit int) ([]*domain.Monster, error) {
 	client := &httpclient.HttpClient{
 		Endpoint: fmt.Sprintf(

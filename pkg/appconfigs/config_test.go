@@ -69,7 +69,7 @@ func TestLoadEnv(t *testing.T) {
 	}
 }
 
-// LOCAL ITS FINE
+// RUNNING WELL IN LOCAL
 func TestUpdateEnv(t *testing.T) {
 	t.Skip()
 	viper.SetConfigFile("../../.example.env")

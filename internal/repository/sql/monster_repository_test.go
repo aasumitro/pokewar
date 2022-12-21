@@ -147,9 +147,9 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Update_ExpectedError(
 // =========== COUNT
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnData() {
 	data := suite.mock.
-		NewRows([]string{"count"}).
+		NewRows([]string{"total"}).
 		AddRow(50)
-	q := "SELECT COUNT(*) FROM monsters"
+	q := "SELECT COUNT(*) AS total FROM monsters"
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res := suite.repo.Count(context.TODO())
@@ -157,7 +157,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnD
 	require.EqualValues(suite.T(), res, 50)
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnErrorFromQuery() {
-	q := "SELECT COUNT(*) FROM monsters"
+	q := "SELECT COUNT(*) AS total FROM monsters"
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
 	res := suite.repo.Count(context.TODO())

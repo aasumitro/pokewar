@@ -35,24 +35,6 @@ Pocket Monster Battleroyale
     List of Battles Log 
     (id, battle_id, description, created_at)
    
-
-#### Action & Queries 
-1. First Booting App:
-    
-    Validate & sync local monsters list with remote resource (pokeapi)
-
-2. Monster List:
-
-   actions:`[monsters_handlers]`
-
-   DAO: `[monsters_repository]`
-
-   DTO: `[pokewar_service]`
-
-   queries:
-
-   - `SELECT id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills FROM monsters`
-
 ...
 
 #### Entity (*)
@@ -163,18 +145,6 @@ Local run:
 3. Run Tests
 4. Run 
 
-#### Build
-Local run:
-
-`./script/build-web.sh`
-
-1. Regenerate API Spec
-2. Static Check
-3. Run Tests
-4. Build
-
 #### Downloads
-- [MacOS v0.0.1-dev]()
-- [Windows v0.0.1-dev]()
-- [Linux v0.0.1-dev]()
+- [Bundle v0.0.1-dev]()
 

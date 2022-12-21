@@ -41,11 +41,11 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData()
 	q += "monsters.avatar as avatar, monsters.types as types, "
 	q += "count(p.monster_id) as total_battles, sum(IFNULL(p.point, 0)) as points, "
 	q += "(SELECT count(w.rank) FROM battle_players as w where rank = 1  "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as win_battles, "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as win_battles, "
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
-	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC LIMIT 1"
+	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO(), "LIMIT 1")
@@ -58,9 +58,9 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	q += "monsters.avatar as avatar, monsters.types as types, "
 	q += "count(p.monster_id) as total_battles, sum(IFNULL(p.point, 0)) as points, "
 	q += "(SELECT count(w.rank) FROM battle_players as w where rank = 1  "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as win_battles, "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as win_battles, "
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
 	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	expectedQuery := regexp.QuoteMeta(q)
@@ -78,9 +78,9 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	q += "monsters.avatar as avatar, monsters.types as types, "
 	q += "count(p.monster_id) as total_battles, sum(IFNULL(p.point, 0)) as points, "
 	q += "(SELECT count(w.rank) FROM battle_players as w where rank = 1  "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as win_battles, "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as win_battles, "
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
-	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
+	q += "AND monster_id = monsters.id AND annulled_at = 0) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
 	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	expectedQuery := regexp.QuoteMeta(q)
