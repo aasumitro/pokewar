@@ -1,0 +1,23 @@
+### GET MONSTERS
+GET http://localhost:8000/api/v1/monsters
+Accept: application/json
+
+### GET MONSTERS LIMIT 5
+GET http://localhost:8000/api/v1/monsters?limit=5
+Accept: application/json
+
+### GET BATTLES
+GET http://localhost:8000/api/v1/battles
+Accept: application/json
+
+### GET BATTLES LIMIT 5
+GET http://localhost:8000/api/v1/battles?limit=5
+Accept: application/json
+
+### GET RANKS
+GET http://localhost:8000/api/v1/ranks
+Accept: application/json
+
+### GET RANKS LIMIT 5
+GET http://localhost:8000/api/v1/ranks?limit=5
+Accept: application/json

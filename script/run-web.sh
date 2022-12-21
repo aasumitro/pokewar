@@ -5,6 +5,8 @@ if test -f "$FILE"; then
   echo "Everything is OK"
   echo "Validate dependencies . . ."
   go mod tidy -compat=1.19
+  echo "Re-generate Swagger File (api-spec docs) . . ."
+  swag init --parseDependency --parseInternal --parseDepth 4 -g ./cmd/web/main.go
   echo "Trying to run the linter & tests . . ."
   staticcheck ./...
   go vet ./...

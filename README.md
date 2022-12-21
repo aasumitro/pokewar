@@ -5,20 +5,20 @@ Pocket Monster Battleroyale
 ![img](./assets/SS221216162205.png)
 
 ---
-### NTK
+### NTK - Battleroyale
 
-1. Battleroyale - 5 player in 1 battle
-2. Battle History
-3. Battle Ranks & Scores (*must dynamic - !(score)declared?)
-4. Monsters Point based on Battle (accumulate rank)
-5. Annulled Player Rank (end of battle)
+1. 5 players in 1 battle/round
+2. Record battle history
+3. Battle ranks & scores 
+4. Monsters point based on battle (accumulate rank)
+5. Annulled player rank (in the end of battle)
 
 ---
 #### Basic Entity Info
 1. Monsters:
     
    List of Available Monsters (Dex)
-   (id, name, species, type, skills)
+   (id, origin_id, name/species, base_exp, height, weight, avatar, types, stats, skills, created_at, updated_at)
 
 2. Battles: 
 
@@ -28,12 +28,12 @@ Pocket Monster Battleroyale
 3. Players: 
 
     List of Played Monsters in 1 Battle 
-    (id, battle_id, monster_id, eliminate_at, annulled_at, rank)
+    (id, battle_id, monster_id, eliminate_at, annulled_at, rank, point)
 
 4. Logs:
 
     List of Battles Log 
-    (id, battle_id, name, description)
+    (id, battle_id, description, created_at)
    
 
 #### Action & Queries 
@@ -43,24 +43,55 @@ Pocket Monster Battleroyale
 
 2. Monster List:
 
-   actions:
-        
-   - ``
-   
+   actions:`[monsters_handlers]`
+
+   DAO: `[monsters_repository]`
+
+   DTO: `[pokewar_service]`
+
    queries:
 
-   - ``
+   - `SELECT id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills FROM monsters`
 
 ...
 
 #### Entity (*)
 ```mermaid
 erDiagram
-    MONSTERS {}
+    MONSTERS {
+        id int  
+        origin_id int
+        base_exp int
+        height int
+        weight int 
+        avatar string
+        types text
+        stats text
+        skills text 
+        created_at int
+        updated_at int
+    }
     
-    BATTLES {}
-    PLAYERS {}
-    LOGS {}
+    BATTLES {
+        id int
+        started_at int
+        ended_at int
+    }
+    PLAYERS {
+        id int
+        battle_id int
+        monster_id int
+        eliminated_at int 
+        annulled_at int
+        rank int
+        point int
+    }
+    LOGS {
+        id int
+        battle_id int
+        description string
+        created_at int
+    }
     
     BATTLES }|--|{ PLAYERS : m2m
     BATTLES ||--|{ LOGS : o2m
@@ -87,7 +118,7 @@ erDiagram
         Note over REST_REPOSITORY,SERVICE: ...
    
         SQL_REPOSITORY-->>-SERVICE: ...
-        Note over REST_REPOSITORY,SERVICE: ...
+        Note over SQL_REPOSITORY,SERVICE: ...
         
         SERVICE-->>-DELIVERY: ...
         Note over SERVICE,DELIVERY: ...     
@@ -97,21 +128,53 @@ erDiagram
 ### GTK
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
 
-#### Req
-...
+#### Required
+- Sqlite3
+- Golang v1.19
+
+#### Database Migration
+###### Required tools:
+- [Golang Migrate](https://github.com/golang-migrate/migrate)
+###### How to use
+
+- Add new migration
+    ```bash
+    migrate create -ext sql -dir db/migrations example_table
+    ```
+
+- Run Migration
+    - up
+      ```bash
+      go run cmd/cli/main.go migrate up
+      ```
+    - down
+      ```bash
+      go run cmd/cli/main.go migrate down
+      ```
+more info read the [docs](https://pkg.go.dev/github.com/golang-migrate/migrate/v4).
 
 #### Run
-...
+Local run: 
+
+`./script/run-web.sh`
+
+1. Regenerate API Spec
+2. Static Check
+3. Run Tests
+4. Run 
 
 #### Build
-...
+Local run:
 
-#### Deploy
-...
+`./script/build-web.sh`
+
+1. Regenerate API Spec
+2. Static Check
+3. Run Tests
+4. Build
 
 #### Downloads
-...
+- [MacOS v0.0.1-dev]()
+- [Windows v0.0.1-dev]()
+- [Linux v0.0.1-dev]()
 
----
-### PS
-- [(*)] mean ...

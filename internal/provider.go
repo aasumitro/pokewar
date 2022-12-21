@@ -1,28 +1,41 @@
 package internal
 
 import (
-	"fmt"
-	httpDelivery "github.com/aasumitro/pokewar/internal/delivery/handler/http"
-	wsDelivery "github.com/aasumitro/pokewar/internal/delivery/handler/ws"
+	"context"
+	"github.com/aasumitro/pokewar/domain"
+	"github.com/aasumitro/pokewar/internal/delivery/handler/http"
+	"github.com/aasumitro/pokewar/internal/delivery/handler/ws"
 	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
 	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
 	"github.com/aasumitro/pokewar/internal/service"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/gin-gonic/gin"
 )
 
-// NewApi Inject-Inject Club
-func NewApi() {
-	// TODO
-	pokeapiRESTRepo := restRepo.NewPokeapiRESTRepository()
-	battleSQLRepo := sqlRepo.NewBattleSQLRepository()
-	monsterSQLRepo := sqlRepo.NewMonsterSQlRepository()
-	rankSQLRepo := sqlRepo.NewRankSQLRepository()
-	pokewarService := service.NewPokewarService()
-	battleHTTPDelivery := httpDelivery.NewBattleHttpHandler()
-	rankHTTPDelivery := httpDelivery.NewRankHttpHandler()
-	matchWSDelivery := wsDelivery.NewMatchWSHandler()
+var (
+	pokeapiRESTRepo domain.IPokeapiRESTRepository
+	monsterSQLRepo  domain.IMonsterRepository
+	rankSQLRepo     domain.IRankRepository
+	battleSQLRepo   domain.IBattleRepository
+)
 
-	fmt.Println(
-		pokeapiRESTRepo, battleSQLRepo, monsterSQLRepo,
-		rankSQLRepo, pokewarService, battleHTTPDelivery,
-		rankHTTPDelivery, matchWSDelivery)
+func NewApiProvider(ctx context.Context, router *gin.Engine) {
+	pokeapiRESTRepo = restRepo.NewPokeapiRESTRepository()
+	monsterSQLRepo = sqlRepo.NewMonsterSQlRepository()
+	rankSQLRepo = sqlRepo.NewRankSQLRepository()
+	battleSQLRepo = sqlRepo.NewBattleSQLRepository()
+	pokewarService := service.NewPokewarService(ctx,
+		pokeapiRESTRepo, monsterSQLRepo, rankSQLRepo, battleSQLRepo)
+
+	if appconfigs.Instance.LastSync == 0 &&
+		appconfigs.Instance.TotalMonsterSync == 0 &&
+		appconfigs.Instance.LastMonsterID == 0 {
+		pokewarService.SyncMonsters()
+	}
+
+	v1 := router.Group("/api/v1")
+	http.NewMonsterHttpHandler(pokewarService, v1)
+	http.NewRankHttpHandler(pokewarService, v1)
+	http.NewBattleHttpHandler(pokewarService, v1)
+	ws.NewMatchWSHandler(pokewarService, v1)
 }

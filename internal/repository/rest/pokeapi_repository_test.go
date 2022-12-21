@@ -7,9 +7,12 @@ import (
 
 type pokeapiRESTRepositoryTestSuite struct {
 	suite.Suite
+	//mock func(url string, v interface{}) error
 }
 
-func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {}
+func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {
+
+}
 
 // ============
 // TODO: HERE
