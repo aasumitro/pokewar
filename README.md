@@ -2,7 +2,7 @@
 
 Pocket Monster Battleroyale
 
-![img](./assets/SS221216162205.png)
+![img](./assets/battleroyale.gif)
 
 ---
 ### NTK - Battleroyale
