@@ -7,6 +7,7 @@ import (
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"math/rand"
+	"net/http"
 	"time"
 )
 
@@ -37,7 +38,6 @@ func (service *pokewarService) SyncMonsters(_ ...string) (data []*domain.Monster
 
 	var maxID int
 	for _, d := range data {
-		fmt.Println()
 		if d.OriginID > maxID {
 			maxID = d.OriginID
 		}
@@ -115,15 +115,16 @@ func (service *pokewarService) PrepareMonstersForBattle() (monsters []*domain.Mo
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-func (service *pokewarService) AddBattle(param domain.Battle) *utils.ServiceError {
-	// TODO
+func (service *pokewarService) AddBattle(param *domain.Battle) *utils.ServiceError {
+	err := service.battleRepo.Create(service.ctx, param)
+	if err != nil {
+		return &utils.ServiceError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
 	return nil
-}
-
-func (service *pokewarService) AnnulledPlayer(playerId int) (data int64, error *utils.ServiceError) {
-	annulledTime, err := service.battleRepo.UpdatePlayer(service.ctx, playerId)
-
-	return utils.ValidatePrimitiveValue[int64](annulledTime, err)
 }
 
 func NewPokewarService(

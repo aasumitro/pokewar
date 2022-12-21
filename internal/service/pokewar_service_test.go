@@ -2,7 +2,7 @@ package service_test
 
 import (
 	"context"
-	"errors"
+	errors "errors"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/service"
 	"github.com/aasumitro/pokewar/mocks"
@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"testing"
-	"time"
 )
 
 type pokewarServiceTestSuite struct {
@@ -289,37 +288,29 @@ func (suite *pokewarServiceTestSuite) TestService_PrepareMonstersForBattle_Shoul
 	repo.AssertExpectations(suite.T())
 }
 
-//func (suite *pokewarServiceTestSuite) TestService_AddBattle_ShouldSuccess() {}
-//func (suite *pokewarServiceTestSuite) TestService_AddBattle_ShouldError() {}
-
-func (suite *pokewarServiceTestSuite) TestService_AnnulledPlayer_ShouldSuccess() {
+func (suite *pokewarServiceTestSuite) TestService_AddBattle_ShouldSuccess() {
 	repo := new(mocks.IBattleRepository)
 	svc := service.NewPokewarService(
 		context.TODO(), new(mocks.IPokeapiRESTRepository),
 		new(mocks.IMonsterRepository),
 		new(mocks.IRankRepository), repo)
-	t := time.Now().Unix()
 	repo.
-		On("UpdatePlayer", mock.Anything, mock.Anything).
-		Once().
-		Return(t, nil)
-	data, err := svc.AnnulledPlayer(1)
+		On("Create", mock.Anything, mock.Anything).
+		Return(nil).Once()
+	err := svc.AddBattle(suite.battle[0])
 	require.Nil(suite.T(), err)
-	require.NotNil(suite.T(), data)
-	require.Equal(suite.T(), data, t)
 	repo.AssertExpectations(suite.T())
 }
-func (suite *pokewarServiceTestSuite) TestService_AnnulledPlayer_ShouldError() {
+func (suite *pokewarServiceTestSuite) TestService_AddBattle_ShouldError() {
 	repo := new(mocks.IBattleRepository)
 	svc := service.NewPokewarService(
 		context.TODO(), new(mocks.IPokeapiRESTRepository),
 		new(mocks.IMonsterRepository),
 		new(mocks.IRankRepository), repo)
 	repo.
-		On("UpdatePlayer", mock.Anything, mock.Anything).
-		Once().
-		Return(time.Now().Unix(), errors.New("UNEXPECTED"))
-	_, err := svc.AnnulledPlayer(1)
+		On("Create", mock.Anything, mock.Anything).
+		Once().Return(errors.New("UNEXPECTED"))
+	err := svc.AddBattle(suite.battle[0])
 	require.NotNil(suite.T(), err)
 	require.Equal(suite.T(), err, suite.svcErr)
 	repo.AssertExpectations(suite.T())

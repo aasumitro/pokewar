@@ -15,11 +15,11 @@ type IPokewarService struct {
 }
 
 // AddBattle provides a mock function with given fields: param
-func (_m *IPokewarService) AddBattle(param domain.Battle) *utils.ServiceError {
+func (_m *IPokewarService) AddBattle(param *domain.Battle) *utils.ServiceError {
 	ret := _m.Called(param)
 
 	var r0 *utils.ServiceError
-	if rf, ok := ret.Get(0).(func(domain.Battle) *utils.ServiceError); ok {
+	if rf, ok := ret.Get(0).(func(*domain.Battle) *utils.ServiceError); ok {
 		r0 = rf(param)
 	} else {
 		if ret.Get(0) != nil {
@@ -28,29 +28,6 @@ func (_m *IPokewarService) AddBattle(param domain.Battle) *utils.ServiceError {
 	}
 
 	return r0
-}
-
-// AnnulledPlayer provides a mock function with given fields: playerId
-func (_m *IPokewarService) AnnulledPlayer(playerId int) (int64, *utils.ServiceError) {
-	ret := _m.Called(playerId)
-
-	var r0 int64
-	if rf, ok := ret.Get(0).(func(int) int64); ok {
-		r0 = rf(playerId)
-	} else {
-		r0 = ret.Get(0).(int64)
-	}
-
-	var r1 *utils.ServiceError
-	if rf, ok := ret.Get(1).(func(int) *utils.ServiceError); ok {
-		r1 = rf(playerId)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*utils.ServiceError)
-		}
-	}
-
-	return r0, r1
 }
 
 // BattlesCount provides a mock function with given fields:

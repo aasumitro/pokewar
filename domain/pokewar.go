@@ -13,7 +13,6 @@ type (
 		BattlesCount() int
 		FetchBattles(args ...string) (data []*Battle, err *utils.ServiceError)
 		PrepareMonstersForBattle() (data []*Monster, err *utils.ServiceError)
-		AddBattle(param Battle) *utils.ServiceError
-		AnnulledPlayer(playerId int) (annulledTime int64, err *utils.ServiceError)
+		AddBattle(param *Battle) *utils.ServiceError
 	}
 )

@@ -45,7 +45,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData()
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
 	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
-	q += "ON monsters.id = p.monster_id GROUP BY monsters.id LIMIT 1"
+	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC LIMIT 1"
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO(), "LIMIT 1")
@@ -62,7 +62,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
 	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
-	q += "ON monsters.id = p.monster_id GROUP BY monsters.id "
+	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
 	res, err := suite.repo.All(context.TODO())
@@ -82,7 +82,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
 	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
-	q += "ON monsters.id = p.monster_id GROUP BY monsters.id "
+	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO())

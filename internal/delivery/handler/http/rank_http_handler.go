@@ -26,7 +26,7 @@ type RankHTTPHandler struct {
 // @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
 // @Router /api/v1/ranks [GET]
 func (handler *RankHTTPHandler) Fetch(ctx *gin.Context) {
-	paging, args := utils.ParseParam(ctx)
+	paging, args := utils.ParseParam(ctx, false)
 
 	data, err := handler.Svc.FetchRanks(args...)
 	if err != nil {
@@ -34,7 +34,7 @@ func (handler *RankHTTPHandler) Fetch(ctx *gin.Context) {
 		return
 	}
 
-	if len(args) > 0 {
+	if len(paging) > 0 && paging[0] != 0 {
 		limit, offset := paging[0], paging[1]
 		monsterCount := handler.Svc.MonstersCount()
 		host := ctx.Request.Host

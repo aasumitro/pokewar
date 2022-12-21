@@ -47,7 +47,7 @@ func (g *Game) Start(game chan *Game, log chan string, eliminated chan string) {
 	g.BattleLogsChannel = log
 	g.EliminatedPlayerChannel = eliminated
 	g.StartAt = time.Now()
-	startLog := fmt.Sprintf("%s starting battle!\n", g.StartAt)
+	startLog := fmt.Sprintf("%d - starting battle!\n", g.StartAt.UnixMicro())
 	g.Logs = append(g.Logs, Log{Description: startLog})
 	g.BattleLogsChannel <- startLog
 
@@ -107,12 +107,12 @@ func (g *Game) Moves() {
 				g.Eliminate(j)
 				// Set the end time of the game
 				g.EndAt = time.Now()
-				logEnd := fmt.Sprintf("%s battle end!\n", g.StartAt)
+				logEnd := fmt.Sprintf("%d - battle end!\n", g.EndAt.UnixMicro())
 				g.Logs = append(g.Logs, Log{Description: logEnd})
 				g.BattleLogsChannel <- logEnd
 				// Set the winner of the game.
 				g.Winner = g.Players[i]
-				logWinner := fmt.Sprintf("%s win the game!\n", g.Winner.Name)
+				logWinner := fmt.Sprintf("%d - %s win the game!\n", time.Now().UnixMicro(), g.Winner.Name)
 				g.Logs = append(g.Logs, Log{Description: logWinner})
 				g.BattleLogsChannel <- logWinner
 			}
@@ -124,10 +124,9 @@ func (g *Game) Eliminate(pos int) {
 	player := g.Players[pos]
 	now := time.Now()
 	player.EliminatedAt = &now
-	log := fmt.Sprintf("%s eliminated from the game!\n", player.Name)
+	log := fmt.Sprintf("%d - %s eliminated from the game!\n", time.Now().UnixMicro(), player.Name)
 	g.Logs = append(g.Logs, Log{Description: log})
 	g.BattleLogsChannel <- log
-	time.Sleep(10 * time.Nanosecond)
 	g.EliminatedPlayerChannel <- player.Name
 }
 

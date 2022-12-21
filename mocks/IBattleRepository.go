@@ -72,27 +72,6 @@ func (_m *IBattleRepository) Create(ctx context.Context, param *domain.Battle) e
 	return r0
 }
 
-// UpdatePlayer provides a mock function with given fields: ctx, id
-func (_m *IBattleRepository) UpdatePlayer(ctx context.Context, id int) (int64, error) {
-	ret := _m.Called(ctx, id)
-
-	var r0 int64
-	if rf, ok := ret.Get(0).(func(context.Context, int) int64); ok {
-		r0 = rf(ctx, id)
-	} else {
-		r0 = ret.Get(0).(int64)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
-		r1 = rf(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 type mockConstructorTestingTNewIBattleRepository interface {
 	mock.TestingT
 	Cleanup(func())

@@ -13,7 +13,7 @@ func TestParseParam(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/?limit=10&offset=20", nil)
 		ctx, _ := gin.CreateTestContext(nil)
 		ctx.Request = req
-		paging, args := utils.ParseParam(ctx)
+		paging, args := utils.ParseParam(ctx, false)
 		if !reflect.DeepEqual(paging, []int{10, 20}) {
 			t.Errorf("ParseParam: expected paging slice [10, 20], got %v", paging)
 		}
@@ -26,7 +26,7 @@ func TestParseParam(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/?limit=10", nil)
 		ctx, _ := gin.CreateTestContext(nil)
 		ctx.Request = req
-		paging, args := utils.ParseParam(ctx)
+		paging, args := utils.ParseParam(ctx, false)
 		if !reflect.DeepEqual(paging, []int{10, 0}) {
 			t.Errorf("ParseParam: expected paging slice [10, 0], got %v", paging)
 		}
@@ -39,7 +39,7 @@ func TestParseParam(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/", nil)
 		ctx, _ := gin.CreateTestContext(nil)
 		ctx.Request = req
-		paging, args := utils.ParseParam(ctx)
+		paging, args := utils.ParseParam(ctx, false)
 		if len(paging) != 0 {
 			t.Errorf("ParseParam: expected empty paging slice, got %v", paging)
 		}
@@ -48,13 +48,13 @@ func TestParseParam(t *testing.T) {
 		}
 	})
 
-	//t.Run("Check that between is parsed correctly", func(t *testing.T) {
-	//	req, _ := http.NewRequest("GET", "/?between=10-10-2022,11-10-2022", nil)
-	//	ctx, _ := gin.CreateTestContext(nil)
-	//	ctx.Request = req
-	//	_, args := utils.ParseParam(ctx)
-	//	if !reflect.DeepEqual(args, []string{"WHERE started_at BETWEEN 10-10-2022 AND 11-10-2022"}) {
-	//		t.Errorf("ParseParam: expected args slice [WHERE started_at BETWEEN 10-10-2022 AND 11-10-2022], got %v", args)
-	//	}
-	//})
+	t.Run("Check that between is parsed correctly", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/?between=1671552000,1671724800", nil)
+		ctx, _ := gin.CreateTestContext(nil)
+		ctx.Request = req
+		_, args := utils.ParseParam(ctx, true)
+		if !reflect.DeepEqual(args, []string{"WHERE b.started_at BETWEEN 1671552000 AND 1671724800"}) {
+			t.Errorf("ParseParam: expected args slice [WHERE started_at BETWEEN 1671552000 AND 1671724800], got %v", args)
+		}
+	})
 }

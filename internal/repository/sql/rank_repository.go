@@ -58,7 +58,7 @@ func (repo *rankSQLRepository) All(ctx context.Context, args ...string) (data []
 	q += "(SELECT count(l.rank) FROM battle_players as l where rank > 1 "
 	q += "AND monster_id = monsters.id AND annulled_at IS NULL) as lose_battles "
 	q += "FROM monsters LEFT JOIN battle_players as p  "
-	q += "ON monsters.id = p.monster_id GROUP BY monsters.id "
+	q += "ON monsters.id = p.monster_id GROUP BY monsters.id ORDER BY points DESC "
 	if len(args) > 0 {
 		for _, arg := range args {
 			q += fmt.Sprintf("%s ", arg)

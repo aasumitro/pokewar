@@ -1,7 +1,5 @@
 package domain
 
-import "context"
-
 type (
 	BattleEntity struct {
 		ID        int
@@ -42,6 +40,5 @@ type (
 		ICreateRepository[Battle]
 		IReadAllRepository[Battle]
 		ICountRowRepository
-		UpdatePlayer(ctx context.Context, id int) (annulledTime int64, err error)
 	}
 )

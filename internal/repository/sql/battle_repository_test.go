@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"regexp"
 	"testing"
-	"time"
 )
 
 type battleSQLRepositoryTestSuite struct {
@@ -64,7 +63,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
 	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b LIMIT 1"
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC LIMIT 1 "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO(), "LIMIT 1")
@@ -79,7 +78,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
 	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
 	res, err := suite.repo.All(context.TODO())
@@ -97,7 +96,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
 	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO())
@@ -106,57 +105,24 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 }
 
 // =========== Create
-func (suite *battleSQLRepositoryTestSuite) TestRepository_Create_TestTable() {
-	// TODO
-	//testCase := struct {
-	//	param *domain.Battle
-	//	want  error
-	//}{
-	//	param: &domain.Battle{
-	//		StartedAt: 1234567890,
-	//		EndedAt:   1234567891,
-	//		Logs: []domain.Log{
-	//			{Description: "Test log"},
-	//		},
-	//		Players: []domain.Player{
-	//			{MonsterID: 1, EliminatedAt: 1234567891, Rank: 1, Point: 5},
-	//		},
-	//	},
-	//	want: nil,
-	//}
-}
+func (suite *battleSQLRepositoryTestSuite) TestRepository_Create() {
+	battle := &domain.Battle{
+		StartedAt: 1234567890,
+		EndedAt:   1234567891,
+		Logs:      []domain.Log{{Description: "Test log"}},
+		Players:   []domain.Player{{MonsterID: 1, EliminatedAt: 1234567891, Rank: 1, Point: 5}},
+	}
 
-// =========== UpdatePlayer
-func (suite *battleSQLRepositoryTestSuite) TestRepository_UpdatePlayer_ExpectedSuccess() {
-	now := time.Now().Unix()
-	row := suite.mock.
-		NewRows([]string{"annulled_at"}).
-		AddRow(now)
-	q := "UPDATE battle_players SET annulled_at = ? WHERE id = ?"
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).
-		WithArgs(now, 1).
-		WillReturnRows(row).
-		WillReturnError(nil)
-	res, err := suite.repo.UpdatePlayer(context.TODO(), 1)
+	suite.mock.ExpectBegin()
+	suite.mock.ExpectExec(`INSERT INTO battles`).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.mock.ExpectExec(`INSERT INTO battle_logs`).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.mock.ExpectExec(`INSERT INTO battle_players`).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.mock.ExpectCommit()
+	err := suite.repo.Create(context.TODO(), battle)
 	require.Nil(suite.T(), err)
-	require.NotNil(suite.T(), res)
-	require.EqualValues(suite.T(), now, res)
-}
-func (suite *battleSQLRepositoryTestSuite) TestRepository_UpdatePlayer_ExpectedError() {
-	now := time.Now().Unix()
-	row := suite.mock.
-		NewRows([]string{"annulled_at"}).
-		AddRow(nil)
-	q := "UPDATE battle_players SET annulled_at = ? WHERE id = ?"
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).
-		WithArgs(now, 1).
-		WillReturnRows(row).
-		WillReturnError(nil)
-	res, err := suite.repo.UpdatePlayer(context.TODO(), 1)
-	require.NotNil(suite.T(), err)
-	require.EqualValues(suite.T(), 0, res)
 }
 
 func TestBattleSQLRepository(t *testing.T) {

@@ -41,8 +41,8 @@ func (p *Player) Attack(other *Player) Log {
 
 	return Log{
 		Description: fmt.Sprintf(
-			"%s uses %s to attack %s, reducing their health to %d\n",
-			p.Name, skill.Name, other.Name, other.Health,
+			"%d - %s uses %s to attack %s, reducing their health to %d\n",
+			time.Now().UnixMicro(), p.Name, skill.Name, other.Name, other.Health,
 		),
 	}
 }

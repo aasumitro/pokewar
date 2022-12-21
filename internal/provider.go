@@ -8,6 +8,7 @@ import (
 	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
 	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
 	"github.com/aasumitro/pokewar/internal/service"
+	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,9 +24,14 @@ func NewApiProvider(ctx context.Context, router *gin.Engine) {
 	monsterSQLRepo = sqlRepo.NewMonsterSQlRepository()
 	rankSQLRepo = sqlRepo.NewRankSQLRepository()
 	battleSQLRepo = sqlRepo.NewBattleSQLRepository()
-
 	pokewarService := service.NewPokewarService(ctx,
 		pokeapiRESTRepo, monsterSQLRepo, rankSQLRepo, battleSQLRepo)
+
+	if appconfigs.Instance.LastSync == 0 &&
+		appconfigs.Instance.TotalMonsterSync == 0 &&
+		appconfigs.Instance.LastMonsterID == 0 {
+		pokewarService.SyncMonsters()
+	}
 
 	v1 := router.Group("/api/v1")
 	http.NewMonsterHttpHandler(pokewarService, v1)

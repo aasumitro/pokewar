@@ -26,7 +26,7 @@ type BattleHTTPHandler struct {
 // @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
 // @Router /api/v1/battles [GET]
 func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
-	paging, args := utils.ParseParam(ctx)
+	paging, args := utils.ParseParam(ctx, true)
 
 	data, err := handler.Svc.FetchBattles(args...)
 	if err != nil {
@@ -34,7 +34,7 @@ func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
 		return
 	}
 
-	if len(args) > 0 {
+	if len(paging) > 0 && paging[0] != 0 {
 		limit, offset := paging[0], paging[1]
 		monsterCount := handler.Svc.BattlesCount()
 		host := ctx.Request.Host
