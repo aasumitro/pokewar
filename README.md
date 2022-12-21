@@ -146,5 +146,5 @@ Local run:
 4. Run 
 
 #### Downloads
-- [Bundle v0.0.1-dev]()
+- [Bundle v0.0.1-dev](https://github.com/aasumitro/pokewar/releases/download/0.0.1-dev/pokewar-bundle.zip)
 
