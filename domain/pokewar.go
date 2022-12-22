@@ -6,7 +6,7 @@ type (
 	IPokewarService interface {
 		MonstersCount() int
 		FetchMonsters(args ...string) (data []*Monster, err *utils.ServiceError)
-		SyncMonsters(args ...string) (data []*Monster, err *utils.ServiceError)
+		SyncMonsters(updateEnv bool, args ...string) (data []*Monster, err *utils.ServiceError)
 
 		FetchRanks(args ...string) (data []*Rank, err *utils.ServiceError)
 

@@ -6,6 +6,7 @@ import (
 	"github.com/aasumitro/pokewar/internal/delivery/handler/ws"
 	"github.com/aasumitro/pokewar/mocks"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/battleroyale"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -23,6 +24,7 @@ type matchWSHandlerTestSuite struct {
 	suite.Suite
 	battles  []*domain.Battle
 	monsters []*domain.Monster
+	players  []*battleroyale.Player
 }
 
 func (suite *matchWSHandlerTestSuite) SetupSuite() {
@@ -73,6 +75,20 @@ func (suite *matchWSHandlerTestSuite) SetupSuite() {
 			Skills:   []*domain.Skill{{PP: 1, Name: "test"}, {PP: 1, Name: "test"}, {PP: 1, Name: "test"}, {PP: 1, Name: "test"}},
 		},
 	}
+	suite.players = []*battleroyale.Player{
+		{ID: 1, Name: "Player 1", Health: 100, Skills: []*battleroyale.Skill{
+			{Name: "Kick", Power: 20},
+			{Name: "Punch", Power: 10},
+		}},
+		{ID: 2, Name: "Player 2", Health: 100, Skills: []*battleroyale.Skill{
+			{Name: "Kick", Power: 20},
+			{Name: "Punch", Power: 10},
+		}},
+		{ID: 3, Name: "Player 3", Health: 100, Skills: []*battleroyale.Skill{
+			{Name: "Kick", Power: 20},
+			{Name: "Punch", Power: 10},
+		}},
+	}
 }
 
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldSuccess() {
@@ -103,6 +119,8 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldSuccess() 
 
 	require.Equal(suite.T(), msg["status"], "success")
 	require.Equal(suite.T(), msg["data_type"], "battle_histories")
+	require.Len(suite.T(), msg["data"], len(suite.battles))
+
 }
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldErrorFromService() {
 	svc := new(mocks.IPokewarService)
@@ -165,6 +183,7 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldSuccess() 
 
 	require.Equal(suite.T(), msg["status"], "success")
 	require.Equal(suite.T(), msg["data_type"], "monsters")
+	require.Len(suite.T(), msg["data"], len(suite.monsters))
 }
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldError() {
 	svc := new(mocks.IPokewarService)
@@ -200,6 +219,7 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldError() {
 }
 
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart_ShouldSuccess() {
+	suite.T().Skip()
 	svc := new(mocks.IPokewarService)
 	router := gin.New()
 	ws.NewMatchWSHandler(svc, router.Group(""))
@@ -251,10 +271,11 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart_ShouldSuccess() {
 //var msg map[string]interface{}
 //err = json.Unmarshal(message, &msg)
 //require.Nil(suite.T(), err)
-
 //require.Equal(suite.T(), msg["status"], "success")
 //require.Equal(suite.T(), msg["data_type"], "battle_histories")
 //}
+
+// TODO UPDATE COVERAGE
 
 func TestMatchWSHandler(t *testing.T) {
 	suite.Run(t, new(matchWSHandlerTestSuite))

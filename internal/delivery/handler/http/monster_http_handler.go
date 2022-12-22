@@ -59,7 +59,7 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 // @Failure 500 {object} utils.ErrorRespond "INTERNAL SERVER ERROR RESPOND"
 // @Router /api/v1/monsters/sync [GET]
 func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
-	data, err := handler.Svc.SyncMonsters()
+	data, err := handler.Svc.SyncMonsters(true)
 	if err != nil {
 		utils.NewHttpRespond(ctx, err.Code, err.Message)
 		return
