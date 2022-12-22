@@ -22,7 +22,7 @@ func NewApiProvider(ctx context.Context, router *gin.Engine) {
 	if appconfigs.Instance.LastSync == 0 &&
 		appconfigs.Instance.TotalMonsterSync == 0 &&
 		appconfigs.Instance.LastMonsterID == 0 {
-		pokewarService.SyncMonsters()
+		pokewarService.SyncMonsters(true)
 	}
 
 	v1 := router.Group("/api/v1")

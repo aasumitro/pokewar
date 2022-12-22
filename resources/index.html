@@ -293,7 +293,7 @@
         mainComponent.classList.add('hidden')
         matchList.innerHTML = ""
         monsterList.innerHTML = ""
-
+        playGameButton.classList.add("hidden")
         if (isWsConnReady && !connId) {
             wsConn.close()
         }
@@ -731,13 +731,11 @@
             alert(callback.message)
             return
         }
-
+        console.log(callback.data_type)
         switch (callback.data_type) {
             case "monsters":
                 proceedMonsterUI(callback.data)
-                break;
-            case "players":
-                playGameButton.classList.add("hidden")
+                playGameButton.classList.remove("hidden")
                 break;
             case "battle_histories":
                 proceedBattleHistoryUI(callback.data)
@@ -752,6 +750,7 @@
                 proceedEliminatedResult(callback.data)
                 break;
             case "battle_result":
+                playGameButton.classList.add("hidden")
                 proceedMatchResultUI(callback.data)
                 break;
         }
@@ -761,7 +760,6 @@
     function proceedMonsterUI(monsters) {
         instructionSectionUI.classList.add('hidden')
         playgroundSectionUI.classList.remove('hidden')
-        playGameButton.classList.remove("hidden")
         monsterSectionUI.classList.remove("hidden")
         monsterSectionUI.innerHTML = ""
         logsUI.innerHTML = ""

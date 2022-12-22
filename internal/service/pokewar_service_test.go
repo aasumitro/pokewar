@@ -171,7 +171,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessInse
 	mstRepo.On("Create", mock.Anything, mock.Anything).
 		Once().
 		Return(nil)
-	data, err := svc.SyncMonsters()
+	data, err := svc.SyncMonsters(false)
 	require.Nil(suite.T(), err)
 	require.NotNil(suite.T(), data)
 	require.Equal(suite.T(), data, suite.monsters)
@@ -193,7 +193,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert
 	mstRepo.On("Create", mock.Anything, mock.Anything).
 		Once().
 		Return(errors.New(""))
-	_, _ = svc.SyncMonsters()
+	_, _ = svc.SyncMonsters(false)
 	repo.AssertExpectations(suite.T())
 }
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessUpdate() {
@@ -212,7 +212,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessUpda
 	mstRepo.On("Update", mock.Anything, mock.Anything).
 		Once().
 		Return(nil)
-	data, err := svc.SyncMonsters()
+	data, err := svc.SyncMonsters(false)
 	require.Nil(suite.T(), err)
 	require.NotNil(suite.T(), data)
 	require.Equal(suite.T(), data, suite.monsters)
@@ -234,7 +234,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorUpdate
 	mstRepo.On("Update", mock.Anything, mock.Anything).
 		Once().
 		Return(errors.New(""))
-	_, _ = svc.SyncMonsters()
+	_, _ = svc.SyncMonsters(false)
 }
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorWhenGetPokemon() {
 	appconfigs.Instance.TotalMonsterSync = 10
@@ -248,7 +248,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorWhenGe
 		On("Pokemon", mock.Anything, mock.Anything).
 		Once().
 		Return(nil, errors.New("UNEXPECTED"))
-	data, err := svc.SyncMonsters()
+	data, err := svc.SyncMonsters(false)
 	require.Nil(suite.T(), data)
 	require.NotNil(suite.T(), err)
 	require.Equal(suite.T(), err, suite.svcErr)

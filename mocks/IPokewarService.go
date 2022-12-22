@@ -176,19 +176,20 @@ func (_m *IPokewarService) PrepareMonstersForBattle() ([]*domain.Monster, *utils
 	return r0, r1
 }
 
-// SyncMonsters provides a mock function with given fields: args
-func (_m *IPokewarService) SyncMonsters(args ...string) ([]*domain.Monster, *utils.ServiceError) {
+// SyncMonsters provides a mock function with given fields: updateEnv, args
+func (_m *IPokewarService) SyncMonsters(updateEnv bool, args ...string) ([]*domain.Monster, *utils.ServiceError) {
 	_va := make([]interface{}, len(args))
 	for _i := range args {
 		_va[_i] = args[_i]
 	}
 	var _ca []interface{}
+	_ca = append(_ca, updateEnv)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 []*domain.Monster
-	if rf, ok := ret.Get(0).(func(...string) []*domain.Monster); ok {
-		r0 = rf(args...)
+	if rf, ok := ret.Get(0).(func(bool, ...string) []*domain.Monster); ok {
+		r0 = rf(updateEnv, args...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*domain.Monster)
@@ -196,8 +197,8 @@ func (_m *IPokewarService) SyncMonsters(args ...string) ([]*domain.Monster, *uti
 	}
 
 	var r1 *utils.ServiceError
-	if rf, ok := ret.Get(1).(func(...string) *utils.ServiceError); ok {
-		r1 = rf(args...)
+	if rf, ok := ret.Get(1).(func(bool, ...string) *utils.ServiceError); ok {
+		r1 = rf(updateEnv, args...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*utils.ServiceError)

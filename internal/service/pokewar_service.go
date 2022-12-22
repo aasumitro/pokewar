@@ -29,7 +29,7 @@ func (service *pokewarService) FetchMonsters(args ...string) (monsters []*domain
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-func (service *pokewarService) SyncMonsters(_ ...string) (data []*domain.Monster, error *utils.ServiceError) {
+func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data []*domain.Monster, error *utils.ServiceError) {
 	offset := appconfigs.Instance.TotalMonsterSync
 	limit := appconfigs.Instance.LimitSync
 	lastId := appconfigs.Instance.LastMonsterID
@@ -77,9 +77,11 @@ func (service *pokewarService) SyncMonsters(_ ...string) (data []*domain.Monster
 
 	<-done
 
-	appconfigs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
-	appconfigs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
-	appconfigs.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
+	if updateEnv {
+		appconfigs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
+		appconfigs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
+		appconfigs.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
+	}
 
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
