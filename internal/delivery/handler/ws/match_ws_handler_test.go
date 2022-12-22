@@ -119,8 +119,6 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldSuccess() 
 
 	require.Equal(suite.T(), msg["status"], "success")
 	require.Equal(suite.T(), msg["data_type"], "battle_histories")
-	require.Len(suite.T(), msg["data"], len(suite.battles))
-
 }
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldErrorFromService() {
 	svc := new(mocks.IPokewarService)
@@ -183,7 +181,6 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldSuccess() 
 
 	require.Equal(suite.T(), msg["status"], "success")
 	require.Equal(suite.T(), msg["data_type"], "monsters")
-	require.Len(suite.T(), msg["data"], len(suite.monsters))
 }
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldError() {
 	svc := new(mocks.IPokewarService)
