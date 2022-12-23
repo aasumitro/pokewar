@@ -24,14 +24,9 @@ func TestLoadEnv(t *testing.T) {
 			expected: "Pokewar",
 		},
 		{
-			name:     "Test AppDebug Env",
-			value:    appconfigs.Instance.AppName,
-			expected: "Pokewar",
-		},
-		{
 			name:     "Test AppVersion Env",
 			value:    appconfigs.Instance.AppVersion,
-			expected: "0.0.1-dev",
+			expected: "0.0.2-dev",
 		},
 		{
 			name:     "Test AppUrl Env",
@@ -42,11 +37,6 @@ func TestLoadEnv(t *testing.T) {
 			name:     "Test PokeApiUrl Env",
 			value:    appconfigs.Instance.PokeapiUrl,
 			expected: "https://pokeapi.co/api/v2/",
-		},
-		{
-			name:     "Test Pokedex Env",
-			value:    appconfigs.Instance.Pokedex,
-			expected: "kanto",
 		},
 		{
 			name:     "Test DbDriver Env",
@@ -69,9 +59,7 @@ func TestLoadEnv(t *testing.T) {
 	}
 }
 
-// RUNNING WELL IN LOCAL
 func TestUpdateEnv(t *testing.T) {
-	t.Skip()
 	viper.SetConfigFile("../../.example.env")
 
 	appconfigs.LoadEnv()

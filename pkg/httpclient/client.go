@@ -12,8 +12,6 @@ type HttpClient struct {
 	Endpoint string
 	Timeout  time.Duration
 	Method   string
-	// TODO retry mechanism
-	// retry? && retryCount!
 }
 
 type IHttpClient interface {

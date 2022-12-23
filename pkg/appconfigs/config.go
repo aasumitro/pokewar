@@ -16,7 +16,6 @@ type AppConfig struct {
 	AppVersion       string `mapstructure:"APP_VERSION"`
 	AppUrl           string `mapstructure:"APP_URL"`
 	PokeapiUrl       string `mapstructure:"POKEAPI_URL"`
-	Pokedex          string `mapstructure:"POKEDEX"`
 	DBDriver         string `mapstructure:"DB_DRIVER"`
 	DBDsnUrl         string `mapstructure:"DB_DSN_URL"`
 	LastSync         int64  `mapstructure:"LAST_SYNC"`
