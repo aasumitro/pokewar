@@ -1,3 +1,15 @@
+# This makefile should be used to hold functions/variables
+
+define github_url
+    https://github.com/$(GITHUB)/releases/download/v$(VERSION)/$(ARCHIVE)
+endef
+
+# creates a directory bin.
+bin:
+	@ mkdir -p $@
+
+# ~~ [ gotestsum ] ~~~ https://github.com/gotestyourself/gotestsum ~~~~~~~~~~~~~~~~~~~~~~~
+
 GOTESTSUM := $(shell command -v gotestsum || echo "bin/gotestsum")
 gotestsum: bin/gotestsum ## Installs gotestsum (testing go code)
 
@@ -8,7 +20,6 @@ bin/gotestsum: bin
 	@ printf "Install gotestsum... "
 	@ curl -Ls $(shell echo $(call github_url) | tr A-Z a-z) | tar -zOxf - gotestsum > $@ && chmod +x $@
 	@ echo "done."
-
 
 # ~~ [ golangci-lint ] ~~~ https://github.com/golangci/golangci-lint ~~~~~~~~~~~~~~~~~~~~~
 
