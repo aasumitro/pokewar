@@ -20,3 +20,4 @@ UPDATE VERSION:
 - UI Improvement
 - WS Handler Improvement
 - Add battle log after player annulled
+- Update Test Coverage

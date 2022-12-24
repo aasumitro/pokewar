@@ -19,40 +19,35 @@ type pokewarService struct {
 	battleRepo  domain.IBattleRepository
 }
 
+// MonstersCount returns the total count of monsters stored in the database.
 func (service *pokewarService) MonstersCount() int {
 	return service.monsterRepo.Count(service.ctx)
 }
 
-func (service *pokewarService) FetchMonsters(args ...string) (monsters []*domain.Monster, error *utils.ServiceError) {
+// FetchMonsters retrieves a list of monsters from the database.
+// The list can be filtered by providing arguments such as limit and offset.
+// The function returns a slice of pointers to domain.Monster structs and an error.
+func (service *pokewarService) FetchMonsters(
+	args ...string,
+) (monsters []*domain.Monster, error *utils.ServiceError) {
 	data, err := service.monsterRepo.All(service.ctx, args...)
 
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-// SyncMonsters
-//
-//	if lastID == maxID || maxID < lastID {
-//		go func() {
-//			for _, d := range data {
-//				if err := service.monsterRepo.Update(service.ctx, d); err != nil {
-//					fmt.Println(err.Error())
-//				}
-//			}
-//			done <- true
-//		}()
-//	}
-func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data []*domain.Monster, svcErr *utils.ServiceError) {
+// SyncMonsters synchronizes the data for the monsters in the local database
+// with the data from the remote API (https://pokeapi.co).
+func (service *pokewarService) SyncMonsters(
+	updateEnv bool,
+	_ ...string,
+) (data []*domain.Monster, svcErr *utils.ServiceError) {
 	offset := appconfigs.Instance.TotalMonsterSync
 	limit := appconfigs.Instance.LimitSync
 	lastID := appconfigs.Instance.LastMonsterID
 	var maxID int
 	done := make(chan bool)
 	maxRetries, retryCount := 3, 0
-
-	fmt.Println("offset", offset)
-	fmt.Println("limit", limit)
-	fmt.Println("lastID", lastID)
-
+	// get data from pokeapi.co
 	data, err := service.pokemonRepo.Pokemon(offset, limit)
 	if err != nil {
 		return nil, &utils.ServiceError{
@@ -60,23 +55,17 @@ func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data [
 			Message: err.Error(),
 		}
 	}
-
-	fmt.Println("DATA", data)
-
+	// get highest id from result
 	for _, d := range data {
 		if d.OriginID > maxID {
 			maxID = d.OriginID
 		}
 	}
-
-	fmt.Println("MAXID", maxID)
-
+	// store data from pokeapi.co
 	if maxID > lastID {
 		go func() {
 			for {
-				fmt.Println("RTC", retryCount)
 				err := service.monsterRepo.Create(service.ctx, data)
-				fmt.Println("ERROR_SAVE", err)
 				// Data was successfully inserted,
 				// so break out of the loop
 				if err == nil {
@@ -94,35 +83,51 @@ func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data [
 			done <- true
 		}()
 	}
-
+	// wait till data stored to database
 	<-done
-
+	// when success update env
 	if updateEnv {
 		appconfigs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
 		appconfigs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
 		appconfigs.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
 	}
-
+	// return data to handler
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-func (service *pokewarService) FetchRanks(args ...string) (ranks []*domain.Rank, error *utils.ServiceError) {
+// FetchRanks retrieves a list of monsters rank from the database.
+// The list can be filtered by providing arguments such as limit and offset.
+// The function returns a slice of pointers to domain.Rank structs and an error.
+func (service *pokewarService) FetchRanks(
+	args ...string,
+) (ranks []*domain.Rank, error *utils.ServiceError) {
 	data, err := service.rankRepo.All(service.ctx, args...)
 
 	return utils.ValidateDataRows[domain.Rank](data, err)
 }
 
+// BattlesCount returns the total count of battles stored in the database.
 func (service *pokewarService) BattlesCount() int {
 	return service.battleRepo.Count(service.ctx)
 }
 
-func (service *pokewarService) FetchBattles(args ...string) (ranks []*domain.Battle, error *utils.ServiceError) {
+// FetchBattles retrieves a list of battles from the database.
+// The list can be filtered by providing arguments such as limit and offset.
+// also between with unix timestamp in millisecond format
+// The function returns a slice of pointers to domain.Battle structs and an error.
+func (service *pokewarService) FetchBattles(
+	args ...string,
+) (ranks []*domain.Battle, error *utils.ServiceError) {
 	data, err := service.battleRepo.All(service.ctx, args...)
 
 	return utils.ValidateDataRows[domain.Battle](data, err)
 }
 
-func (service *pokewarService) PrepareMonstersForBattle() (monsters []*domain.Monster, error *utils.ServiceError) {
+// PrepareMonstersForBattle retrieves a list of monsters from the database limited to 5.
+func (service *pokewarService) PrepareMonstersForBattle() (
+	monsters []*domain.Monster,
+	error *utils.ServiceError,
+) {
 	var args []string
 	randID := make([]int, 0, 5)
 	generatedKey := make(map[int]bool)
@@ -143,6 +148,7 @@ func (service *pokewarService) PrepareMonstersForBattle() (monsters []*domain.Mo
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
+// AddBattle store/insert the latest match to database
 func (service *pokewarService) AddBattle(param *domain.Battle) *utils.ServiceError {
 	err := service.battleRepo.Create(service.ctx, param)
 	if err != nil {

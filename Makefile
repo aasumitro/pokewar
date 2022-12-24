@@ -7,11 +7,14 @@ build: swag
 
 swag: tests
 	@echo "Re-generate Swagger File (API Spec docs)"
-	swag init --parseDependency --parseInternal --parseDepth 4 -g ./cmd/web/main.go
+	swag init --parseDependency --parseInternal \
+		--parseDepth 4 -g ./cmd/web/main.go
 
 tests: lint
 	@echo "Run tests"
-	gotestsum --format pkgname-and-test-fails --hide-summary=skipped -- -coverprofile=cover.out ./...
+	gotestsum --format pkgname-and-test-fails \
+		--hide-summary=skipped \
+		-- -coverprofile=cover.out ./...
 	rm cover.out
 
 lint:
