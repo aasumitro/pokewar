@@ -1,3 +1,10 @@
+# Exporting bin folder to the path for makefile
+export PATH   := $(PWD)/bin:$(PATH)
+# Default Shell
+export SHELL  := bash
+# Type of OS: Linux or Darwin.
+export OSTYPE := $(shell uname -s)
+
 # --- Tooling & Variables ----------------------------------------------------------------
 include ./misc/make/tools.Makefile
 
@@ -20,7 +27,7 @@ swag: tests
 		--parseDepth 4 -g ./cmd/web/main.go
 	@ echo "done"
 
-tests: lint
+tests: $(GOTESTSUM) lint
 	@ echo "Run tests"
 	@ gotestsum --format pkgname-and-test-fails \
 		--hide-summary=skipped \
