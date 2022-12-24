@@ -13,7 +13,7 @@ bin:
 GOTESTSUM := $(shell command -v gotestsum || echo "bin/gotestsum")
 gotestsum: bin/gotestsum ## Installs gotestsum (testing go code)
 
-bin/gotestsum: VERSION := 1.6.1
+bin/gotestsum: VERSION := 1.8.2
 bin/gotestsum: GITHUB  := gotestyourself/gotestsum
 bin/gotestsum: ARCHIVE := gotestsum_$(VERSION)_$(OSTYPE)_amd64.tar.gz
 bin/gotestsum: bin
@@ -26,7 +26,7 @@ bin/gotestsum: bin
 GOLANGCI := $(shell command -v golangci-lint || echo "bin/golangci-lint")
 golangci-lint: bin/golangci-lint ## Installs golangci-lint (linter)
 
-bin/golangci-lint: VERSION := 1.39.0
+bin/golangci-lint: VERSION := 1.50.1
 bin/golangci-lint: GITHUB  := golangci/golangci-lint
 bin/golangci-lint: ARCHIVE := golangci-lint-$(VERSION)-$(OSTYPE)-amd64.tar.gz
 bin/golangci-lint: bin
