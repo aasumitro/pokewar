@@ -49,6 +49,10 @@ func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data [
 	done := make(chan bool)
 	maxRetries, retryCount := 3, 0
 
+	fmt.Println("offset", offset)
+	fmt.Println("limit", limit)
+	fmt.Println("lastID", lastID)
+
 	data, err := service.pokemonRepo.Pokemon(offset, limit)
 	if err != nil {
 		return nil, &utils.ServiceError{
@@ -57,16 +61,22 @@ func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data [
 		}
 	}
 
+	fmt.Println("DATA", data)
+
 	for _, d := range data {
 		if d.OriginID > maxID {
 			maxID = d.OriginID
 		}
 	}
 
+	fmt.Println("MAXID", maxID)
+
 	if maxID > lastID {
 		go func() {
 			for {
+				fmt.Println("RTC", retryCount)
 				err := service.monsterRepo.Create(service.ctx, data)
+				fmt.Println("ERROR_SAVE", err)
 				// Data was successfully inserted,
 				// so break out of the loop
 				if err == nil {

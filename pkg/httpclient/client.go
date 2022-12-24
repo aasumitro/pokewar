@@ -15,7 +15,12 @@ type HttpClient struct {
 }
 
 type IHttpClient interface {
+	NewClient() *HttpClient
 	MakeRequest(obj interface{}) error
+}
+
+func (c *HttpClient) NewClient() *HttpClient {
+	return c
 }
 
 func (c *HttpClient) MakeRequest(obj interface{}) error {
