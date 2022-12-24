@@ -26,16 +26,22 @@ func (_m *IHttpClient) MakeRequest(obj interface{}) error {
 	return r0
 }
 
-// NewClient provides a mock function with given fields:
-func (_m *IHttpClient) NewClient() *httpclient.HttpClient {
-	ret := _m.Called()
+// NewClient provides a mock function with given fields: opts
+func (_m *IHttpClient) NewClient(opts ...httpclient.Option) *httpclient.HTTPClient {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
-	var r0 *httpclient.HttpClient
-	if rf, ok := ret.Get(0).(func() *httpclient.HttpClient); ok {
-		r0 = rf()
+	var r0 *httpclient.HTTPClient
+	if rf, ok := ret.Get(0).(func(...httpclient.Option) *httpclient.HTTPClient); ok {
+		r0 = rf(opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*httpclient.HttpClient)
+			r0 = ret.Get(0).(*httpclient.HTTPClient)
 		}
 	}
 

@@ -2,7 +2,7 @@ package service_test
 
 import (
 	"context"
-	errors "errors"
+	"errors"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/service"
 	"github.com/aasumitro/pokewar/mocks"
@@ -166,7 +166,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessInse
 		context.TODO(), repo, mstRepo,
 		new(mocks.IRankRepository), new(mocks.IBattleRepository))
 	repo.
-		On("Pokemon", mock.Anything, mock.Anything).
+		On("Pokemon", mock.Anything, mock.Anything, mock.Anything).
 		Once().
 		Return(suite.monsters, nil)
 	mstRepo.On("Create", mock.Anything, mock.Anything).
@@ -191,7 +191,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert
 		context.TODO(), repo, mstRepo,
 		new(mocks.IRankRepository), new(mocks.IBattleRepository))
 	repo.
-		On("Pokemon", mock.Anything, mock.Anything).
+		On("Pokemon", mock.Anything, mock.Anything, mock.Anything).
 		Once().
 		Return(suite.monsters, nil)
 	mstRepo.On("Create", mock.Anything, mock.Anything).
@@ -218,7 +218,7 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorWhenGe
 		context.TODO(), repo, new(mocks.IMonsterRepository),
 		new(mocks.IRankRepository), new(mocks.IBattleRepository))
 	repo.
-		On("Pokemon", mock.Anything, mock.Anything).
+		On("Pokemon", mock.Anything, mock.Anything, mock.Anything).
 		Once().
 		Return(nil, errors.New("UNEXPECTED"))
 	data, err := svc.SyncMonsters(false)

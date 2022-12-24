@@ -30,7 +30,7 @@ func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
 
 	data, err := handler.Svc.FetchBattles(args...)
 	if err != nil {
-		utils.NewHttpRespond(ctx, err.Code, err.Message)
+		utils.NewHTTPRespond(ctx, err.Code, err.Message)
 		return
 	}
 
@@ -40,14 +40,14 @@ func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
 		host := ctx.Request.Host
 		path := "api/v1/battles"
 		total, current, next, prev := utils.Paginate(limit, offset, monsterCount, host, path)
-		utils.NewHttpRespond(ctx, http.StatusOK, data, total, current, next, prev)
+		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev)
 		return
 	}
 
-	utils.NewHttpRespond(ctx, http.StatusOK, data)
+	utils.NewHTTPRespond(ctx, http.StatusOK, data)
 }
 
-func NewBattleHttpHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
+func NewBattleHTTPHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
 	handler := &BattleHTTPHandler{Svc: svc}
 	router.GET("/battles", handler.Fetch)
 }

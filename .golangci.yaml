@@ -1,3 +1,27 @@
+linters-settings:
+  dupl:
+    threshold: 300
+  lll:
+    line-length: 160
+  gomnd:
+    checks:
+      - argument
+      - case
+      - condition
+      - return
+    ignored-numbers:
+      - "0"
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+      - "5"
+      - "10"
+      - "100"
+      - "500"
+  gosec:
+    excludes:
+      - G404
 linters:
   enable:
     - errcheck
@@ -19,20 +43,23 @@ linters:
     - unparam
     - unused
     - whitespace
-    - depguard           # Go linter that checks if package imports are in a list of acceptable packages
-#    - revive             # Fast, configurable, extensible, flexible, and beautiful linter for Go
+    - depguard
+    - dupl
+    - goconst
+    - lll
+    - noctx
+    - gomnd
+    - gosec
+    - revive
 #    - goimports          # Check import statements are formatted according to the 'goimport' command
-#    - dupl               # check duplicate - SKIP FOR NOW
-#    - goconst            # Finds repeated strings that could be replaced by a constant - SKIP FOR NOW
-#    - gomnd              # An analyzer to detect magic numbers - SKIP FOR NOW
-#    - gosec              # Inspects source code for security problems - SKIP FOR NOW
-#    - lll                # Reports long lines - SKIP FOR NOW
-#    - noctx              # noctx finds sending http request without context.Context - SKIP FOR NOW
 issues:
   exclude-rules:
     - path: _test\.go
       linters:
         - gomnd
+        - dupl
+        - goconst
+        - lll
 run:
   timeout: 5m
   go: "1.19"

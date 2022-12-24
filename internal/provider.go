@@ -26,8 +26,8 @@ func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 	}
 
 	v1 := router.Group("/api/v1")
-	http.NewMonsterHttpHandler(pokewarService, v1)
-	http.NewRankHttpHandler(pokewarService, v1)
-	http.NewBattleHttpHandler(pokewarService, v1)
+	http.NewMonsterHTTPHandler(pokewarService, v1)
+	http.NewRankHTTPHandler(pokewarService, v1)
+	http.NewBattleHTTPHandler(pokewarService, v1)
 	ws.NewMatchWSHandler(pokewarService, v1)
 }

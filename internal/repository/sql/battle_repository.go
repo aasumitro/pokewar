@@ -94,12 +94,12 @@ func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battl
 	}
 	// doesn't need to validate err, because
 	// the database table has an auto-incrementing primary key
-	battleId, _ := newBattle.LastInsertId()
+	battleID, _ := newBattle.LastInsertId()
 
 	ql := "INSERT INTO battle_logs (battle_id, description, created_at) VALUES"
 	now := time.Now().UnixMicro()
 	for i, log := range param.Logs {
-		ql += fmt.Sprintf(" (%d, '%s', %d)", battleId, log.Description, now)
+		ql += fmt.Sprintf(" (%d, '%s', %d)", battleID, log.Description, now)
 		if i != (len(param.Logs) - 1) {
 			ql += ","
 		}
@@ -113,7 +113,7 @@ func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battl
 	qp := "INSERT INTO battle_players (battle_id, monster_id, eliminated_at, annulled_at, rank, point) VALUES"
 	for i, player := range param.Players {
 		qp += fmt.Sprintf(" (%d, %d, %d, %d, %d, %d)",
-			battleId, player.MonsterID, player.EliminatedAt,
+			battleID, player.MonsterID, player.EliminatedAt,
 			player.AnnulledAt, player.Rank, player.Point)
 		if i != (len(param.Players) - 1) {
 			qp += ","

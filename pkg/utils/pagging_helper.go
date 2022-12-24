@@ -14,7 +14,7 @@ func Paginate(limit, offset, total int, host, path string) (totalPages, currentP
 		prevPath := fmt.Sprintf("%s?offset=%d&limit=%d", path, prevOffset, limit)
 		prevLink := fmt.Sprintf("%s://%s/%s", "http", host, prevPath)
 		prev = Paging{
-			Url:  prevLink,
+			URL:  prevLink,
 			Path: prevPath,
 		}
 	}
@@ -24,7 +24,7 @@ func Paginate(limit, offset, total int, host, path string) (totalPages, currentP
 		nextPath := fmt.Sprintf("%s?offset=%d&limit=%d", path, nextOffset, limit)
 		nextLink := fmt.Sprintf("%s://%s/%s", "http", host, nextPath)
 		next = Paging{
-			Url:  nextLink,
+			URL:  nextLink,
 			Path: nextPath,
 		}
 	}

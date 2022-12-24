@@ -39,7 +39,7 @@ func init() {
 	docs.SwaggerInfo.Title = appconfigs.Instance.AppName
 	docs.SwaggerInfo.Description = "Pocket Monster Battleroyale API Spec"
 	docs.SwaggerInfo.Version = appconfigs.Instance.AppVersion
-	docs.SwaggerInfo.Host = appconfigs.Instance.AppUrl
+	docs.SwaggerInfo.Host = appconfigs.Instance.AppURL
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
@@ -57,5 +57,5 @@ func main() {
 
 	internal.NewAPIProvider(ctx, appEngine)
 
-	log.Fatal(appEngine.Run(appconfigs.Instance.AppUrl))
+	log.Fatal(appEngine.Run(appconfigs.Instance.AppURL))
 }

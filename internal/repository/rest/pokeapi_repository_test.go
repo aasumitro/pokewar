@@ -1,6 +1,7 @@
 package rest_test
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/repository/rest"
@@ -26,10 +27,10 @@ type pokeapiRESTRepositoryTestSuite struct {
 
 func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {
 	suite.moves = []domain.Moves{
-		{Move: domain.Move{Name: "a1", Url: "http://example.com/a1"}},
-		{Move: domain.Move{Name: "a3", Url: "http://example.com/a3"}},
-		{Move: domain.Move{Name: "a4", Url: "http://example.com/a4"}},
-		{Move: domain.Move{Name: "a6", Url: "http://example.com/a6"}},
+		{Move: domain.Move{Name: "a1", URL: "http://example.com/a1"}},
+		{Move: domain.Move{Name: "a3", URL: "http://example.com/a3"}},
+		{Move: domain.Move{Name: "a4", URL: "http://example.com/a4"}},
+		{Move: domain.Move{Name: "a6", URL: "http://example.com/a6"}},
 	}
 	suite.pokemon = domain.Pokemon{
 		ID:             1,
@@ -71,7 +72,7 @@ func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {
 func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_Pokemon() {
 	viper.SetConfigFile("../../../.example.env")
 	appconfigs.LoadEnv()
-	appconfigs.Instance.PokeapiUrl = "https://pokeapi.co/api/v2/"
+	appconfigs.Instance.PokeapiURL = "https://pokeapi.co/api/v2/"
 	data, _ := json.Marshal(domain.PokemonResult{
 		Results: []domain.PokemonSummary{
 			{Name: "bulbasaur", URL: "https://pokeapi.co/api/v2/pokemon/1/"},
@@ -82,7 +83,7 @@ func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_Pokemon() {
 	}))
 	defer server.Close()
 	repo := rest.NewPokeapiRESTRepository()
-	monsters, err := repo.Pokemon(0, 1)
+	monsters, err := repo.Pokemon(context.TODO(), 0, 1)
 	require.NotNil(suite.T(), monsters)
 	require.Nil(suite.T(), err)
 }
@@ -90,11 +91,12 @@ func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_Pokemon() {
 func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_ProceedData() {
 	m := new(mocks.IHttpClient)
 	m.On("NewClient").
-		Return(&httpclient.HttpClient{
+		Return(&httpclient.HTTPClient{
 			Timeout: 10 * time.Second,
 			Method:  http.MethodGet,
 		}).Once()
 	c := m.NewClient()
+	c.Ctx = context.TODO()
 	c.Endpoint = "https://pokeapi.co/api/v2/pokemon/1/"
 	m.On("MakeRequest", mock.Anything).
 		Return(domain.PokemonResult{
@@ -108,7 +110,7 @@ func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_ProceedData() {
 }
 
 func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_TransformData() {
-	client := &httpclient.HttpClient{
+	client := &httpclient.HTTPClient{
 		Timeout: 10 * time.Second,
 		Method:  http.MethodGet,
 	}

@@ -1,12 +1,12 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"math/rand"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -16,12 +16,14 @@ type pokeapiRESTRepository struct {
 }
 
 // Pokemon retrieves a list of monsters from the PokeAPI REST API.
-func (repo *pokeapiRESTRepository) Pokemon(offset, limit int) ([]*domain.Monster, error) {
-	client := repo.client.NewClient()
-	client.Endpoint = fmt.Sprintf(
-		"%spokemon?offset=%d&limit=%d",
-		appconfigs.Instance.PokeapiUrl, offset, limit,
-	)
+func (repo *pokeapiRESTRepository) Pokemon(ctx context.Context, offset, limit int) ([]*domain.Monster, error) {
+	client := repo.client.NewClient(
+		httpclient.Ctx(ctx),
+		httpclient.Timeout(3*time.Second),
+		httpclient.Endpoint(fmt.Sprintf(
+			"%spokemon?offset=%d&limit=%d",
+			appconfigs.Instance.PokeapiURL, offset, limit,
+		)))
 
 	monsters, err := ProceedData(client, TransformData)
 	if err != nil {
@@ -33,8 +35,8 @@ func (repo *pokeapiRESTRepository) Pokemon(offset, limit int) ([]*domain.Monster
 
 // ProceedData - helper function to proceed data
 func ProceedData(
-	client *httpclient.HttpClient,
-	transformData func(*httpclient.HttpClient, *domain.Pokemon) *domain.Monster,
+	client *httpclient.HTTPClient,
+	transformData func(*httpclient.HTTPClient, *domain.Pokemon) *domain.Monster,
 ) ([]*domain.Monster, error) {
 	var pokemons *domain.PokemonResult
 	var monsters []*domain.Monster
@@ -64,7 +66,7 @@ func ProceedData(
 
 // TransformData function to transform origin data
 func TransformData(
-	client *httpclient.HttpClient,
+	client *httpclient.HTTPClient,
 	pokemon *domain.Pokemon,
 ) *domain.Monster {
 	types := make([]string, 0, len(pokemon.Types))
@@ -118,7 +120,7 @@ func RandomSubset(slice []domain.Moves, size int) []string {
 	for len(result) < size {
 		n := rand.Intn(max)
 		if _, found := generatedKey[n]; !found {
-			result = append(result, slice[n].Move.Url)
+			result = append(result, slice[n].Move.URL)
 			generatedKey[n] = true
 		}
 	}
@@ -127,8 +129,5 @@ func RandomSubset(slice []domain.Moves, size int) []string {
 
 // NewPokeapiRESTRepository use in main app
 func NewPokeapiRESTRepository() domain.IPokeapiRESTRepository {
-	return &pokeapiRESTRepository{client: &httpclient.HttpClient{
-		Timeout: 10 * time.Second,
-		Method:  http.MethodGet,
-	}}
+	return &pokeapiRESTRepository{client: &httpclient.HTTPClient{}}
 }

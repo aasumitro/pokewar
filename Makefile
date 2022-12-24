@@ -26,3 +26,7 @@ run:
 	@echo "Run App"
 	go mod tidy -compat=1.19
 	go run ./cmd/web/main.go
+
+prepare:
+	go mod install
+	cp .example.env .env

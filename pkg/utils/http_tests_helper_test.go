@@ -16,7 +16,7 @@ func TestMockJsonRequest(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(writer)
 	ctx.Request = &http.Request{Header: make(http.Header)}
 	expectedContent := map[string]string{"foo": "foo"}
-	utils.MockJsonRequest(ctx, http.MethodPost, "application/json", map[string]interface{}{
+	utils.MockJSONRequest(ctx, http.MethodPost, "application/json", map[string]interface{}{
 		"foo": "foo",
 	})
 	assert.Equal(t, http.MethodPost, ctx.Request.Method)

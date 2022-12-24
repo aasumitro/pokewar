@@ -48,7 +48,7 @@ func (service *pokewarService) SyncMonsters(
 	done := make(chan bool)
 	maxRetries, retryCount := 3, 0
 	// get data from pokeapi.co
-	data, err := service.pokemonRepo.Pokemon(offset, limit)
+	data, err := service.pokemonRepo.Pokemon(service.ctx, offset, limit)
 	if err != nil {
 		return nil, &utils.ServiceError{
 			Code:    http.StatusInternalServerError,

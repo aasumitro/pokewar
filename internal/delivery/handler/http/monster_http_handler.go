@@ -30,7 +30,7 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 
 	data, err := handler.Svc.FetchMonsters(args...)
 	if err != nil {
-		utils.NewHttpRespond(ctx, err.Code, err.Message)
+		utils.NewHTTPRespond(ctx, err.Code, err.Message)
 		return
 	}
 
@@ -40,11 +40,11 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 		host := ctx.Request.Host
 		path := "api/v1/monsters"
 		total, current, next, prev := utils.Paginate(limit, offset, monsterCount, host, path)
-		utils.NewHttpRespond(ctx, http.StatusOK, data, total, current, next, prev)
+		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev)
 		return
 	}
 
-	utils.NewHttpRespond(ctx, http.StatusOK, data)
+	utils.NewHTTPRespond(ctx, http.StatusOK, data)
 }
 
 // Sync godoc
@@ -61,14 +61,14 @@ func (handler *MonsterHTTPHandler) Fetch(ctx *gin.Context) {
 func (handler *MonsterHTTPHandler) Sync(ctx *gin.Context) {
 	data, err := handler.Svc.SyncMonsters(true)
 	if err != nil {
-		utils.NewHttpRespond(ctx, err.Code, err.Message)
+		utils.NewHTTPRespond(ctx, err.Code, err.Message)
 		return
 	}
 
-	utils.NewHttpRespond(ctx, http.StatusOK, data)
+	utils.NewHTTPRespond(ctx, http.StatusOK, data)
 }
 
-func NewMonsterHttpHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
+func NewMonsterHTTPHandler(svc domain.IPokewarService, router *gin.RouterGroup) {
 	handler := &MonsterHTTPHandler{Svc: svc}
 	router.GET("/monsters", handler.Fetch)
 	router.GET("/monsters/sync", handler.Sync)

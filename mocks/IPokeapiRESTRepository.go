@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/aasumitro/pokewar/domain"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,13 +14,13 @@ type IPokeapiRESTRepository struct {
 	mock.Mock
 }
 
-// Pokemon provides a mock function with given fields: offset, limit
-func (_m *IPokeapiRESTRepository) Pokemon(offset int, limit int) ([]*domain.Monster, error) {
-	ret := _m.Called(offset, limit)
+// Pokemon provides a mock function with given fields: ctx, offset, limit
+func (_m *IPokeapiRESTRepository) Pokemon(ctx context.Context, offset int, limit int) ([]*domain.Monster, error) {
+	ret := _m.Called(ctx, offset, limit)
 
 	var r0 []*domain.Monster
-	if rf, ok := ret.Get(0).(func(int, int) []*domain.Monster); ok {
-		r0 = rf(offset, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []*domain.Monster); ok {
+		r0 = rf(ctx, offset, limit)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*domain.Monster)
@@ -26,8 +28,8 @@ func (_m *IPokeapiRESTRepository) Pokemon(offset int, limit int) ([]*domain.Mons
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, int) error); ok {
-		r1 = rf(offset, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(ctx, offset, limit)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -1,6 +1,7 @@
 package httpclient_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"net/http"
@@ -107,11 +108,12 @@ func TestMakeRequest(t *testing.T) {
 				test.endpoint = server.URL
 			}
 
-			c := &httpclient.HttpClient{
-				Endpoint: test.endpoint,
-				Timeout:  test.timeout,
-				Method:   test.method,
-			}
+			c := &httpclient.HTTPClient{}
+			c = c.NewClient(
+				httpclient.Timeout(test.timeout),
+				httpclient.Endpoint(test.endpoint),
+				httpclient.Method(test.method),
+				httpclient.Ctx(context.TODO()))
 			var obj map[string]string
 			err := c.MakeRequest(&obj)
 

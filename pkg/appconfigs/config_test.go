@@ -30,12 +30,12 @@ func TestLoadEnv(t *testing.T) {
 		},
 		{
 			name:     "Test AppUrl Env",
-			value:    appconfigs.Instance.AppUrl,
+			value:    appconfigs.Instance.AppURL,
 			expected: "localhost:8000",
 		},
 		{
 			name:     "Test PokeApiUrl Env",
-			value:    appconfigs.Instance.PokeapiUrl,
+			value:    appconfigs.Instance.PokeapiURL,
 			expected: "https://pokeapi.co/api/v2/",
 		},
 		{
@@ -45,7 +45,7 @@ func TestLoadEnv(t *testing.T) {
 		},
 		{
 			name:     "Test DbDsnUrl Env",
-			value:    appconfigs.Instance.DBDsnUrl,
+			value:    appconfigs.Instance.DBDsnURL,
 			expected: "./db/local-data.db",
 		},
 	}
@@ -82,7 +82,7 @@ func TestInitDBConn(t *testing.T) {
 
 	appconfigs.LoadEnv()
 
-	appconfigs.Instance.DBDsnUrl = "../../db/local-data.db"
+	appconfigs.Instance.DBDsnURL = "../../db/local-data.db"
 	appconfigs.Instance.InitDbConn()
 
 	if appconfigs.DbPool == nil {

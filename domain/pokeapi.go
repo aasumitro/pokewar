@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type (
 	PokemonResult struct {
 		Count    int              `json:"count"`
@@ -56,10 +58,10 @@ type (
 
 	Move struct {
 		Name string `json:"name"`
-		Url  string `json:"url"`
+		URL  string `json:"url"`
 	}
 
 	IPokeapiRESTRepository interface {
-		Pokemon(offset, limit int) ([]*Monster, error)
+		Pokemon(ctx context.Context, offset, limit int) ([]*Monster, error)
 	}
 )
