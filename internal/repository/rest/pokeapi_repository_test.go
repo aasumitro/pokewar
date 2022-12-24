@@ -15,7 +15,7 @@ import (
 
 type pokeapiRESTRepositoryTestSuite struct {
 	suite.Suite
-	//mock func(url string, v interface{}) error
+	// mock func(url string, v interface{}) error
 }
 
 func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {

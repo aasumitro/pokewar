@@ -38,7 +38,7 @@ type (
 	}
 
 	IMonsterRepository interface {
-		ICreateRepository[Monster]
+		ICreateBulkRepository[Monster]
 		IReadAllRepository[Monster]
 		IUpdateRepository[Monster]
 		ICountRowRepository

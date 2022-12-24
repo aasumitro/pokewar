@@ -59,11 +59,11 @@ func (_m *IMonsterRepository) Count(ctx context.Context) int {
 }
 
 // Create provides a mock function with given fields: ctx, param
-func (_m *IMonsterRepository) Create(ctx context.Context, param *domain.Monster) error {
+func (_m *IMonsterRepository) Create(ctx context.Context, param []*domain.Monster) error {
 	ret := _m.Called(ctx, param)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *domain.Monster) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []*domain.Monster) error); ok {
 		r0 = rf(ctx, param)
 	} else {
 		r0 = ret.Error(0)

@@ -66,8 +66,8 @@ func TransformGameResultToBattle(game *battleroyale.Game) *domain.Battle {
 	}
 	// returns the transformed data.
 	return &domain.Battle{
-		StartedAt: (*game).StartAt.UnixMicro(),
-		EndedAt:   (*game).EndAt.UnixMicro(),
+		StartedAt: game.StartAt.UnixMicro(),
+		EndedAt:   game.EndAt.UnixMicro(),
 		Players:   players,
 		Logs:      logs,
 	}

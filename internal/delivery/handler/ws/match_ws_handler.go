@@ -33,14 +33,14 @@ var (
 // battleHistory handles the "histories" request message type from the client.
 // Proceed an error message or the list of battles history that extracted to
 // the relevant information and format, and sends it back to the client.
-func (handler *MatchWSHandler) battleHistory(msgType int, clientId string) {
+func (handler *MatchWSHandler) battleHistory(msgType int, clientID string) {
 	// Fetch the last 5 battles from the database via service
 	data, errorData := handler.Svc.FetchBattles("LIMIT 5")
 	if errorData != nil {
 		// If there was an error fetching the battles,
 		// send an error message to the client
 		handler.sendMessageToClient(
-			msgType, clientId, "error",
+			msgType, clientID, "error",
 			errorData.Message.(string), nil)
 	}
 	// Pre-allocate capacity for the histories slice using make
@@ -66,44 +66,44 @@ func (handler *MatchWSHandler) battleHistory(msgType int, clientId string) {
 	}
 	// Send the histories to the client
 	handler.sendMessageToClient(
-		msgType, clientId, "success",
+		msgType, clientID, "success",
 		"battle_histories", histories)
 }
 
 // prepareBattle handles the "prepare" request message type from the client.
 // Proceed an error message or the list of monsters then transform the list of monsters
 // into a list of players and sends the list of monsters back to the client.
-func (handler *MatchWSHandler) prepareBattle(msgType int, clientId string) {
+func (handler *MatchWSHandler) prepareBattle(msgType int, clientID string) {
 	// Fetch the list of monsters from the database
 	monsterData, errorData := handler.Svc.PrepareMonstersForBattle()
 	if errorData != nil {
 		// If there was an error fetching the monsters,
 		// send an error message to the client
 		handler.sendMessageToClient(
-			msgType, clientId, "error",
+			msgType, clientID, "error",
 			errorData.Message.(string), nil)
 	}
 	// Store the list of monsters and transform
 	// the data to battleroyale.players
-	handler.Monsters[clientId] = monsterData
+	handler.Monsters[clientID] = monsterData
 	players := datatransform.TransformMonstersAsGamePlayers(monsterData)
-	handler.GamePlayers[clientId] = players
+	handler.GamePlayers[clientID] = players
 	// Send the list of monsters to the client
 	handler.sendMessageToClient(
-		msgType, clientId, "success",
+		msgType, clientID, "success",
 		"monsters", monsterData)
 }
 
 // startBattle handles the "start" request message type from the client.
 // It starts a new battle game for a specified client, sends data (logs, eliminated players, and result)
 // back to the client after transforming it into the specified format, and resets the game.
-func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
-	if handler.GamePlayers[clientId] == nil {
+func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
+	if handler.GamePlayers[clientID] == nil {
 		// if players not set don't play the game
 		// and send notify to user load random monster
 		// to play the game and start the match
 		handler.sendMessageToClient(
-			msgType, clientId, "error",
+			msgType, clientID, "error",
 			"Please press random button again!", nil)
 		return
 	}
@@ -113,8 +113,8 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
 	go func() {
 		for update := range updateBuffer {
 			handler.sendMessageToClient(
-				msgType, clientId, update["status"].(string),
-				update["data_type"].(string), update["data"].(any))
+				msgType, clientID, update["status"].(string),
+				update["data_type"].(string), update["data"])
 		}
 	}()
 	// Use a fixed-size buffer channel for the result, log, and eliminated channels
@@ -122,9 +122,8 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
 	log := make(chan string, 100)
 	eliminated := make(chan string, 5)
 	// Start a new game and transform the result to domain.Battle
-	game := battleroyale.NewGame(handler.GamePlayers[clientId])
+	game := battleroyale.NewGame(handler.GamePlayers[clientID])
 	go game.Start(result, log, eliminated)
-	gameResult := datatransform.TransformGameResultToBattle(<-result)
 	// Start a goroutine to handle log updates and eliminated players
 	go func() {
 		for {
@@ -149,9 +148,10 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
 		}
 	}()
 	// Send game result to client
-	handler.BattleData[clientId] = gameResult
+	gameResult := datatransform.TransformGameResultToBattle(<-result)
+	handler.BattleData[clientID] = gameResult
 	handler.sendMessageToClient(
-		msgType, clientId, "success",
+		msgType, clientID, "success",
 		"battle_result", gameResult)
 	// Reset the game
 	game.Reset()
@@ -161,22 +161,22 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientId string) {
 // It finds the index of the player to be annulled increment/decrement-ing the rank and points of other players
 // after that make new log, sends the updated data to the client and schedules the save function
 // to be called after 10 seconds using time.AfterFunc
-func (handler *MatchWSHandler) annulledPlayer(msgType int, clientId string, data any) {
+func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data any) {
 	// Find the index of the player to be annulled
 	var playerIndex int
-	for i, player := range handler.BattleData[clientId].Players {
+	for i, player := range handler.BattleData[clientID].Players {
 		if player.MonsterID == int(data.(float64)) {
 			playerIndex = i
 			break
 		}
 	}
 	// Get a reference to the player to be annulled
-	annulledPlayer := &handler.BattleData[clientId].Players[playerIndex]
+	annulledPlayer := &handler.BattleData[clientID].Players[playerIndex]
 	// Increment the rank and points of players with a higher rank than the annulled player
-	for i := range handler.BattleData[clientId].Players {
-		if handler.BattleData[clientId].Players[i].Rank > annulledPlayer.Rank {
-			handler.BattleData[clientId].Players[i].Rank--
-			handler.BattleData[clientId].Players[i].Point++
+	for i := range handler.BattleData[clientID].Players {
+		if handler.BattleData[clientID].Players[i].Rank > annulledPlayer.Rank {
+			handler.BattleData[clientID].Players[i].Rank--
+			handler.BattleData[clientID].Players[i].Point++
 		}
 	}
 	// Update the annulled player's data
@@ -186,22 +186,22 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientId string, data
 	tplMsg := "%d - player %s was annulled from the game and " +
 		"their rank and points were reset to 0!\n"
 	logMsg := fmt.Sprintf(tplMsg, annulledPlayer.AnnulledAt, annulledPlayer.Name)
-	handler.BattleData[clientId].Logs = append(
-		handler.BattleData[clientId].Logs,
+	handler.BattleData[clientID].Logs = append(
+		handler.BattleData[clientID].Logs,
 		domain.Log{Description: logMsg},
 	)
 	// Send log message to the client
 	handler.sendMessageToClient(
-		msgType, clientId, "success",
+		msgType, clientID, "success",
 		"battle_logs", logMsg)
 	// Send updated data to the client
 	handler.sendMessageToClient(
-		msgType, clientId, "success",
-		"eliminated_result", handler.BattleData[clientId])
+		msgType, clientID, "success",
+		"eliminated_result", handler.BattleData[clientID])
 	// Schedule the save function to be called after 10 seconds
-	isLastBattleSaved[clientId] = false
-	time.AfterFunc(10*time.Second, func() {
-		handler.save(clientId)
+	isLastBattleSaved[clientID] = false
+	time.AfterFunc(1*time.Second, func() {
+		handler.save(clientID)
 	})
 }
 
@@ -210,15 +210,15 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientId string, data
 // the function will retry for a maximum of 5 times with a 500ms delay between each retry.
 // If the data stored or the maximum number of retries is reached,
 // the battle data and other related data for the client will be reset.
-func (handler *MatchWSHandler) save(clientId string) {
-	if isLastBattleSaved[clientId] && handler.BattleData[clientId] == nil {
+func (handler *MatchWSHandler) save(clientID string) {
+	if isLastBattleSaved[clientID] && handler.BattleData[clientID] == nil {
 		return
 	}
 	// Set the maximum number of retries and
 	// the initial retry counter
-	maxRetries, retryCount := 5, 0
+	maxRetries, retryCount := 3, 0
 	for {
-		err := handler.Svc.AddBattle(handler.BattleData[clientId])
+		err := handler.Svc.AddBattle(handler.BattleData[clientID])
 		// If the function succeeds,
 		// break out of the loop
 		if err == nil {
@@ -233,11 +233,12 @@ func (handler *MatchWSHandler) save(clientId string) {
 		// Sleep for a short period before retrying
 		time.Sleep(500 * time.Millisecond)
 	}
+
 	// reset the data
-	isLastBattleSaved[clientId] = true
-	handler.BattleData[clientId] = nil
-	handler.Monsters[clientId] = nil
-	handler.GamePlayers[clientId] = nil
+	isLastBattleSaved[clientID] = true
+	handler.BattleData[clientID] = nil
+	handler.Monsters[clientID] = nil
+	handler.GamePlayers[clientID] = nil
 }
 
 // sendMessageToClient helper function to send message to specified client by given id
@@ -278,7 +279,7 @@ func (handler *MatchWSHandler) Run(ctx *gin.Context) {
 	ws, _ := wsUpgraded.Upgrade(ctx.Writer, ctx.Request, nil)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(ws)
 	clients[idParams] = ws
-	//starts a loop that listens for incoming messages from the client and processes them.
+	// starts a loop that listens for incoming messages from the client and processes them.
 	for {
 		mt, message, err := ws.ReadMessage()
 		if err != nil {

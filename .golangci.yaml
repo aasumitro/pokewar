@@ -1,0 +1,40 @@
+linters:
+  enable:
+    - errcheck
+    - dogsled
+    - exportloopref
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - nolintlint
+    - staticcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+    - depguard           # Go linter that checks if package imports are in a list of acceptable packages
+#    - revive             # Fast, configurable, extensible, flexible, and beautiful linter for Go
+#    - goimports          # Check import statements are formatted according to the 'goimport' command
+#    - dupl               # check duplicate - SKIP FOR NOW
+#    - goconst            # Finds repeated strings that could be replaced by a constant - SKIP FOR NOW
+#    - gomnd              # An analyzer to detect magic numbers - SKIP FOR NOW
+#    - gosec              # Inspects source code for security problems - SKIP FOR NOW
+#    - lll                # Reports long lines - SKIP FOR NOW
+#    - noctx              # noctx finds sending http request without context.Context - SKIP FOR NOW
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+run:
+  timeout: 5m
+  go: "1.19"
+  modules-download-mode: readonly
+  skip-dirs: []

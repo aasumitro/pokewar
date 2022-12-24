@@ -29,47 +29,57 @@ func (service *pokewarService) FetchMonsters(args ...string) (monsters []*domain
 	return utils.ValidateDataRows[domain.Monster](data, err)
 }
 
-func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data []*domain.Monster, error *utils.ServiceError) {
+// SyncMonsters
+//
+//	if lastID == maxID || maxID < lastID {
+//		go func() {
+//			for _, d := range data {
+//				if err := service.monsterRepo.Update(service.ctx, d); err != nil {
+//					fmt.Println(err.Error())
+//				}
+//			}
+//			done <- true
+//		}()
+//	}
+func (service *pokewarService) SyncMonsters(updateEnv bool, _ ...string) (data []*domain.Monster, svcErr *utils.ServiceError) {
 	offset := appconfigs.Instance.TotalMonsterSync
 	limit := appconfigs.Instance.LimitSync
-	lastId := appconfigs.Instance.LastMonsterID
+	lastID := appconfigs.Instance.LastMonsterID
+	var maxID int
+	done := make(chan bool)
+	maxRetries, retryCount := 3, 0
 
 	data, err := service.pokemonRepo.Pokemon(offset, limit)
 	if err != nil {
 		return nil, &utils.ServiceError{
-			Code:    500,
+			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
 	}
 
-	var maxID int
 	for _, d := range data {
 		if d.OriginID > maxID {
 			maxID = d.OriginID
 		}
 	}
 
-	done := make(chan bool)
-
-	if lastId == maxID || maxID < lastId {
+	if maxID > lastID {
 		go func() {
-			for _, d := range data {
-				if err := service.monsterRepo.Update(service.ctx, d); err != nil {
-					// todo retry mechanism
-					fmt.Println(err.Error())
+			for {
+				err := service.monsterRepo.Create(service.ctx, data)
+				// Data was successfully inserted,
+				// so break out of the loop
+				if err == nil {
+					break
 				}
-			}
-			done <- true
-		}()
-	}
-
-	if maxID > lastId {
-		go func() {
-			for _, d := range data {
-				if err := service.monsterRepo.Create(service.ctx, d); err != nil {
-					// todo retry mechanism
-					fmt.Println(err.Error())
+				retryCount++
+				// If the maximum number of retries is reached,
+				// break out of the loop
+				if retryCount >= maxRetries {
+					break
 				}
+				// Data was not successfully inserted, so sleep for the specified delay before trying again
+				time.Sleep(500 * time.Millisecond)
 			}
 			done <- true
 		}()
@@ -104,18 +114,18 @@ func (service *pokewarService) FetchBattles(args ...string) (ranks []*domain.Bat
 
 func (service *pokewarService) PrepareMonstersForBattle() (monsters []*domain.Monster, error *utils.ServiceError) {
 	var args []string
-	randId := make([]int, 0, 5)
+	randID := make([]int, 0, 5)
 	generatedKey := make(map[int]bool)
-	for len(randId) < 5 {
+	for len(randID) < 5 {
 		n := rand.Intn(appconfigs.Instance.TotalMonsterSync-1) + 1
 		if _, found := generatedKey[n]; !found {
-			randId = append(randId, n)
+			randID = append(randID, n)
 			generatedKey[n] = true
 		}
 	}
 	args = append(args, fmt.Sprintf(
 		"WHERE origin_id IN (%d,%d,%d,%d,%d)",
-		randId[0], randId[1], randId[2], randId[3], randId[4]))
+		randID[0], randID[1], randID[2], randID[3], randID[4]))
 	args = append(args, "LIMIT 5")
 
 	data, err := service.monsterRepo.All(service.ctx, args...)

@@ -107,7 +107,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromScan() {
 	data := suite.mock.
 		NewRows([]string{"id", "started_at", "ended_at", "players", "logs"}).
-		AddRow(1, 1, 1, "[{\"id\":1,\"description\":\"venomoth attack ekans\"}]", "[{\"id\":1,\"monster_id\":1,\"eliminated_at\":null,\"annulled_at\":null,\"rank\":1,\"point\":5,\"name\":\"venomoth\"}]").
+		AddRow(nil, nil, nil, nil, nil).
 		AddRow(nil, nil, nil, nil, nil)
 	q := "SELECT b.id as id, b.started_at as started_at, b.ended_at as ended_at, "
 	q += "CAST((SELECT json_group_array(json_object('id', bl.id, 'battle_id', bl.battle_id, 'description', bl.description, "
@@ -115,7 +115,7 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
 	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
 	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b "
 	expectedQuery := regexp.QuoteMeta(q)
 	suite.mock.ExpectQuery(expectedQuery).WillReturnRows(data)
 	res, err := suite.repo.All(context.TODO())

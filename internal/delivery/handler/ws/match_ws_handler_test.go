@@ -244,33 +244,33 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart_ShouldSuccess() {
 	require.Equal(suite.T(), msg["data_type"], "players")
 }
 
-//func (suite *matchWSHandlerTestSuite) TestHandler_Action_() {
-//svc := new(mocks.IPokewarService)
-//router := gin.New()
-//ws.NewMatchWSHandler(svc, router.Group(""))
-//server := httptest.NewServer(router)
-//defer server.Close()
+// func (suite *matchWSHandlerTestSuite) TestHandler_Action_() {
+// svc := new(mocks.IPokewarService)
+// router := gin.New()
+// ws.NewMatchWSHandler(svc, router.Group(""))
+// server := httptest.NewServer(router)
+// defer server.Close()
 //
-//u := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/1"
-//wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
-//require.Nil(suite.T(), err)
-//defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
+// u := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/1"
+// wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
+// require.Nil(suite.T(), err)
+// defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
 //
-//svc.On("FetchBattles", mock.Anything).Return(suite.battles, nil).Once()
-//if err := wsConn.WriteMessage(
-//	websocket.TextMessage,
-//	[]byte(`{"action": "histories", "id": "1"}`),
-//); err != nil {
-//	suite.T().Fatalf("failed to write message: %v", err)
-//}
-//_, message, err := wsConn.ReadMessage()
-//require.Nil(suite.T(), err)
-//var msg map[string]interface{}
-//err = json.Unmarshal(message, &msg)
-//require.Nil(suite.T(), err)
-//require.Equal(suite.T(), msg["status"], "success")
-//require.Equal(suite.T(), msg["data_type"], "battle_histories")
-//}
+// svc.On("FetchBattles", mock.Anything).Return(suite.battles, nil).Once()
+//  if err := wsConn.WriteMessage(
+//	 websocket.TextMessage,
+// 	 []byte(`{"action": "histories", "id": "1"}`),
+// ); err != nil {
+//	 suite.T().Fatalf("failed to write message: %v", err)
+// }
+// _, message, err := wsConn.ReadMessage()
+// require.Nil(suite.T(), err)
+// var msg map[string]interface{}
+// err = json.Unmarshal(message, &msg)
+// require.Nil(suite.T(), err)
+// require.Equal(suite.T(), msg["status"], "success")
+// require.Equal(suite.T(), msg["data_type"], "battle_histories")
+// }
 
 // TODO UPDATE COVERAGE
 

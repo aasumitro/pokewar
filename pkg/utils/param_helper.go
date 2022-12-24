@@ -22,7 +22,7 @@ func ParseParam(ctx *gin.Context, filterBetween bool) ([]int, []string) {
 				date := strings.SplitAfter(between, ",")
 				args = append(args, fmt.Sprintf(
 					"WHERE b.started_at BETWEEN %s AND %s",
-					strings.Replace(date[0], ",", "", -1), date[1]))
+					strings.ReplaceAll(date[0], ",", ""), date[1]))
 			}
 		}
 

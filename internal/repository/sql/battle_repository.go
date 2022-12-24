@@ -80,14 +80,14 @@ func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data 
 	return data, nil
 }
 
-func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle) error {
+func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battle) error {
 	tx, err := repo.db.Begin()
 	if err != nil {
 		return err
 	}
 
 	qb := "INSERT INTO battles (started_at, ended_at) VALUES (?, ?) RETURNING id"
-	newBattle, err := tx.Exec(qb, param.StartedAt, param.EndedAt)
+	newBattle, err := tx.ExecContext(ctx, qb, param.StartedAt, param.EndedAt)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -104,7 +104,7 @@ func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle)
 			ql += ","
 		}
 	}
-	_, err = tx.Exec(ql)
+	_, err = tx.ExecContext(ctx, ql)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -119,7 +119,7 @@ func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle)
 			qp += ","
 		}
 	}
-	_, err = tx.Exec(qp)
+	_, err = tx.ExecContext(ctx, qp)
 	if err != nil {
 		_ = tx.Rollback()
 		return err

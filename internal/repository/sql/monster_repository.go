@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"strings"
 	"time"
 )
 
@@ -63,25 +64,34 @@ func (repo *monsterSQLRepository) All(ctx context.Context, args ...string) (data
 	return data, nil
 }
 
-func (repo *monsterSQLRepository) Create(ctx context.Context, param *domain.Monster) error {
-	var monster domain.MonsterEntity
+func (repo *monsterSQLRepository) Create(ctx context.Context, params []*domain.Monster) error {
+	tx, err := repo.db.Begin()
+	if err != nil {
+		return err
+	}
 
-	types, _ := json.Marshal(param.Types)
-	stats, _ := json.Marshal(param.Stats)
-	skills, _ := json.Marshal(param.Skills)
+	query := "INSERT INTO monsters (origin_id, name, base_exp, height, weight, avatar, types, stats, skills, created_at) VALUES"
+	args := make([]string, len(params))
+	for _, monster := range params {
+		types, _ := json.Marshal(monster.Types)
+		stats, _ := json.Marshal(monster.Stats)
+		skills, _ := json.Marshal(monster.Skills)
+		now := time.Now().UnixMicro()
+		args = append(args, fmt.Sprintf("(%d, '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', %d)",
+			monster.OriginID, monster.Name, monster.BaseExp,
+			monster.Height, monster.Weight, monster.Avatar,
+			types, stats, skills, now))
+	}
+	query += fmt.Sprintf(" %s", strings.Join(args, ","))
 
-	q := "INSERT INTO monsters (origin_id, name, base_exp, height, weight, avatar, types, stats, skills, created_at) "
-	q += "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "
-	q += "id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills"
-	if err := repo.db.QueryRowContext(ctx, q,
-		param.OriginID, param.Name, param.BaseExp,
-		param.Height, param.Weight, param.Avatar,
-		types, stats, skills, time.Now().Unix(),
-	).Scan(
-		&monster.ID, &monster.OriginID, &monster.Name,
-		&monster.BaseExp, &monster.Height, &monster.Weight,
-		&monster.Avatar, &monster.Types, &monster.Stats, &monster.Stats,
-	); err != nil {
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
 		return err
 	}
 
@@ -123,6 +133,6 @@ func (repo *monsterSQLRepository) Count(ctx context.Context) int {
 	return total
 }
 
-func NewMonsterSQlRepository() domain.IMonsterRepository {
+func NewMonsterSQLRepository() domain.IMonsterRepository {
 	return &monsterSQLRepository{db: appconfigs.DbPool}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 type pokewarServiceTestSuite struct {
@@ -171,11 +172,14 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessInse
 	mstRepo.On("Create", mock.Anything, mock.Anything).
 		Once().
 		Return(nil)
-	data, err := svc.SyncMonsters(false)
+	data, err := svc.SyncMonsters(true)
 	require.Nil(suite.T(), err)
 	require.NotNil(suite.T(), data)
 	require.Equal(suite.T(), data, suite.monsters)
 	repo.AssertExpectations(suite.T())
+	appconfigs.Instance.UpdateEnv("LAST_SYNC", 0)
+	appconfigs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", 0)
+	appconfigs.Instance.UpdateEnv("LAST_MONSTER_ID", 0)
 }
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert() {
 	appconfigs.Instance.TotalMonsterSync = 0
@@ -192,50 +196,61 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert
 		Return(suite.monsters, nil)
 	mstRepo.On("Create", mock.Anything, mock.Anything).
 		Once().
-		Return(errors.New(""))
+		Return(errors.New("UNEXPECTED"))
+	time.Sleep(500 * time.Millisecond)
+	mstRepo.On("Create", mock.Anything, mock.Anything).
+		Once().
+		Return(errors.New("UNEXPECTED"))
+	time.Sleep(500 * time.Millisecond)
+	mstRepo.On("Create", mock.Anything, mock.Anything).
+		Once().
+		Return(errors.New("UNEXPECTED"))
+	time.Sleep(500 * time.Millisecond)
 	_, _ = svc.SyncMonsters(false)
 	repo.AssertExpectations(suite.T())
 }
-func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessUpdate() {
-	appconfigs.Instance.TotalMonsterSync = 10
-	appconfigs.Instance.LimitSync = 10
-	appconfigs.Instance.LastMonsterID = 10
-	repo := new(mocks.IPokeapiRESTRepository)
-	mstRepo := new(mocks.IMonsterRepository)
-	svc := service.NewPokewarService(
-		context.TODO(), repo, mstRepo,
-		new(mocks.IRankRepository), new(mocks.IBattleRepository))
-	repo.
-		On("Pokemon", mock.Anything, mock.Anything).
-		Once().
-		Return(suite.monsters, nil)
-	mstRepo.On("Update", mock.Anything, mock.Anything).
-		Once().
-		Return(nil)
-	data, err := svc.SyncMonsters(false)
-	require.Nil(suite.T(), err)
-	require.NotNil(suite.T(), data)
-	require.Equal(suite.T(), data, suite.monsters)
-	repo.AssertExpectations(suite.T())
-}
-func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorUpdate() {
-	appconfigs.Instance.TotalMonsterSync = 10
-	appconfigs.Instance.LimitSync = 10
-	appconfigs.Instance.LastMonsterID = 10
-	repo := new(mocks.IPokeapiRESTRepository)
-	mstRepo := new(mocks.IMonsterRepository)
-	svc := service.NewPokewarService(
-		context.TODO(), repo, mstRepo,
-		new(mocks.IRankRepository), new(mocks.IBattleRepository))
-	repo.
-		On("Pokemon", mock.Anything, mock.Anything).
-		Once().
-		Return(suite.monsters, nil)
-	mstRepo.On("Update", mock.Anything, mock.Anything).
-		Once().
-		Return(errors.New(""))
-	_, _ = svc.SyncMonsters(false)
-}
+
+//	func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessUpdate() {
+//		appconfigs.Instance.TotalMonsterSync = 10
+//		appconfigs.Instance.LimitSync = 10
+//		appconfigs.Instance.LastMonsterID = 10
+//		repo := new(mocks.IPokeapiRESTRepository)
+//		mstRepo := new(mocks.IMonsterRepository)
+//		svc := service.NewPokewarService(
+//			context.TODO(), repo, mstRepo,
+//			new(mocks.IRankRepository), new(mocks.IBattleRepository))
+//		repo.
+//			On("Pokemon", mock.Anything, mock.Anything).
+//			Once().
+//			Return(suite.monsters, nil)
+//		mstRepo.On("Update", mock.Anything, mock.Anything).
+//			Once().
+//			Return(nil)
+//		data, err := svc.SyncMonsters(false)
+//		require.Nil(suite.T(), err)
+//		require.NotNil(suite.T(), data)
+//		require.Equal(suite.T(), data, suite.monsters)
+//		repo.AssertExpectations(suite.T())
+//	}
+//
+//	func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorUpdate() {
+//		appconfigs.Instance.TotalMonsterSync = 10
+//		appconfigs.Instance.LimitSync = 10
+//		appconfigs.Instance.LastMonsterID = 10
+//		repo := new(mocks.IPokeapiRESTRepository)
+//		mstRepo := new(mocks.IMonsterRepository)
+//		svc := service.NewPokewarService(
+//			context.TODO(), repo, mstRepo,
+//			new(mocks.IRankRepository), new(mocks.IBattleRepository))
+//		repo.
+//			On("Pokemon", mock.Anything, mock.Anything).
+//			Once().
+//			Return(suite.monsters, nil)
+//		mstRepo.On("Update", mock.Anything, mock.Anything).
+//			Once().
+//			Return(errors.New(""))
+//		_, _ = svc.SyncMonsters(false)
+//	}
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorWhenGetPokemon() {
 	appconfigs.Instance.TotalMonsterSync = 10
 	appconfigs.Instance.LimitSync = 10

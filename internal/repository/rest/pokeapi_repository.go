@@ -72,12 +72,12 @@ func transformData(
 	client *httpclient.HttpClient,
 	pokemon *domain.Pokemon,
 ) *domain.Monster {
-	types := make([]string, 0, len(pokemon.Types))
+	types := make([]string, len(pokemon.Types))
 	for _, pokemon := range pokemon.Types {
 		types = append(types, pokemon.Type.Name)
 	}
 
-	stats := make([]domain.Stat, 0, len(pokemon.Stats))
+	stats := make([]domain.Stat, len(pokemon.Stats))
 	for _, pokemon := range pokemon.Stats {
 		stats = append(stats, domain.Stat{
 			BaseStat: pokemon.BaseStat,
@@ -88,18 +88,18 @@ func transformData(
 	movesUrls := randomSubset(pokemon.Moves, 4)
 	var wgMove sync.WaitGroup
 	var skills []*domain.Skill
-	for _, moveUrl := range movesUrls {
+	for _, moveURL := range movesUrls {
 		wgMove.Add(1)
-		go func(moveUrl string) {
+		go func(moveURL string) {
 			defer wgMove.Done()
 			var skill *domain.Skill
-			client.Endpoint = moveUrl
+			client.Endpoint = moveURL
 			if err := client.MakeRequest(&skill); err != nil {
 				skills = append(skills, nil)
 			} else {
 				skills = append(skills, skill)
 			}
-		}(moveUrl)
+		}(moveURL)
 	}
 	wgMove.Wait()
 
