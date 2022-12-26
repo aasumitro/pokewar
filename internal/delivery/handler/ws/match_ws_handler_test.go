@@ -145,7 +145,6 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory() {
 			require.Equal(suite.T(), msg["message"], "UNEXPECTED_ERROR")
 		}
 	}
-
 }
 
 func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare() {
@@ -236,12 +235,11 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart() {
 			require.Equal(suite.T(), msg["message"], "Please press random button again!")
 		}
 
-		if t == "NOT_NIL_GAME_PLAYER" {
-			// test := ws.MatchWSHandler{}
-			// test.GamePlayers["1"] = suite.players
-		}
+		// if t == "NOT_NIL_GAME_PLAYER" {
+		// test := ws.MatchWSHandler{}
+		// test.GamePlayers["1"] = suite.players
+		// }
 	}
-
 }
 
 func (suite *matchWSHandlerTestSuite) TestHandler_Annulled() {
