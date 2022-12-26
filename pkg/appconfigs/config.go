@@ -50,10 +50,10 @@ func LoadEnv() {
 			// specified error message
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				// Config file not found; ignore error if desired
-				panic(".env file not found!, please copy .example.env and paste as .env")
+				log.Println(".env file not found!, please copy .example.env and paste as .env")
 			}
 			// general error message
-			panic(fmt.Sprintf("ENV_ERROR: %s", err.Error()))
+			log.Printf("ENV_ERROR: %s", err.Error())
 		}
 		// extract config to struct
 		if err := viper.Unmarshal(&Instance); err != nil {

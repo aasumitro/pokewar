@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -61,9 +60,6 @@ func (c *HTTPClient) NewClient(opts ...Option) *HTTPClient {
 		opt(httpclient)
 	}
 
-	fmt.Println(httpclient.Timeout)
-	fmt.Println(httpclient.Method)
-	fmt.Println(httpclient.Endpoint)
 	return httpclient
 }
 

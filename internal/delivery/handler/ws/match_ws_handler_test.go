@@ -91,7 +91,7 @@ func (suite *matchWSHandlerTestSuite) SetupSuite() {
 	}
 }
 
-func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldSuccess() {
+func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory() {
 	svc := new(mocks.IPokewarService)
 	router := gin.New()
 	ws.NewMatchWSHandler(svc, router.Group(""))
@@ -103,24 +103,52 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldSuccess() 
 	require.Nil(suite.T(), err)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
 
-	svc.On("FetchBattles", mock.Anything).
-		Return(suite.battles, nil).Once()
-	if err := wsConn.WriteMessage(
-		websocket.TextMessage,
-		[]byte(`{"action": "histories", "id": "1"}`),
-	); err != nil {
-		suite.T().Fatalf("failed to write message: %v", err)
-	}
-	_, message, err := wsConn.ReadMessage()
-	require.Nil(suite.T(), err)
-	var msg map[string]interface{}
-	err = json.Unmarshal(message, &msg)
-	require.Nil(suite.T(), err)
+	ttERROR := []bool{true, false}
+	for _, t := range ttERROR {
+		if t {
+			svc.On("FetchBattles", mock.Anything).
+				Return(suite.battles, nil).Once()
+			if err := wsConn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(`{"action": "histories", "id": "1"}`),
+			); err != nil {
+				suite.T().Fatalf("failed to write message: %v", err)
+			}
+			_, message, err := wsConn.ReadMessage()
+			require.Nil(suite.T(), err)
+			var msg map[string]interface{}
+			err = json.Unmarshal(message, &msg)
+			require.Nil(suite.T(), err)
 
-	require.Equal(suite.T(), msg["status"], "success")
-	require.Equal(suite.T(), msg["data_type"], "battle_histories")
+			require.Equal(suite.T(), msg["status"], "success")
+			require.Equal(suite.T(), msg["data_type"], "battle_histories")
+		}
+
+		if !t {
+			svc.On("FetchBattles", mock.Anything).
+				Return(nil, &utils.ServiceError{
+					Code:    http.StatusInternalServerError,
+					Message: "UNEXPECTED_ERROR",
+				}).Once()
+			if err := wsConn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(`{"action": "histories", "id": "1"}`),
+			); err != nil {
+				suite.T().Fatalf("failed to write message: %v", err)
+			}
+			_, message, err := wsConn.ReadMessage()
+			require.Nil(suite.T(), err)
+			var msg map[string]interface{}
+			err = json.Unmarshal(message, &msg)
+			require.Nil(suite.T(), err)
+			require.Equal(suite.T(), msg["status"], "error")
+			require.Equal(suite.T(), msg["message"], "UNEXPECTED_ERROR")
+		}
+	}
+
 }
-func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldErrorFromService() {
+
+func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare() {
 	svc := new(mocks.IPokewarService)
 	router := gin.New()
 	ws.NewMatchWSHandler(svc, router.Group(""))
@@ -132,28 +160,52 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionHistory_ShouldErrorFromS
 	require.Nil(suite.T(), err)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
 
-	svc.On("FetchBattles", mock.Anything).
-		Return(nil, &utils.ServiceError{
-			Code:    http.StatusInternalServerError,
-			Message: "UNEXPECTED_ERROR",
-		}).Once()
-	if err := wsConn.WriteMessage(
-		websocket.TextMessage,
-		[]byte(`{"action": "histories", "id": "1"}`),
-	); err != nil {
-		suite.T().Fatalf("failed to write message: %v", err)
-	}
-	_, message, err := wsConn.ReadMessage()
-	require.Nil(suite.T(), err)
-	var msg map[string]interface{}
-	err = json.Unmarshal(message, &msg)
-	require.Nil(suite.T(), err)
+	ttERROR := []bool{true, false}
+	for _, t := range ttERROR {
+		if t {
+			svc.On("PrepareMonstersForBattle").
+				Return(suite.monsters, nil).Once()
+			if err := wsConn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(`{"action": "prepare", "id": "1"}`),
+			); err != nil {
+				suite.T().Fatalf("failed to write message: %v", err)
+			}
+			_, message, err := wsConn.ReadMessage()
+			require.Nil(suite.T(), err)
+			var msg map[string]interface{}
+			err = json.Unmarshal(message, &msg)
+			require.Nil(suite.T(), err)
 
-	require.Equal(suite.T(), msg["status"], "error")
-	require.Equal(suite.T(), msg["message"], "UNEXPECTED_ERROR")
+			require.Equal(suite.T(), msg["status"], "success")
+			require.Equal(suite.T(), msg["data_type"], "monsters")
+		}
+
+		if !t {
+			svc.On("PrepareMonstersForBattle").
+				Return(nil, &utils.ServiceError{
+					Code:    http.StatusInternalServerError,
+					Message: "UNEXPECTED_ERROR",
+				}).Once()
+			if err := wsConn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(`{"action": "prepare", "id": "1"}`),
+			); err != nil {
+				suite.T().Fatalf("failed to write message: %v", err)
+			}
+			_, message, err := wsConn.ReadMessage()
+			require.Nil(suite.T(), err)
+			var msg map[string]interface{}
+			err = json.Unmarshal(message, &msg)
+			require.Nil(suite.T(), err)
+
+			require.Equal(suite.T(), msg["status"], "error")
+			require.Equal(suite.T(), msg["message"], "UNEXPECTED_ERROR")
+		}
+	}
 }
 
-func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldSuccess() {
+func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart() {
 	svc := new(mocks.IPokewarService)
 	router := gin.New()
 	ws.NewMatchWSHandler(svc, router.Group(""))
@@ -164,115 +216,41 @@ func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldSuccess() 
 	wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	require.Nil(suite.T(), err)
 	defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
-
-	svc.On("PrepareMonstersForBattle").
-		Return(suite.monsters, nil).Once()
-	if err := wsConn.WriteMessage(
-		websocket.TextMessage,
-		[]byte(`{"action": "prepare", "id": "1"}`),
-	); err != nil {
-		suite.T().Fatalf("failed to write message: %v", err)
+	ttCASE := []string{
+		"NIL_GAME_PLAYER", "NOT_NIL_GAME_PLAYER",
 	}
-	_, message, err := wsConn.ReadMessage()
-	require.Nil(suite.T(), err)
-	var msg map[string]interface{}
-	err = json.Unmarshal(message, &msg)
-	require.Nil(suite.T(), err)
+	for _, t := range ttCASE {
+		if t == "NIL_GAME_PLAYER" {
+			if err := wsConn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(`{"action": "start", "id": "1"}`),
+			); err != nil {
+				suite.T().Fatalf("failed to write message: %v", err)
+			}
+			_, message, err := wsConn.ReadMessage()
+			require.Nil(suite.T(), err)
+			var msg map[string]interface{}
+			err = json.Unmarshal(message, &msg)
+			require.Nil(suite.T(), err)
+			require.Equal(suite.T(), msg["status"], "error")
+			require.Equal(suite.T(), msg["message"], "Please press random button again!")
+		}
 
-	require.Equal(suite.T(), msg["status"], "success")
-	require.Equal(suite.T(), msg["data_type"], "monsters")
-}
-func (suite *matchWSHandlerTestSuite) TestHandler_ActionPrepare_ShouldError() {
-	svc := new(mocks.IPokewarService)
-	router := gin.New()
-	ws.NewMatchWSHandler(svc, router.Group(""))
-	server := httptest.NewServer(router)
-	defer server.Close()
-
-	u := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/1"
-	wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
-	require.Nil(suite.T(), err)
-	defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
-
-	svc.On("PrepareMonstersForBattle").
-		Return(nil, &utils.ServiceError{
-			Code:    http.StatusInternalServerError,
-			Message: "UNEXPECTED_ERROR",
-		}).Once()
-	if err := wsConn.WriteMessage(
-		websocket.TextMessage,
-		[]byte(`{"action": "prepare", "id": "1"}`),
-	); err != nil {
-		suite.T().Fatalf("failed to write message: %v", err)
+		if t == "NOT_NIL_GAME_PLAYER" {
+			// test := ws.MatchWSHandler{}
+			// test.GamePlayers["1"] = suite.players
+		}
 	}
-	_, message, err := wsConn.ReadMessage()
-	require.Nil(suite.T(), err)
-	var msg map[string]interface{}
-	err = json.Unmarshal(message, &msg)
-	require.Nil(suite.T(), err)
 
-	require.Equal(suite.T(), msg["status"], "error")
-	require.Equal(suite.T(), msg["message"], "UNEXPECTED_ERROR")
 }
 
-func (suite *matchWSHandlerTestSuite) TestHandler_ActionStart_ShouldSuccess() {
-	suite.T().Skip()
-	svc := new(mocks.IPokewarService)
-	router := gin.New()
-	ws.NewMatchWSHandler(svc, router.Group(""))
-	server := httptest.NewServer(router)
-	defer server.Close()
+func (suite *matchWSHandlerTestSuite) TestHandler_Annulled() {
 
-	u := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/1"
-	wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
-	require.Nil(suite.T(), err)
-	defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
-
-	if err := wsConn.WriteMessage(
-		websocket.TextMessage,
-		[]byte(`{"action": "start", "id": "1"}`),
-	); err != nil {
-		suite.T().Fatalf("failed to write message: %v", err)
-	}
-	_, message, err := wsConn.ReadMessage()
-	require.Nil(suite.T(), err)
-	var msg map[string]interface{}
-	err = json.Unmarshal(message, &msg)
-	require.Nil(suite.T(), err)
-
-	require.Equal(suite.T(), msg["status"], "success")
-	require.Equal(suite.T(), msg["data_type"], "players")
 }
 
-// func (suite *matchWSHandlerTestSuite) TestHandler_Action_() {
-// svc := new(mocks.IPokewarService)
-// router := gin.New()
-// ws.NewMatchWSHandler(svc, router.Group(""))
-// server := httptest.NewServer(router)
-// defer server.Close()
-//
-// u := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/1"
-// wsConn, _, err := websocket.DefaultDialer.Dial(u, nil)
-// require.Nil(suite.T(), err)
-// defer func(ws *websocket.Conn) { _ = ws.Close() }(wsConn)
-//
-// svc.On("FetchBattles", mock.Anything).Return(suite.battles, nil).Once()
-//  if err := wsConn.WriteMessage(
-//	 websocket.TextMessage,
-// 	 []byte(`{"action": "histories", "id": "1"}`),
-// ); err != nil {
-//	 suite.T().Fatalf("failed to write message: %v", err)
-// }
-// _, message, err := wsConn.ReadMessage()
-// require.Nil(suite.T(), err)
-// var msg map[string]interface{}
-// err = json.Unmarshal(message, &msg)
-// require.Nil(suite.T(), err)
-// require.Equal(suite.T(), msg["status"], "success")
-// require.Equal(suite.T(), msg["data_type"], "battle_histories")
-// }
+func (suite *matchWSHandlerTestSuite) TestHandler_Save() {
 
-// TODO UPDATE COVERAGE
+}
 
 func TestMatchWSHandler(t *testing.T) {
 	suite.Run(t, new(matchWSHandlerTestSuite))

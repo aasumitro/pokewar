@@ -34,7 +34,6 @@ tests: $(GOTESTSUM) lint
 		-- -coverprofile=cover.out ./...
 	@ rm cover.out
 
-
 lint: $(GOLANGCI)
 	@ echo "Applying linter"
 	@ golangci-lint cache clean

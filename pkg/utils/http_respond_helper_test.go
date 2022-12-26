@@ -10,12 +10,11 @@ import (
 
 func TestNewHttpRespond(t *testing.T) {
 	tests := []struct {
-		name          string
-		code          int
-		data          interface{}
-		args          []any
-		expected      interface{}
-		expectedError bool
+		name     string
+		code     int
+		data     interface{}
+		args     []any
+		expected interface{}
 	}{
 		{
 			name:     "success with no pagination",
@@ -51,16 +50,14 @@ func TestNewHttpRespond(t *testing.T) {
 			expected: utils.ErrorRespond{Code: http.StatusBadRequest, Status: "Bad Request", Data: "invalid request"},
 		},
 		{
-			name:          "error with no data",
-			code:          http.StatusBadRequest,
-			expected:      utils.ErrorRespond{Code: http.StatusBadRequest, Status: "Bad Request", Data: "something went wrong with the request"},
-			expectedError: false,
+			name:     "error with no data",
+			code:     http.StatusBadRequest,
+			expected: utils.ErrorRespond{Code: http.StatusBadRequest, Status: "Bad Request", Data: "something went wrong with the request"},
 		},
 		{
-			name:          "error with no data and server error code",
-			code:          http.StatusInternalServerError,
-			expected:      utils.ErrorRespond{Code: http.StatusInternalServerError, Status: "Internal Server Error", Data: "something went wrong with the server"},
-			expectedError: false,
+			name:     "error with no data and server error code",
+			code:     http.StatusInternalServerError,
+			expected: utils.ErrorRespond{Code: http.StatusInternalServerError, Status: "Internal Server Error", Data: "something went wrong with the server"},
 		},
 	}
 
@@ -69,11 +66,6 @@ func TestNewHttpRespond(t *testing.T) {
 			writer := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(writer)
 			utils.NewHTTPRespond(c, test.code, test.data, test.args...)
-
-			if test.expectedError {
-				t.Error("expected error but got none")
-				return
-			}
 		})
 	}
 }

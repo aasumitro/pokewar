@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"github.com/aasumitro/pokewar/pkg/utils"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -23,17 +24,9 @@ func TestPaginate(t *testing.T) {
 	}
 	for _, test := range tests {
 		totalPages, currentPage, next, prev := utils.Paginate(test.limit, test.offset, test.total, "example.com", "test")
-		if totalPages != test.expectedTP {
-			t.Errorf("Paginate(%d, %d, %d): expected totalPages %d, got %d", test.limit, test.offset, test.total, test.expectedTP, totalPages)
-		}
-		if currentPage != test.expectedCP {
-			t.Errorf("Paginate(%d, %d, %d): expected currentPage %d, got %d", test.limit, test.offset, test.total, test.expectedCP, currentPage)
-		}
-		if next != test.expectedNxt {
-			t.Errorf("Paginate(%d, %d, %d): expected next %v, got %v", test.limit, test.offset, test.total, test.expectedNxt, next)
-		}
-		if prev != test.expectedPrv {
-			t.Errorf("Paginate(%d, %d, %d): expected prev %v, got %v", test.limit, test.offset, test.total, test.expectedPrv, prev)
-		}
+		assert.Equal(t, totalPages, test.expectedTP)
+		assert.Equal(t, currentPage, test.expectedCP)
+		assert.Equal(t, next, test.expectedNxt)
+		assert.Equal(t, prev, test.expectedPrv)
 	}
 }

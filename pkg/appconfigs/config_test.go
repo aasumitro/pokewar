@@ -1,18 +1,21 @@
 package appconfigs_test
 
 import (
+	"fmt"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestLoadEnv(t *testing.T) {
+func TestAppConfig(t *testing.T) {
+	viper.Reset()
 	viper.SetConfigFile("../../.example.env")
-
+	viper.SetConfigType("dotenv")
 	appconfigs.LoadEnv()
 
-	tests := []struct {
+	tt := []struct {
 		name     string
 		value    any
 		expected any
@@ -48,44 +51,41 @@ func TestLoadEnv(t *testing.T) {
 			value:    appconfigs.Instance.DBDsnURL,
 			expected: "./db/local-data.db",
 		},
+		{
+			name:     "TestUpdateEnv Function",
+			expected: "UPDATE_SUCCESS",
+		},
+		{
+			name:     "TestInitDBConn",
+			expected: "DB_CONN",
+		},
+		{
+			name:     "TestUpdateEnv Function ShouldError ReadWrite",
+			expected: "UPDATE_ERROR",
+		},
 	}
 
-	for _, test := range tests {
+	for _, test := range tt {
+		fmt.Println(test.name)
 		t.Run(test.name, func(t *testing.T) {
-			if test.value != test.expected {
-				t.Errorf("expected %v, got %v", test.expected, test.value)
+			switch test.expected {
+			case "UPDATE_SUCCESS":
+				initialValue := appconfigs.Instance.AppDebug
+				appconfigs.Instance.UpdateEnv("APP_DEBUG", !initialValue)
+				assert.Equal(t, appconfigs.Instance.AppDebug, false)
+				appconfigs.Instance.UpdateEnv("APP_DEBUG", initialValue)
+			case "DB_CONN":
+				appconfigs.Instance.DBDsnURL = "../../db/local-data.db"
+				appconfigs.Instance.InitDbConn()
+				assert.NotEqual(t, appconfigs.DbPool, nil)
+			case "UPDATE_ERROR":
+				viper.Reset()
+				initialValue := appconfigs.Instance.AppDebug
+				appconfigs.Instance.UpdateEnv("APP_DEBUG", !initialValue)
+				assert.Equal(t, appconfigs.Instance.AppDebug, initialValue)
+			default:
+				assert.Equal(t, test.expected, test.value)
 			}
 		})
-	}
-}
-
-func TestUpdateEnv(t *testing.T) {
-	viper.SetConfigFile("../../.example.env")
-
-	appconfigs.LoadEnv()
-
-	initialValue := appconfigs.Instance.AppDebug
-
-	appconfigs.Instance.UpdateEnv("APP_DEBUG", !initialValue)
-
-	appconfigs.LoadEnv()
-
-	if appconfigs.Instance.AppDebug != false {
-		t.Errorf("Expected APP_DEBUG to be false, got %v", appconfigs.Instance.AppDebug)
-	}
-
-	appconfigs.Instance.UpdateEnv("APP_DEBUG", initialValue)
-}
-
-func TestInitDBConn(t *testing.T) {
-	viper.SetConfigFile("../../.example.env")
-
-	appconfigs.LoadEnv()
-
-	appconfigs.Instance.DBDsnURL = "../../db/local-data.db"
-	appconfigs.Instance.InitDbConn()
-
-	if appconfigs.DbPool == nil {
-		t.Errorf("Expected DbPool to be non-nil, got %v", appconfigs.DbPool)
 	}
 }

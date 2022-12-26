@@ -3,6 +3,7 @@ package utils_test
 import (
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"reflect"
 	"testing"
@@ -40,12 +41,8 @@ func TestParseParam(t *testing.T) {
 		ctx, _ := gin.CreateTestContext(nil)
 		ctx.Request = req
 		paging, args := utils.ParseParam(ctx, false)
-		if len(paging) != 0 {
-			t.Errorf("ParseParam: expected empty paging slice, got %v", paging)
-		}
-		if len(args) != 0 {
-			t.Errorf("ParseParam: expected empty args slice, got %v", args)
-		}
+		assert.Zero(t, len(paging))
+		assert.Zero(t, len(args))
 	})
 
 	t.Run("Check that between is parsed correctly", func(t *testing.T) {

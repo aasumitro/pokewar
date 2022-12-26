@@ -2,7 +2,6 @@ package httpclient_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"net/http"
 	"net/http/httptest"
@@ -116,10 +115,6 @@ func TestMakeRequest(t *testing.T) {
 				httpclient.Ctx(context.TODO()))
 			var obj map[string]string
 			err := c.MakeRequest(&obj)
-
-			if err != nil {
-				fmt.Println(test.name, err)
-			}
 
 			if (err != nil) != test.wantErr {
 				t.Errorf("unexpected error: %v", err)
