@@ -1,7 +1,6 @@
 package appconfigs_test
 
 import (
-	"fmt"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
@@ -66,7 +65,6 @@ func TestAppConfig(t *testing.T) {
 	}
 
 	for _, test := range tt {
-		fmt.Println(test.name)
 		t.Run(test.name, func(t *testing.T) {
 			switch test.expected {
 			case "UPDATE_SUCCESS":

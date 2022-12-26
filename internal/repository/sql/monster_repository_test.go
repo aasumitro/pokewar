@@ -73,6 +73,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnDat
 	require.Nil(suite.T(), err)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), res)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromQuery() {
 	q := "SELECT id, origin_id, name, base_exp, height, weight, avatar, types, stats, skills FROM monsters"
@@ -81,6 +82,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErr
 	res, err := suite.repo.All(context.TODO())
 	require.NotNil(suite.T(), err)
 	require.Nil(suite.T(), res)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromScan() {
 	data := suite.mock.
@@ -93,6 +95,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErr
 	res, err := suite.repo.All(context.TODO())
 	require.Nil(suite.T(), res)
 	require.NotNil(suite.T(), err)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 
 // =========== UPDATE
@@ -114,6 +117,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Update_ExpectedSucces
 		WillReturnError(nil).WillReturnRows(data)
 	err := suite.repo.Update(context.TODO(), suite.monster)
 	require.Nil(suite.T(), err)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Update_ExpectedError() {
 	q := "UPDATE monsters SET name = ?, base_exp = ?, height = ?, weight = ?, avatar = ?, "
@@ -125,6 +129,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Update_ExpectedError(
 		WillReturnError(errors.New(""))
 	err := suite.repo.Update(context.TODO(), suite.monster)
 	require.NotNil(suite.T(), err)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 
 // =========== COUNT
@@ -138,6 +143,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnD
 	res := suite.repo.Count(context.TODO())
 	require.NotNil(suite.T(), res)
 	require.EqualValues(suite.T(), res, 50)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnErrorFromQuery() {
 	q := "SELECT COUNT(*) AS total FROM monsters"
@@ -145,6 +151,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Count_ExpectedReturnE
 	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
 	res := suite.repo.Count(context.TODO())
 	require.EqualValues(suite.T(), res, 0)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 
 // =========== CREATE
@@ -155,12 +162,14 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ExpectedSucces
 	suite.mock.ExpectCommit()
 	err := suite.repo.Create(context.TODO(), suite.monsters)
 	require.Nil(suite.T(), err)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ShouldErrorTxBegin() {
 	suite.mock.ExpectBegin().WillReturnError(errors.New("UNEXPECTED"))
 	err := suite.repo.Create(context.TODO(), suite.monsters)
 	require.NotNil(suite.T(), err)
 	require.Equal(suite.T(), err.Error(), "UNEXPECTED")
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ShouldErrorTxExec() {
 	suite.mock.ExpectBegin()
@@ -170,6 +179,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ShouldErrorTxE
 	err := suite.repo.Create(context.TODO(), suite.monsters)
 	require.NotNil(suite.T(), err)
 	require.Equal(suite.T(), err.Error(), "UNEXPECTED")
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ShouldErrorCommit() {
 	suite.mock.ExpectBegin()
@@ -179,6 +189,7 @@ func (suite *monsterSQLRepositoryTestSuite) TestRepository_Create_ShouldErrorCom
 	err := suite.repo.Create(context.TODO(), suite.monsters)
 	require.NotNil(suite.T(), err)
 	require.Equal(suite.T(), err.Error(), "UNEXPECTED")
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 
 func TestMonsterRepository(t *testing.T) {

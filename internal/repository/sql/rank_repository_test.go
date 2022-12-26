@@ -52,6 +52,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData()
 	require.Nil(suite.T(), err)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), res)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromQuery() {
 	q := "SELECT monsters.id as id, monsters.origin_id as origin_id, monsters.name as name, "
@@ -68,6 +69,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	res, err := suite.repo.All(context.TODO())
 	require.NotNil(suite.T(), err)
 	require.Nil(suite.T(), res)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromScan() {
 	data := suite.mock.
@@ -88,6 +90,7 @@ func (suite *rankSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorF
 	res, err := suite.repo.All(context.TODO())
 	require.Nil(suite.T(), res)
 	require.NotNil(suite.T(), err)
+	require.Nil(suite.T(), suite.mock.ExpectationsWereMet())
 }
 
 func TestRankRepository(t *testing.T) {
