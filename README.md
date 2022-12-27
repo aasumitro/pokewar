@@ -146,6 +146,10 @@ Build:
 
 `make build`
 
+Profiling:
+
+`go tool pprof -http=:8001 http://localhost:8000/debug/pprof/profile`
+
 #### Downloads
-- [Bundle v0.0.1-dev]()
+- [latest]()
 
