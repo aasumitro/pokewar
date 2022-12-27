@@ -6,9 +6,11 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"strconv"
+
+	// sqlite3 driver
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var migrateCmd = &cobra.Command{

@@ -14,6 +14,10 @@ Accept: application/json
 GET http://localhost:8000/api/v1/battles?limit=5
 Accept: application/json
 
+### GET BATTLES BETWEEN
+GET http://localhost:8000/api/v1/battles?between=1671815375254877,1671815390180508
+Accept: application/json
+
 ### GET RANKS
 GET http://localhost:8000/api/v1/ranks
 Accept: application/json

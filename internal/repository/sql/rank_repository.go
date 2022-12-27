@@ -13,41 +13,6 @@ type rankSQLRepository struct {
 	db *sql.DB
 }
 
-// All
-// TODO ADD:
-//
-// ALTERNATE QUERY -> need to use sql.NullType && need to validate data (return)
-//
-//	q := `
-//	SELECT m.id as id,
-//		   m.origin_id as origin_id,
-//		   m.name as name,
-//		   m.avatar as avatar,
-//		   m.types as types,
-//		   p.total_battles,
-//		   p.points,
-//		   p.win_battles,
-//		   p.lose_battles
-//	FROM monsters as m
-//	LEFT JOIN
-//	(
-//		SELECT monster_id,
-//			   COUNT(*) as total_battles,
-//			   SUM(IFNULL(point, 0)) as points,
-//			   (
-//			   		SELECT COUNT(IFNULL(*, 0)) FROM battle_players as w
-//			        WHERE rank = 1 AND monster_id = bp.monster_id
-//			        AND annulled_at IS NULL
-//			   ) as win_battles,
-//			   (
-//			   		SELECT COUNT(IFNULL(*, 0)) FROM battle_players as l
-//					WHERE rank > 1 AND monster_id = bp.monster_id
-//				  	AND annulled_at IS NULL
-//				) as lose_battles
-//		FROM battle_players as bp
-//		GROUP BY monster_id
-//	) as p ON m.id = p.monster_id
-//	`
 func (repo *rankSQLRepository) All(ctx context.Context, args ...string) (data []*domain.Rank, err error) {
 	// TODO: Optimize this query
 	q := "SELECT monsters.id as id, monsters.origin_id as origin_id, monsters.name as name, "

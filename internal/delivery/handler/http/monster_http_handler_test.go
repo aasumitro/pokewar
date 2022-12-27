@@ -35,29 +35,39 @@ func (suite *monsterHTTPHandlerTestSuite) SetupSuite() {
 			Skills:   []*domain.Skill{{PP: 1, Name: "test"}},
 		},
 	}
+
+	svcMock := new(mocks.IPokewarService)
+	eg := gin.Default().Group("test")
+	httpHandler.NewMonsterHTTPHandler(svcMock, eg)
 }
 
 func (suite *monsterHTTPHandlerTestSuite) TestHandler_Fetch_ShouldSuccess() {
 	svcMock := new(mocks.IPokewarService)
-	svcMock.
-		On("FetchMonsters", mock.Anything).
-		Return(suite.monsters, nil).
-		Once()
-	svcMock.
-		On("MonstersCount").
-		Return(50).
-		Once()
-	writer := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(writer)
-	req, _ := http.NewRequest("GET", "/api/v1/monsters?limit=1", nil)
-	ctx.Request = req
-	handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
-	handler.Fetch(ctx)
-	var got utils.SuccessRespond
-	_ = json.Unmarshal(writer.Body.Bytes(), &got)
-	assert.Equal(suite.T(), http.StatusOK, writer.Code)
-	assert.Equal(suite.T(), http.StatusOK, got.Code)
-	assert.Equal(suite.T(), http.StatusText(http.StatusOK), got.Status)
+	ttURL := []string{
+		"/api/v1/monsters?limit=1",
+		"/api/v1/monsters",
+	}
+	for _, u := range ttURL {
+		writer := httptest.NewRecorder()
+		ctx, _ := gin.CreateTestContext(writer)
+		req, _ := http.NewRequest("GET", u, nil)
+		ctx.Request = req
+		svcMock.
+			On("FetchMonsters", mock.Anything).
+			Return(suite.monsters, nil).
+			Once()
+		svcMock.
+			On("MonstersCount").
+			Return(50).
+			Once()
+		handler := httpHandler.MonsterHTTPHandler{Svc: svcMock}
+		handler.Fetch(ctx)
+		var got utils.SuccessRespond
+		_ = json.Unmarshal(writer.Body.Bytes(), &got)
+		assert.Equal(suite.T(), http.StatusOK, writer.Code)
+		assert.Equal(suite.T(), http.StatusOK, got.Code)
+		assert.Equal(suite.T(), http.StatusText(http.StatusOK), got.Status)
+	}
 }
 
 func (suite *monsterHTTPHandlerTestSuite) TestHandler_Fetch_ShouldError() {

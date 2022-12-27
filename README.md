@@ -87,25 +87,25 @@ erDiagram
    sequenceDiagram
         participant DELIVERY
         participant SERVICE
-        participant REST_REPOSITORY
         participant SQL_REPOSITORY
+        participant REST_REPOSITORY
         par Data Flow
-            DELIVERY->>+SERVICE: ...
+            DELIVERY->>+SERVICE: ...args
         and
-            SERVICE->>+REST_REPOSITORY: ...
+            SERVICE->>+REST_REPOSITORY: http call
         and
-            SERVICE->>+SQL_REPOSITORY: ...
+            SERVICE->>+SQL_REPOSITORY: sql query
         end 
    
      
-        REST_REPOSITORY-->>-SERVICE: ...
-        Note over REST_REPOSITORY,SERVICE: ...
+        REST_REPOSITORY-->>-SERVICE: data
+        Note over REST_REPOSITORY,SERVICE: raw data `transformed` from remote data source
    
-        SQL_REPOSITORY-->>-SERVICE: ...
-        Note over SQL_REPOSITORY,SERVICE: ...
+        SQL_REPOSITORY-->>-SERVICE: data
+        Note over SQL_REPOSITORY,SERVICE: raw data from local data source
         
-        SERVICE-->>-DELIVERY: ...
-        Note over SERVICE,DELIVERY: ...     
+        SERVICE-->>-DELIVERY: data
+        Note over SERVICE,DELIVERY: formatted data  
    ```
 
 ---
@@ -140,13 +140,17 @@ more info read the [docs](https://pkg.go.dev/github.com/golang-migrate/migrate/v
 #### Run
 Local run: 
 
-`./script/run-web.sh`
+`make run`
 
-1. Regenerate API Spec
-2. Static Check
-3. Run Tests
-4. Run 
+Build: 
+
+`make build`
+
+Profiling:
+
+`go tool pprof -http=:8001 http://localhost:8000/debug/pprof/profile`
 
 #### Downloads
-- [Bundle v0.0.1-dev](https://github.com/aasumitro/pokewar/releases/download/0.0.1-dev/pokewar-bundle.zip)
+- [latest]()
+
 

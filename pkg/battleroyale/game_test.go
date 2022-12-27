@@ -2,6 +2,7 @@ package battleroyale_test
 
 import (
 	"github.com/aasumitro/pokewar/pkg/battleroyale"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -30,22 +31,11 @@ func TestGameStart(t *testing.T) {
 	data := <-result
 	time.Sleep(1 * time.Second)
 
-	if data.StartAt.IsZero() {
-		t.Errorf("expected StartAt to be set, but it is zero")
-	}
-	if data.Winner == nil {
-		t.Errorf("expected a winner, but got nil")
-	}
-	if data.EndAt.IsZero() {
-		t.Errorf("expected EndAt to be set, but it is zero")
-	}
-	if len(data.Logs) == 0 {
-		t.Errorf("expected at least one log, but got none")
-	}
-	if len(data.Players) != 3 {
-		t.Errorf("expected 3 players, but got %d", len(data.Players))
-	}
-
+	assert.NotEqual(t, data.StartAt.IsZero(), true)
+	assert.NotEqual(t, data.EndAt.IsZero(), true)
+	assert.NotZero(t, len(data.Logs))
+	assert.NotNil(t, data.Winner)
+	assert.Equal(t, 3, len(data.Players))
 	game.Reset()
 	battleroyale.NewGame(nil)
 }

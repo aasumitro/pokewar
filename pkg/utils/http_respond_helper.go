@@ -24,7 +24,7 @@ type SuccessRespondWithPagination struct {
 }
 
 type Paging struct {
-	Url  string `json:"url"`
+	URL  string `json:"url"`
 	Path string `json:"path"`
 }
 
@@ -35,7 +35,7 @@ type ErrorRespond struct {
 	Data   string `json:"data"`
 }
 
-func NewHttpRespond(context *gin.Context, code int, data interface{}, args ...any) {
+func NewHTTPRespond(context *gin.Context, code int, data interface{}, args ...any) {
 	if code == http.StatusOK || code == http.StatusCreated {
 		if len(args) > 0 {
 			context.JSON(code, SuccessRespondWithPagination{

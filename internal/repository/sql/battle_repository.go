@@ -80,31 +80,31 @@ func (repo *battleSQLRepository) All(ctx context.Context, args ...string) (data 
 	return data, nil
 }
 
-func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle) error {
+func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battle) error {
 	tx, err := repo.db.Begin()
 	if err != nil {
 		return err
 	}
 
 	qb := "INSERT INTO battles (started_at, ended_at) VALUES (?, ?) RETURNING id"
-	newBattle, err := tx.Exec(qb, param.StartedAt, param.EndedAt)
+	newBattle, err := tx.ExecContext(ctx, qb, param.StartedAt, param.EndedAt)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 	// doesn't need to validate err, because
 	// the database table has an auto-incrementing primary key
-	battleId, _ := newBattle.LastInsertId()
+	battleID, _ := newBattle.LastInsertId()
 
 	ql := "INSERT INTO battle_logs (battle_id, description, created_at) VALUES"
 	now := time.Now().UnixMicro()
 	for i, log := range param.Logs {
-		ql += fmt.Sprintf(" (%d, '%s', %d)", battleId, log.Description, now)
+		ql += fmt.Sprintf(" (%d, '%s', %d)", battleID, log.Description, now)
 		if i != (len(param.Logs) - 1) {
 			ql += ","
 		}
 	}
-	_, err = tx.Exec(ql)
+	_, err = tx.ExecContext(ctx, ql)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -113,13 +113,13 @@ func (repo *battleSQLRepository) Create(_ context.Context, param *domain.Battle)
 	qp := "INSERT INTO battle_players (battle_id, monster_id, eliminated_at, annulled_at, rank, point) VALUES"
 	for i, player := range param.Players {
 		qp += fmt.Sprintf(" (%d, %d, %d, %d, %d, %d)",
-			battleId, player.MonsterID, player.EliminatedAt,
+			battleID, player.MonsterID, player.EliminatedAt,
 			player.AnnulledAt, player.Rank, player.Point)
 		if i != (len(param.Players) - 1) {
 			qp += ","
 		}
 	}
-	_, err = tx.Exec(qp)
+	_, err = tx.ExecContext(ctx, qp)
 	if err != nil {
 		_ = tx.Rollback()
 		return err

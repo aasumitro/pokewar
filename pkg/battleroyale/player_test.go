@@ -2,6 +2,7 @@ package battleroyale_test
 
 import (
 	"github.com/aasumitro/pokewar/pkg/battleroyale"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ func TestPlayerAttack(t *testing.T) {
 		Health: 100,
 		Skills: []*battleroyale.Skill{
 			{Name: "Punch", Power: 10},
-			// ADD MORE HMM #LOL
+			{Name: "Kick", Power: 20},
 		},
 	}
 	defender := &battleroyale.Player{
@@ -22,8 +23,7 @@ func TestPlayerAttack(t *testing.T) {
 	}
 
 	log := attacker.Attack(defender)
-	// hard to test time in nano/micro
-	if log.Description == "" {
-		t.Errorf("unexpected attack log: %s", log.Description)
-	}
+	assert.NotEqual(t, "", log.Description)
+	assert.Contains(t, log.Description, "Player 1 uses")
+	assert.Contains(t, log.Description, "to attack Player 2")
 }

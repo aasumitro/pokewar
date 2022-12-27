@@ -11,9 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewApiProvider(ctx context.Context, router *gin.Engine) {
+func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 	pokeapiRESTRepo := restRepo.NewPokeapiRESTRepository()
-	monsterSQLRepo := sqlRepo.NewMonsterSQlRepository()
+	monsterSQLRepo := sqlRepo.NewMonsterSQLRepository()
 	rankSQLRepo := sqlRepo.NewRankSQLRepository()
 	battleSQLRepo := sqlRepo.NewBattleSQLRepository()
 	pokewarService := service.NewPokewarService(ctx,
@@ -26,8 +26,8 @@ func NewApiProvider(ctx context.Context, router *gin.Engine) {
 	}
 
 	v1 := router.Group("/api/v1")
-	http.NewMonsterHttpHandler(pokewarService, v1)
-	http.NewRankHttpHandler(pokewarService, v1)
-	http.NewBattleHttpHandler(pokewarService, v1)
+	http.NewMonsterHTTPHandler(pokewarService, v1)
+	http.NewRankHTTPHandler(pokewarService, v1)
+	http.NewBattleHTTPHandler(pokewarService, v1)
 	ws.NewMatchWSHandler(pokewarService, v1)
 }

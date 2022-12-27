@@ -5,8 +5,8 @@ import "context"
 type FindWith int
 
 const (
-	FindWithId FindWith = iota
-	FindWithRelationId
+	FindWithID FindWith = iota
+	FindWithRelationID
 	FindWithName
 )
 
@@ -14,6 +14,11 @@ type (
 	// ICreateRepository - Create
 	ICreateRepository[T any] interface {
 		Create(ctx context.Context, param *T) error
+	}
+
+	// ICreateBulkRepository - Bulk Create
+	ICreateBulkRepository[T any] interface {
+		Create(ctx context.Context, param []*T) error
 	}
 
 	// IReadAllRepository - ReadAllNoCondition (args: LIMIT, OFFSET, OR WHERE CLAUSE)

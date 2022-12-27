@@ -4,21 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 	"log"
 	"sync"
+
+	// sqlite3 driver
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type AppConfig struct {
 	AppName          string `mapstructure:"APP_NAME"`
 	AppDebug         bool   `mapstructure:"APP_DEBUG"`
 	AppVersion       string `mapstructure:"APP_VERSION"`
-	AppUrl           string `mapstructure:"APP_URL"`
-	PokeapiUrl       string `mapstructure:"POKEAPI_URL"`
-	Pokedex          string `mapstructure:"POKEDEX"`
+	AppURL           string `mapstructure:"APP_URL"`
+	PokeapiURL       string `mapstructure:"POKEAPI_URL"`
 	DBDriver         string `mapstructure:"DB_DRIVER"`
-	DBDsnUrl         string `mapstructure:"DB_DSN_URL"`
+	DBDsnURL         string `mapstructure:"DB_DSN_URL"`
 	LastSync         int64  `mapstructure:"LAST_SYNC"`
 	LimitSync        int    `mapstructure:"LIMIT_SYNC"`
 	LastMonsterID    int    `mapstructure:"LAST_MONSTER_ID"`
@@ -49,10 +50,10 @@ func LoadEnv() {
 			// specified error message
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				// Config file not found; ignore error if desired
-				panic(".env file not found!, please copy .example.env and paste as .env")
+				log.Println(".env file not found!, please copy .example.env and paste as .env")
 			}
 			// general error message
-			panic(fmt.Sprintf("ENV_ERROR: %s", err.Error()))
+			log.Printf("ENV_ERROR: %s", err.Error())
 		}
 		// extract config to struct
 		if err := viper.Unmarshal(&Instance); err != nil {
@@ -92,7 +93,7 @@ func (cfg *AppConfig) UpdateEnv(key, value any) {
 
 func (cfg *AppConfig) InitDbConn() {
 	dbOnce.Do(func() {
-		db, err := sql.Open(cfg.DBDriver, cfg.DBDsnUrl)
+		db, err := sql.Open(cfg.DBDriver, cfg.DBDsnURL)
 		if err != nil {
 			panic(fmt.Sprintf("DATABASE_ERROR: %s", err.Error()))
 		}
