@@ -6,6 +6,7 @@ import (
 	"github.com/aasumitro/pokewar/internal"
 	"github.com/aasumitro/pokewar/internal/delivery/middleware"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/aasumitro/pokewar/resources"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -44,8 +45,6 @@ func init() {
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
-const ginModelsDepth = 3
-
 func main() {
 	appEngine.GET("/", func(context *gin.Context) {
 		context.Redirect(http.StatusPermanentRedirect, "/home")
@@ -56,7 +55,7 @@ func main() {
 
 	appEngine.GET("/docs/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler,
-			ginSwagger.DefaultModelsExpandDepth(ginModelsDepth)))
+			ginSwagger.DefaultModelsExpandDepth(consts.GinModelsDepth)))
 
 	internal.NewAPIProvider(ctx, appEngine)
 
