@@ -44,6 +44,8 @@ func init() {
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
+const ginModelsDepth = 3
+
 func main() {
 	appEngine.GET("/", func(context *gin.Context) {
 		context.Redirect(http.StatusPermanentRedirect, "/home")
@@ -54,7 +56,7 @@ func main() {
 
 	appEngine.GET("/docs/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler,
-			ginSwagger.DefaultModelsExpandDepth(3)))
+			ginSwagger.DefaultModelsExpandDepth(ginModelsDepth)))
 
 	internal.NewAPIProvider(ctx, appEngine)
 

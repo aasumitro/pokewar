@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"math/rand"
 	"sync"
-	"time"
 )
 
 type pokeapiRESTRepository struct {
@@ -19,7 +19,7 @@ type pokeapiRESTRepository struct {
 func (repo *pokeapiRESTRepository) Pokemon(ctx context.Context, offset, limit int) ([]*domain.Monster, error) {
 	client := repo.client.NewClient(
 		httpclient.Ctx(ctx),
-		httpclient.Timeout(3*time.Second),
+		httpclient.Timeout(consts.TimeoutDuration),
 		httpclient.Endpoint(fmt.Sprintf(
 			"%spokemon?offset=%d&limit=%d",
 			appconfigs.Instance.PokeapiURL, offset, limit,
@@ -84,7 +84,7 @@ func TransformData(
 
 	var skills []*domain.Skill
 	var wgMove sync.WaitGroup
-	for _, moveURL := range RandomSubset(pokemon.Moves, 4) {
+	for _, moveURL := range RandomSubset(pokemon.Moves, consts.MaxMoveSize) {
 		wgMove.Add(1)
 		go func(moveURL string) {
 			defer wgMove.Done()
@@ -115,7 +115,7 @@ func TransformData(
 // RandomSubset helper function to get random skills/moves
 func RandomSubset(slice []domain.Moves, size int) []string {
 	max := len(slice)
-	result := make([]string, 0, 4)
+	result := make([]string, 0, size)
 	generatedKey := make(map[int]bool)
 	for len(result) < size {
 		n := rand.Intn(max)

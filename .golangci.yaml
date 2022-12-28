@@ -9,16 +9,6 @@ linters-settings:
       - case
       - condition
       - return
-    ignored-numbers:
-      - "0"
-      - "1"
-      - "2"
-      - "3"
-      - "4"
-      - "5"
-      - "10"
-      - "100"
-      - "500"
   gosec:
     excludes:
       - G404

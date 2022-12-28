@@ -33,6 +33,11 @@ type (
 	}
 )
 
+const (
+	maxPoint      = 5
+	sleepDuration = 500 * time.Millisecond
+)
+
 // Start begins the game loop. It takes three channels as arguments:
 // game: A channel used to send the final game data when the game ends.
 // log: A channel used to send battle logs.
@@ -56,7 +61,7 @@ func (g *Game) Start(game chan *Game, log chan string, eliminated chan string) {
 		// Call this function to perform actions
 		// like attacking and eliminating players.
 		g.performPlayerActions()
-		time.Sleep(500 * time.Millisecond) // todo: lets think about this
+		time.Sleep(sleepDuration) // todo: lets think about this
 		// Check if there is only one player left alive.
 		if g.alivePlayers() == 1 {
 			// Calculate the ranks of the players.
@@ -174,7 +179,7 @@ func (g *Game) calculatePlayersRank() {
 // Players with a higher rank will get more points.
 func (g *Game) calculatePlayersPoint() {
 	for i, p := range g.Players {
-		p.UpdateScore(5 - i)
+		p.UpdateScore(maxPoint - i)
 	}
 }
 
