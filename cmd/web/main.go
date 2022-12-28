@@ -6,6 +6,7 @@ import (
 	"github.com/aasumitro/pokewar/internal"
 	"github.com/aasumitro/pokewar/internal/delivery/middleware"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/aasumitro/pokewar/resources"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -54,7 +55,7 @@ func main() {
 
 	appEngine.GET("/docs/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler,
-			ginSwagger.DefaultModelsExpandDepth(3)))
+			ginSwagger.DefaultModelsExpandDepth(consts.GinModelsDepth)))
 
 	internal.NewAPIProvider(ctx, appEngine)
 

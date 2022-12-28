@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"math/rand"
 	"net/http"
@@ -78,7 +79,7 @@ func (service *pokewarService) SyncMonsters(
 					break
 				}
 				// Data was not successfully inserted, so sleep for the specified delay before trying again
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(consts.SleepDuration)
 			}
 			done <- true
 		}()
@@ -129,7 +130,7 @@ func (service *pokewarService) PrepareMonstersForBattle() (
 	error *utils.ServiceError,
 ) {
 	var args []string
-	randID := make([]int, 0, 5)
+	randID := make([]int, 0, consts.MaxPlayerSize)
 	generatedKey := make(map[int]bool)
 	for len(randID) < 5 {
 		n := rand.Intn(appconfigs.Instance.TotalMonsterSync-1) + 1

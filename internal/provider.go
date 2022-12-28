@@ -8,6 +8,7 @@ import (
 	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
 	"github.com/aasumitro/pokewar/internal/service"
 	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,9 +20,7 @@ func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 	pokewarService := service.NewPokewarService(ctx,
 		pokeapiRESTRepo, monsterSQLRepo, rankSQLRepo, battleSQLRepo)
 
-	if appconfigs.Instance.LastSync == 0 &&
-		appconfigs.Instance.TotalMonsterSync == 0 &&
-		appconfigs.Instance.LastMonsterID == 0 {
+	if shouldSyncMonsters() {
 		pokewarService.SyncMonsters(true)
 	}
 
@@ -30,4 +29,10 @@ func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 	http.NewRankHTTPHandler(pokewarService, v1)
 	http.NewBattleHTTPHandler(pokewarService, v1)
 	ws.NewMatchWSHandler(pokewarService, v1)
+}
+
+func shouldSyncMonsters() bool {
+	return appconfigs.Instance.LastSync <= consts.SyncThreshold &&
+		appconfigs.Instance.TotalMonsterSync <= consts.SyncThreshold &&
+		appconfigs.Instance.LastMonsterID <= consts.SyncThreshold
 }

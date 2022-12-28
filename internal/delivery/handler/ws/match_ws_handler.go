@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/battleroyale"
+	"github.com/aasumitro/pokewar/pkg/consts"
 	"github.com/aasumitro/pokewar/pkg/datatransform"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -108,7 +109,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 		return
 	}
 	// Create a buffered channel with a capacity of 10 to store log updates and eliminated players
-	updateBuffer := make(chan map[string]any, 10)
+	updateBuffer := make(chan map[string]any, consts.MaxWSUpdateBufferSize)
 	// Start a goroutine to handle sending updates to the client
 	go func() {
 		for update := range updateBuffer {
@@ -119,8 +120,8 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	}()
 	// Use a fixed-size buffer channel for the result, log, and eliminated channels
 	result := make(chan *battleroyale.Game, 1)
-	log := make(chan string, 100)
-	eliminated := make(chan string, 5)
+	log := make(chan string, consts.MaxGameLogSize)
+	eliminated := make(chan string, consts.MaxPlayerSize)
 	// Start a new game and transform the result to domain.Battle
 	game := battleroyale.NewGame(handler.GamePlayers[clientID])
 	go game.Start(result, log, eliminated)
@@ -231,7 +232,7 @@ func (handler *MatchWSHandler) save(clientID string) {
 			break
 		}
 		// Sleep for a short period before retrying
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(consts.SleepDuration)
 	}
 
 	// reset the data
