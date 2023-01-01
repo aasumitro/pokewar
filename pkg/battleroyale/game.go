@@ -151,10 +151,8 @@ func (g *Game) calculatePlayersRank() {
 
 	rank := 1
 	for _, p := range g.Players {
-		if p.EliminatedAt != nil {
-			rank++
-		}
 		p.UpdateRank(rank)
+		rank++
 	}
 }
 

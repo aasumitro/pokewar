@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/appconfig"
-	"strings"
 	"time"
 )
 
@@ -71,18 +70,19 @@ func (repo *monsterSQLRepository) Create(ctx context.Context, params []*domain.M
 	}
 
 	query := "INSERT INTO monsters (origin_id, name, base_exp, height, weight, avatar, types, stats, skills, created_at) VALUES"
-	args := make([]string, len(params))
-	for _, monster := range params {
+	for i, monster := range params {
 		types, _ := json.Marshal(monster.Types)
 		stats, _ := json.Marshal(monster.Stats)
 		skills, _ := json.Marshal(monster.Skills)
 		now := time.Now().UnixMicro()
-		args = append(args, fmt.Sprintf("(%d, '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', %d)",
+		query += fmt.Sprintf("(%d, '%s', %d, %d, %d, '%s', '%s', '%s', '%s', %d)",
 			monster.OriginID, monster.Name, monster.BaseExp,
 			monster.Height, monster.Weight, monster.Avatar,
-			types, stats, skills, now))
+			types, stats, skills, now)
+		if i != (len(params) - 1) {
+			query += ","
+		}
 	}
-	query += fmt.Sprintf(" %s", strings.Join(args, ","))
 
 	_, err = tx.ExecContext(ctx, query)
 	if err != nil {

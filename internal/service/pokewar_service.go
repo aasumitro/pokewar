@@ -9,6 +9,7 @@ import (
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"math/rand"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -45,8 +46,6 @@ func (service *pokewarService) SyncMonsters(
 	offset := appconfig.Instance.TotalMonsterSync
 	limit := appconfig.Instance.LimitSync
 	lastID := appconfig.Instance.LastMonsterID
-	var maxID int
-	done := make(chan bool)
 	maxRetries, retryCount := 3, 0
 	// get data from pokeapi.co
 	data, err := service.pokemonRepo.Pokemon(service.ctx, offset, limit)
@@ -57,35 +56,29 @@ func (service *pokewarService) SyncMonsters(
 		}
 	}
 	// get highest id from result
-	for _, d := range data {
-		if d.OriginID > maxID {
-			maxID = d.OriginID
-		}
-	}
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].OriginID > data[j].OriginID
+	})
+	maxID := data[0].OriginID
 	// store data from pokeapi.co
 	if maxID > lastID {
-		go func() {
-			for {
-				err := service.monsterRepo.Create(service.ctx, data)
-				// Data was successfully inserted,
-				// so break out of the loop
-				if err == nil {
-					break
-				}
-				retryCount++
-				// If the maximum number of retries is reached,
-				// break out of the loop
-				if retryCount >= maxRetries {
-					break
-				}
-				// Data was not successfully inserted, so sleep for the specified delay before trying again
-				time.Sleep(constant.SleepDuration)
+		for {
+			err = service.monsterRepo.Create(service.ctx, data)
+			// Data was successfully inserted,
+			// so break out of the loop
+			if err == nil {
+				break
 			}
-			done <- true
-		}()
+			retryCount++
+			// If the maximum number of retries is reached,
+			// break out of the loop
+			if retryCount >= maxRetries {
+				break
+			}
+			// Data was not successfully inserted, so sleep for the specified delay before trying again
+			time.Sleep(constant.SleepDuration)
+		}
 	}
-	// wait till data stored to database
-	<-done
 	// when success update env
 	if updateEnv {
 		appconfig.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())

@@ -16,7 +16,7 @@ deps:
 build: swag
 	@ echo "Build Binary"
 	@ mkdir ./build && mkdir ./build/db
-	@ cp ./db/fresh.db ./build/db && cp .example.env ./build/.env
+	@ cp ./db/fresh.db ./build/db/local-data.db && cp .example.env ./build/.env
 	@ go mod tidy -compat=1.19
 	@ go build -o ./build/pokewar ./cmd/web/main.go
 	@ echo "done"
