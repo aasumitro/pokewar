@@ -5,8 +5,8 @@ import (
 	"github.com/aasumitro/pokewar/docs"
 	"github.com/aasumitro/pokewar/internal"
 	"github.com/aasumitro/pokewar/internal/delivery/middleware"
-	"github.com/aasumitro/pokewar/pkg/appconfigs"
-	"github.com/aasumitro/pokewar/pkg/consts"
+	"github.com/aasumitro/pokewar/pkg/appconfig"
+	"github.com/aasumitro/pokewar/pkg/constant"
 	"github.com/aasumitro/pokewar/resources"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -27,21 +27,21 @@ var (
 )
 
 func init() {
-	appconfigs.LoadEnv()
+	appconfig.LoadEnv()
 
-	appconfigs.Instance.InitDbConn()
+	appconfig.Instance.InitDbConn()
 
-	if !appconfigs.Instance.AppDebug {
+	if !appconfig.Instance.AppDebug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	appEngine = gin.Default()
 
 	docs.SwaggerInfo.BasePath = appEngine.BasePath()
-	docs.SwaggerInfo.Title = appconfigs.Instance.AppName
+	docs.SwaggerInfo.Title = appconfig.Instance.AppName
 	docs.SwaggerInfo.Description = "Pocket Monster Battleroyale API Spec"
-	docs.SwaggerInfo.Version = appconfigs.Instance.AppVersion
-	docs.SwaggerInfo.Host = appconfigs.Instance.AppURL
+	docs.SwaggerInfo.Version = appconfig.Instance.AppVersion
+	docs.SwaggerInfo.Host = appconfig.Instance.AppURL
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
@@ -55,13 +55,13 @@ func main() {
 
 	appEngine.GET("/docs/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler,
-			ginSwagger.DefaultModelsExpandDepth(consts.GinModelsDepth)))
+			ginSwagger.DefaultModelsExpandDepth(constant.GinModelsDepth)))
 
 	internal.NewAPIProvider(ctx, appEngine)
 
-	if appconfigs.Instance.AppDebug {
+	if appconfig.Instance.AppDebug {
 		middleware.RegisterPPROF(appEngine)
 	}
 
-	log.Fatal(appEngine.Run(appconfigs.Instance.AppURL))
+	log.Fatal(appEngine.Run(appconfig.Instance.AppURL))
 }

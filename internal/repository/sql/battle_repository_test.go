@@ -6,7 +6,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/aasumitro/pokewar/domain"
 	repoSql "github.com/aasumitro/pokewar/internal/repository/sql"
-	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"regexp"
@@ -22,7 +22,7 @@ type battleSQLRepositoryTestSuite struct {
 func (suite *battleSQLRepositoryTestSuite) SetupSuite() {
 	var err error
 
-	appconfigs.DbPool, suite.mock, err = sqlmock.New(
+	appconfig.DbPool, suite.mock, err = sqlmock.New(
 		sqlmock.QueryMatcherOption(
 			sqlmock.QueryMatcherRegexp))
 
@@ -133,7 +133,7 @@ type battleSQLRepositoryTestSuiteForCreate struct {
 func (suite *battleSQLRepositoryTestSuiteForCreate) SetupSuite() {
 	var err error
 
-	appconfigs.DbPool, suite.mock, err = sqlmock.New(
+	appconfig.DbPool, suite.mock, err = sqlmock.New(
 		sqlmock.QueryMatcherOption(
 			sqlmock.QueryMatcherRegexp))
 

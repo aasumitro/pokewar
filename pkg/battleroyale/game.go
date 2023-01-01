@@ -2,7 +2,7 @@ package battleroyale
 
 import (
 	"fmt"
-	"github.com/aasumitro/pokewar/pkg/consts"
+	"github.com/aasumitro/pokewar/pkg/constant"
 	"math/rand"
 	"sort"
 	"time"
@@ -57,7 +57,7 @@ func (g *Game) Start(game chan *Game, log chan string, eliminated chan string) {
 		// Call this function to perform actions
 		// like attacking and eliminating players.
 		g.performPlayerActions()
-		time.Sleep(consts.SleepDuration) // todo: lets think about this
+		time.Sleep(constant.SleepDuration) // todo: lets think about this
 		// Check if there is only one player left alive.
 		if g.alivePlayers() == 1 {
 			// Calculate the ranks of the players.
@@ -73,50 +73,37 @@ func (g *Game) Start(game chan *Game, log chan string, eliminated chan string) {
 }
 
 // performPlayerActions is responsible for executing the moves in the game.
-// TODO: REVALIDATE THIS FUNCTION
 func (g *Game) performPlayerActions() {
 	// Iterate over all the players in the game.
 	for i, p := range g.Players {
-		// If the player is not eliminated, choose a random target to attack.
-		if p.EliminatedAt == nil {
-			// Generate a random index for the target player.
-			j := rand.Intn(len(g.Players))
-			// Make sure the target player is not the same as the current player
-			// and that the target player is not eliminated.
-			if i != j && g.Players[j].EliminatedAt == nil {
-				// Attack the target player.
-				attack := p.Attack(g.Players[j])
-				// Append the attack log to the game logs.
-				g.Logs = append(g.Logs, attack)
-				// Send the attack log to the battle logs channel.
-				g.BattleLogsChannel <- attack.Description
-			}
-			// If the target player's health is zero or below
-			// and the player has not been eliminated,
-			// mark the player as eliminated.
-			if g.Players[j].Health <= 0 && g.Players[j].EliminatedAt == nil {
-				// eliminate and get 2nd winner
-				g.eliminatePlayer(j)
-			}
-			// If there is only one player left alive,
-			// do ... (see inside block of code)
-			if g.alivePlayers() == 1 {
-				// Set the end time of the game
-				g.EndAt = time.Now()
-				// Set the winner of the game.
-				g.Winner = g.Players[i]
-				// send winner log
-				logWinner := fmt.Sprintf(
-					"%d - %s win the game!\n",
-					g.EndAt.UnixMicro(), g.Winner.Name)
-				g.Logs = append(g.Logs, Log{Description: logWinner})
-				g.BattleLogsChannel <- logWinner
-				// send end battle log
-				logEnd := fmt.Sprintf("%d - battle end!\n",
-					g.EndAt.UnixMicro())
-				g.Logs = append(g.Logs, Log{Description: logEnd})
-				g.BattleLogsChannel <- logEnd
-			}
+		// If the player eliminated, continue.
+		if p.EliminatedAt != nil {
+			continue
+		}
+		// if player not eliminated,
+		// Generate a random index for the target player.
+		j := rand.Intn(len(g.Players))
+		// Make sure the target player is not the same as the current player
+		// and that the target player is not eliminated.
+		if i != j && g.Players[j].EliminatedAt == nil {
+			// Attack the target player.
+			attack := p.Attack(g.Players[j])
+			// Append the attack log to the game logs.
+			g.Logs = append(g.Logs, attack)
+			// Send the attack log to the battle logs channel.
+			g.BattleLogsChannel <- attack.Description
+		}
+		// If the target player's health is zero or below
+		// and the player has not been eliminated,
+		// mark the player as eliminated.
+		if g.Players[j].Health <= 0 && g.Players[j].EliminatedAt == nil {
+			// eliminate and get 2nd winner
+			g.eliminatePlayer(j)
+		}
+		// If there is only one player left alive, marks the end of a game,
+		// sets the winner, and logs information
+		if g.alivePlayers() == 1 {
+			g.markEnd(i)
 		}
 	}
 }
@@ -162,10 +149,10 @@ func (g *Game) calculatePlayersRank() {
 		return true
 	})
 
-	for i, p := range g.Players {
-		rank := 1
+	rank := 1
+	for _, p := range g.Players {
 		if p.EliminatedAt != nil {
-			rank += i
+			rank += 1
 		}
 		p.UpdateRank(rank)
 	}
@@ -175,8 +162,27 @@ func (g *Game) calculatePlayersRank() {
 // Players with a higher rank will get more points.
 func (g *Game) calculatePlayersPoint() {
 	for i, p := range g.Players {
-		p.UpdateScore(consts.MaxPoint - i)
+		p.UpdateScore(constant.MaxPoint - i)
 	}
+}
+
+// markEnd marks the end of a game, sets the winner, and logs information
+func (g *Game) markEnd(pos int) {
+	// Set the end time of the game
+	g.EndAt = time.Now()
+	// Set the winner of the game.
+	g.Winner = g.Players[pos]
+	// send winner log
+	logWinner := fmt.Sprintf(
+		"%d - %s win the game!\n",
+		g.EndAt.UnixMicro(), g.Winner.Name)
+	g.Logs = append(g.Logs, Log{Description: logWinner})
+	g.BattleLogsChannel <- logWinner
+	// send end battle log
+	logEnd := fmt.Sprintf("%d - battle end!\n",
+		g.EndAt.UnixMicro())
+	g.Logs = append(g.Logs, Log{Description: logEnd})
+	g.BattleLogsChannel <- logEnd
 }
 
 // Reset the game make the struct value fresh again

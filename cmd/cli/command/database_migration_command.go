@@ -2,7 +2,7 @@ package command
 
 import (
 	"fmt"
-	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/file"
@@ -84,7 +84,7 @@ func initGoMigrate() (instance *migrate.Migrate, err error) {
 	}
 
 	driver, err := sqlite3.WithInstance(
-		appconfigs.DbPool, &sqlite3.Config{})
+		appconfig.DbPool, &sqlite3.Config{})
 	if err != nil {
 		return nil, err
 	}
