@@ -80,7 +80,7 @@ func (service *pokewarService) SyncMonsters(
 		}
 	}
 	// when success update env
-	if updateEnv {
+	if updateEnv && err == nil {
 		appconfig.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
 		appconfig.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
 		appconfig.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
