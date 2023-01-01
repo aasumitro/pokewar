@@ -16,16 +16,17 @@ deps:
 build: swag
 	@ echo "Build Binary"
 	@ mkdir ./build && mkdir ./build/db
-	@ cp ./db/fresh.db ./build/db && cp .example.env ./build/.env
+	@ cp ./db/fresh.db ./build/db/local-data.db && cp .example.env ./build/.env
 	@ go mod tidy -compat=1.19
 	@ go build -o ./build/pokewar ./cmd/web/main.go
-	@ echo "done"
+	@ GOOS=windows GOARCH=amd64 go build -o ./build/pokewar.exe ./cmd/web/main.go
+	@ echo "generate binary done"
 
 swag: tests
 	@ echo "Re-generate Swagger File (API Spec docs)"
 	@ swag init --parseDependency --parseInternal \
 		--parseDepth 4 -g ./cmd/web/main.go
-	@ echo "done"
+	@ echo "generate swagger file done"
 
 tests: $(GOTESTSUM) lint
 	@ echo "Run tests"
