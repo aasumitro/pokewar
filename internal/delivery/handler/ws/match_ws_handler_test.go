@@ -5,7 +5,7 @@ import (
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/delivery/handler/ws"
 	"github.com/aasumitro/pokewar/mocks"
-	"github.com/aasumitro/pokewar/pkg/appconfigs"
+	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -28,9 +28,9 @@ type matchWSHandlerTestSuite struct {
 func (suite *matchWSHandlerTestSuite) SetupSuite() {
 	viper.SetConfigFile("../../../../.example.env")
 
-	appconfigs.LoadEnv()
+	appconfig.LoadEnv()
 
-	appconfigs.Instance.TotalMonsterSync = 10
+	appconfig.Instance.TotalMonsterSync = 10
 
 	suite.battles = []*domain.Battle{
 		{

@@ -1,4 +1,4 @@
-package consts
+package constant
 
 import "time"
 
@@ -12,4 +12,5 @@ const (
 	MaxGameLogSize        = 100
 	SleepDuration         = 500 * time.Millisecond
 	TimeoutDuration       = 3 * time.Second
+	SaveDuration          = 5 * time.Second
 )
