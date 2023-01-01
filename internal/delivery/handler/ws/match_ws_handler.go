@@ -158,7 +158,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	game.Reset()
 	// force safe data after 5 seconds
 	isLastBattleSaved[clientID] = false
-	time.AfterFunc(5*time.Second, func() {
+	time.AfterFunc(constant.SaveDuration, func() {
 		handler.save(clientID)
 	})
 }
