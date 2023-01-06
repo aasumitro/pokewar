@@ -212,6 +212,7 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 // If the data stored or the maximum number of retries is reached,
 // the battle data and other related data for the client will be reset.
 func (handler *MatchWSHandler) save(clientID string) {
+	mu.Lock()
 	if isLastBattleSaved[clientID] && handler.BattleData[clientID] == nil {
 		return
 	}
@@ -240,6 +241,7 @@ func (handler *MatchWSHandler) save(clientID string) {
 	handler.BattleData[clientID] = nil
 	handler.Monsters[clientID] = nil
 	handler.GamePlayers[clientID] = nil
+	mu.Unlock()
 }
 
 // sendMessageToClient helper function to send message to specified client by given id
