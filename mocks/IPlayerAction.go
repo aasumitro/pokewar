@@ -26,6 +26,30 @@ func (_m *IPlayerAction) Attack(other *battleroyale.Player) battleroyale.Log {
 	return r0
 }
 
+// Eliminate provides a mock function with given fields:
+func (_m *IPlayerAction) Eliminate() battleroyale.Log {
+	ret := _m.Called()
+
+	var r0 battleroyale.Log
+	if rf, ok := ret.Get(0).(func() battleroyale.Log); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(battleroyale.Log)
+	}
+
+	return r0
+}
+
+// UpdateRank provides a mock function with given fields: rank
+func (_m *IPlayerAction) UpdateRank(rank int) {
+	_m.Called(rank)
+}
+
+// UpdateScore provides a mock function with given fields: point
+func (_m *IPlayerAction) UpdateScore(point int) {
+	_m.Called(point)
+}
+
 type mockConstructorTestingTNewIPlayerAction interface {
 	mock.TestingT
 	Cleanup(func())

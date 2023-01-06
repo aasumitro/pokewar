@@ -3,9 +3,9 @@ package ws
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/pkg/battleroyale"
-	"github.com/aasumitro/pokewar/pkg/constant"
 	"github.com/aasumitro/pokewar/pkg/datatransform"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -109,7 +109,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 		return
 	}
 	// Create a buffered channel with a capacity of 10 to store log updates and eliminated players
-	updateBuffer := make(chan map[string]any, constant.MaxWSUpdateBufferSize)
+	updateBuffer := make(chan map[string]any, constants.MaxWSUpdateBufferSize)
 	// Start a goroutine to handle sending updates to the client
 	go func() {
 		for update := range updateBuffer {
@@ -120,8 +120,8 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	}()
 	// Use a fixed-size buffer channel for the result, log, and eliminated channels
 	result := make(chan *battleroyale.Game, 1)
-	log := make(chan string, constant.MaxGameLogSize)
-	eliminated := make(chan string, constant.MaxPlayerSize)
+	log := make(chan string, constants.MaxGameLogSize)
+	eliminated := make(chan string, constants.MaxPlayerSize)
 	// Start a new game and transform the result to domain.Battle
 	game := battleroyale.NewGame(handler.GamePlayers[clientID])
 	go game.Start(result, log, eliminated)
@@ -158,7 +158,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	game.Reset()
 	// force safe data after 5 seconds
 	isLastBattleSaved[clientID] = false
-	time.AfterFunc(constant.SaveDuration, func() {
+	time.AfterFunc(constants.SaveDuration, func() {
 		handler.save(clientID)
 	})
 }
@@ -204,11 +204,6 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 	handler.sendMessageToClient(
 		msgType, clientID, "success",
 		"eliminated_result", handler.BattleData[clientID])
-	// Schedule the save function to be called after 10 seconds
-	isLastBattleSaved[clientID] = false
-	time.AfterFunc(1*time.Second, func() {
-		handler.save(clientID)
-	})
 }
 
 // save handles the "save" request message type from the client, or Schedule event from annulledPlayer
@@ -217,6 +212,7 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 // If the data stored or the maximum number of retries is reached,
 // the battle data and other related data for the client will be reset.
 func (handler *MatchWSHandler) save(clientID string) {
+	mu.Lock()
 	if isLastBattleSaved[clientID] && handler.BattleData[clientID] == nil {
 		return
 	}
@@ -237,7 +233,7 @@ func (handler *MatchWSHandler) save(clientID string) {
 			break
 		}
 		// Sleep for a short period before retrying
-		time.Sleep(constant.SleepDuration)
+		time.Sleep(constants.SleepDuration)
 	}
 
 	// reset the data
@@ -245,6 +241,7 @@ func (handler *MatchWSHandler) save(clientID string) {
 	handler.BattleData[clientID] = nil
 	handler.Monsters[clientID] = nil
 	handler.GamePlayers[clientID] = nil
+	mu.Unlock()
 }
 
 // sendMessageToClient helper function to send message to specified client by given id

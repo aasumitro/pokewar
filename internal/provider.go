@@ -2,13 +2,13 @@ package internal
 
 import (
 	"context"
+	"github.com/aasumitro/pokewar/configs"
+	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/internal/delivery/handler/http"
 	"github.com/aasumitro/pokewar/internal/delivery/handler/ws"
 	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
 	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
 	"github.com/aasumitro/pokewar/internal/service"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
-	"github.com/aasumitro/pokewar/pkg/constant"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +32,7 @@ func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 }
 
 func shouldSyncMonsters() bool {
-	return appconfig.Instance.LastSync <= constant.SyncThreshold &&
-		appconfig.Instance.TotalMonsterSync <= constant.SyncThreshold &&
-		appconfig.Instance.LastMonsterID <= constant.SyncThreshold
+	return configs.Instance.LastSync <= constants.SyncThreshold &&
+		configs.Instance.TotalMonsterSync <= constants.SyncThreshold &&
+		configs.Instance.LastMonsterID <= constants.SyncThreshold
 }

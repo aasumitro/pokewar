@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/domain"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"time"
 )
 
@@ -134,5 +134,5 @@ func (repo *monsterSQLRepository) Count(ctx context.Context) int {
 }
 
 func NewMonsterSQLRepository() domain.IMonsterRepository {
-	return &monsterSQLRepository{db: appconfig.DbPool}
+	return &monsterSQLRepository{db: configs.DbPool}
 }
