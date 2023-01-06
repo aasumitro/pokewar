@@ -3,9 +3,9 @@ package rest
 import (
 	"context"
 	"fmt"
+	"github.com/aasumitro/pokewar/configs"
+	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/domain"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
-	"github.com/aasumitro/pokewar/pkg/constant"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"math/rand"
 	"sync"
@@ -19,10 +19,10 @@ type pokeapiRESTRepository struct {
 func (repo *pokeapiRESTRepository) Pokemon(ctx context.Context, offset, limit int) ([]*domain.Monster, error) {
 	client := repo.client.NewClient(
 		httpclient.Ctx(ctx),
-		httpclient.Timeout(constant.TimeoutDuration),
+		httpclient.Timeout(constants.TimeoutDuration),
 		httpclient.Endpoint(fmt.Sprintf(
 			"%spokemon?offset=%d&limit=%d",
-			appconfig.Instance.PokeapiURL, offset, limit,
+			configs.Instance.PokeapiURL, offset, limit,
 		)))
 
 	monsters, err := ProceedData(client, TransformData)
@@ -84,7 +84,7 @@ func TransformData(
 
 	var skills []*domain.Skill
 	var wgMove sync.WaitGroup
-	for _, moveURL := range RandomSubset(pokemon.Moves, constant.MaxMoveSize) {
+	for _, moveURL := range RandomSubset(pokemon.Moves, constants.MaxMoveSize) {
 		wgMove.Add(1)
 		go func(moveURL string) {
 			defer wgMove.Done()

@@ -3,10 +3,10 @@ package rest_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/repository/rest"
 	"github.com/aasumitro/pokewar/mocks"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"github.com/aasumitro/pokewar/pkg/httpclient"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/mock"
@@ -71,8 +71,8 @@ func (suite *pokeapiRESTRepositoryTestSuite) SetupSuite() {
 
 func (suite *pokeapiRESTRepositoryTestSuite) TestRepository_Pokemon() {
 	viper.SetConfigFile("../../../.example.env")
-	appconfig.LoadEnv()
-	appconfig.Instance.PokeapiURL = "https://pokeapi.co/api/v2/"
+	configs.LoadEnv()
+	configs.Instance.PokeapiURL = "https://pokeapi.co/api/v2/"
 	data, _ := json.Marshal(domain.PokemonResult{
 		Results: []domain.PokemonSummary{
 			{Name: "bulbasaur", URL: "https://pokeapi.co/api/v2/pokemon/1/"},

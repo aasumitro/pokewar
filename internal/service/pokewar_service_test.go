@@ -3,10 +3,10 @@ package service_test
 import (
 	"context"
 	"errors"
+	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/domain"
 	"github.com/aasumitro/pokewar/internal/service"
 	"github.com/aasumitro/pokewar/mocks"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/mock"
@@ -27,9 +27,9 @@ type pokewarServiceTestSuite struct {
 func (suite *pokewarServiceTestSuite) SetupSuite() {
 	viper.SetConfigFile("../../.example.env")
 
-	appconfig.LoadEnv()
+	configs.LoadEnv()
 
-	appconfig.Instance.TotalMonsterSync = 10
+	configs.Instance.TotalMonsterSync = 10
 
 	suite.monsters = []*domain.Monster{
 		{
@@ -157,9 +157,9 @@ func (suite *pokewarServiceTestSuite) TestService_FetchMonsters_ShouldError() {
 }
 
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessInsert() {
-	appconfig.Instance.TotalMonsterSync = 0
-	appconfig.Instance.LimitSync = 0
-	appconfig.Instance.LastMonsterID = 0
+	configs.Instance.TotalMonsterSync = 0
+	configs.Instance.LimitSync = 0
+	configs.Instance.LastMonsterID = 0
 	repo := new(mocks.IPokeapiRESTRepository)
 	mstRepo := new(mocks.IMonsterRepository)
 	svc := service.NewPokewarService(
@@ -177,14 +177,14 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldSuccessInse
 	require.NotNil(suite.T(), data)
 	require.Equal(suite.T(), data, suite.monsters)
 	repo.AssertExpectations(suite.T())
-	appconfig.Instance.UpdateEnv("LAST_SYNC", 0)
-	appconfig.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", 0)
-	appconfig.Instance.UpdateEnv("LAST_MONSTER_ID", 0)
+	configs.Instance.UpdateEnv("LAST_SYNC", 0)
+	configs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", 0)
+	configs.Instance.UpdateEnv("LAST_MONSTER_ID", 0)
 }
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert() {
-	appconfig.Instance.TotalMonsterSync = 0
-	appconfig.Instance.LimitSync = 0
-	appconfig.Instance.LastMonsterID = 0
+	configs.Instance.TotalMonsterSync = 0
+	configs.Instance.LimitSync = 0
+	configs.Instance.LastMonsterID = 0
 	repo := new(mocks.IPokeapiRESTRepository)
 	mstRepo := new(mocks.IMonsterRepository)
 	svc := service.NewPokewarService(
@@ -210,9 +210,9 @@ func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorInsert
 	repo.AssertExpectations(suite.T())
 }
 func (suite *pokewarServiceTestSuite) TestService_SyncMonsters_ShouldErrorWhenGetPokemon() {
-	appconfig.Instance.TotalMonsterSync = 10
-	appconfig.Instance.LimitSync = 10
-	appconfig.Instance.LastMonsterID = 10
+	configs.Instance.TotalMonsterSync = 10
+	configs.Instance.LimitSync = 10
+	configs.Instance.LastMonsterID = 10
 	repo := new(mocks.IPokeapiRESTRepository)
 	svc := service.NewPokewarService(
 		context.TODO(), repo, new(mocks.IMonsterRepository),

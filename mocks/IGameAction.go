@@ -12,26 +12,6 @@ type IGameAction struct {
 	mock.Mock
 }
 
-// Eliminate provides a mock function with given fields: pos
-func (_m *IGameAction) Eliminate(pos int) {
-	_m.Called(pos)
-}
-
-// Moves provides a mock function with given fields:
-func (_m *IGameAction) Moves() {
-	_m.Called()
-}
-
-// Point provides a mock function with given fields:
-func (_m *IGameAction) Point() {
-	_m.Called()
-}
-
-// Rank provides a mock function with given fields:
-func (_m *IGameAction) Rank() {
-	_m.Called()
-}
-
 // Reset provides a mock function with given fields:
 func (_m *IGameAction) Reset() {
 	_m.Called()

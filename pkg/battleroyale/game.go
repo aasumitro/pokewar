@@ -2,7 +2,7 @@ package battleroyale
 
 import (
 	"fmt"
-	"github.com/aasumitro/pokewar/pkg/constant"
+	"github.com/aasumitro/pokewar/constants"
 	"math/rand"
 	"sort"
 	"time"
@@ -57,7 +57,7 @@ func (g *Game) Start(game chan *Game, log chan string, eliminated chan string) {
 		// Call this function to perform actions
 		// like attacking and eliminating players.
 		g.performPlayerActions()
-		time.Sleep(constant.SleepDuration) // todo: lets think about this
+		time.Sleep(constants.SleepDuration) // todo: lets think about this
 		// Check if there is only one player left alive.
 		if g.alivePlayers() == 1 {
 			// Calculate the ranks of the players.
@@ -160,7 +160,7 @@ func (g *Game) calculatePlayersRank() {
 // Players with a higher rank will get more points.
 func (g *Game) calculatePlayersPoint() {
 	for i, p := range g.Players {
-		p.UpdateScore(constant.MaxPoint - i)
+		p.UpdateScore(constants.MaxPoint - i)
 	}
 }
 

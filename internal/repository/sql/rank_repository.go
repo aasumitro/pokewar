@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/domain"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
 )
 
 type rankSQLRepository struct {
@@ -58,5 +58,5 @@ func (repo *rankSQLRepository) All(ctx context.Context, args ...string) (data []
 }
 
 func NewRankSQLRepository() domain.IRankRepository {
-	return &rankSQLRepository{db: appconfig.DbPool}
+	return &rankSQLRepository{db: configs.DbPool}
 }

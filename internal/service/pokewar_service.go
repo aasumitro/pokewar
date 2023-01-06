@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/aasumitro/pokewar/configs"
+	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/domain"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
-	"github.com/aasumitro/pokewar/pkg/constant"
 	"github.com/aasumitro/pokewar/pkg/utils"
 	"math/rand"
 	"net/http"
@@ -43,9 +43,9 @@ func (service *pokewarService) SyncMonsters(
 	updateEnv bool,
 	_ ...string,
 ) (data []*domain.Monster, svcErr *utils.ServiceError) {
-	offset := appconfig.Instance.TotalMonsterSync
-	limit := appconfig.Instance.LimitSync
-	lastID := appconfig.Instance.LastMonsterID
+	offset := configs.Instance.TotalMonsterSync
+	limit := configs.Instance.LimitSync
+	lastID := configs.Instance.LastMonsterID
 	maxRetries, retryCount := 3, 0
 	// get data from pokeapi.co
 	data, err := service.pokemonRepo.Pokemon(service.ctx, offset, limit)
@@ -76,14 +76,14 @@ func (service *pokewarService) SyncMonsters(
 				break
 			}
 			// Data was not successfully inserted, so sleep for the specified delay before trying again
-			time.Sleep(constant.SleepDuration)
+			time.Sleep(constants.SleepDuration)
 		}
 	}
 	// when success update env
 	if updateEnv && err == nil {
-		appconfig.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
-		appconfig.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
-		appconfig.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
+		configs.Instance.UpdateEnv("LAST_SYNC", time.Now().Unix())
+		configs.Instance.UpdateEnv("TOTAL_MONSTER_SYNC", offset+len(data))
+		configs.Instance.UpdateEnv("LAST_MONSTER_ID", maxID)
 	}
 	// return data to handler
 	return utils.ValidateDataRows[domain.Monster](data, err)
@@ -123,10 +123,10 @@ func (service *pokewarService) PrepareMonstersForBattle() (
 	error *utils.ServiceError,
 ) {
 	var args []string
-	randID := make([]int, 0, constant.MaxPlayerSize)
+	randID := make([]int, 0, constants.MaxPlayerSize)
 	generatedKey := make(map[int]bool)
 	for len(randID) < 5 {
-		n := rand.Intn(appconfig.Instance.TotalMonsterSync-1) + 1
+		n := rand.Intn(configs.Instance.TotalMonsterSync-1) + 1
 		if _, found := generatedKey[n]; !found {
 			randID = append(randID, n)
 			generatedKey[n] = true

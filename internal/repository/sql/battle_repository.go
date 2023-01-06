@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/domain"
-	"github.com/aasumitro/pokewar/pkg/appconfig"
 	"strings"
 	"time"
 )
@@ -134,5 +134,5 @@ func (repo *battleSQLRepository) Create(ctx context.Context, param *domain.Battl
 }
 
 func NewBattleSQLRepository() domain.IBattleRepository {
-	return &battleSQLRepository{db: appconfig.DbPool}
+	return &battleSQLRepository{db: configs.DbPool}
 }

@@ -1,4 +1,4 @@
-package appconfig
+package configs
 
 import (
 	"database/sql"
