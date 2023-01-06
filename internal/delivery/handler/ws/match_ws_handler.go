@@ -204,11 +204,6 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 	handler.sendMessageToClient(
 		msgType, clientID, "success",
 		"eliminated_result", handler.BattleData[clientID])
-	// Schedule the save function to be called after 10 seconds
-	isLastBattleSaved[clientID] = false
-	time.AfterFunc(1*time.Second, func() {
-		handler.save(clientID)
-	})
 }
 
 // save handles the "save" request message type from the client, or Schedule event from annulledPlayer
