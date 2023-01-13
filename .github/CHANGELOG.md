@@ -31,3 +31,5 @@ UPDATE VERSION:
 - WS Handler Improvement
 - Add battle log after player annulled
 - Update Test Coverage
+- Fixing Player Rank & Score
+- Fixing Monster Sync
