@@ -34,14 +34,14 @@ var (
 // battleHistory handles the "histories" request message type from the client.
 // Proceed an error message or the list of battles history that extracted to
 // the relevant information and format, and sends it back to the client.
-func (handler *MatchWSHandler) battleHistory(msgType int, clientID string) {
+func (handler *MatchWSHandler) battleHistory(clientID string) {
 	// Fetch the last 5 battles from the database via service
 	data, errorData := handler.Svc.FetchBattles("LIMIT 5")
 	if errorData != nil {
 		// If there was an error fetching the battles,
 		// send an error message to the client
 		handler.sendMessageToClient(
-			msgType, clientID, "error",
+			clientID, "error",
 			errorData.Message.(string), nil)
 	}
 	// Pre-allocate capacity for the histories slice using make
@@ -67,21 +67,21 @@ func (handler *MatchWSHandler) battleHistory(msgType int, clientID string) {
 	}
 	// Send the histories to the client
 	handler.sendMessageToClient(
-		msgType, clientID, "success",
+		clientID, "success",
 		"battle_histories", histories)
 }
 
 // prepareBattle handles the "prepare" request message type from the client.
 // Proceed an error message or the list of monsters then transform the list of monsters
 // into a list of players and sends the list of monsters back to the client.
-func (handler *MatchWSHandler) prepareBattle(msgType int, clientID string) {
+func (handler *MatchWSHandler) prepareBattle(clientID string) {
 	// Fetch the list of monsters from the database
 	monsterData, errorData := handler.Svc.PrepareMonstersForBattle()
 	if errorData != nil {
 		// If there was an error fetching the monsters,
 		// send an error message to the client
 		handler.sendMessageToClient(
-			msgType, clientID, "error",
+			clientID, "error",
 			errorData.Message.(string), nil)
 	}
 	// Store the list of monsters and transform
@@ -91,20 +91,20 @@ func (handler *MatchWSHandler) prepareBattle(msgType int, clientID string) {
 	handler.GamePlayers[clientID] = players
 	// Send the list of monsters to the client
 	handler.sendMessageToClient(
-		msgType, clientID, "success",
+		clientID, "success",
 		"monsters", monsterData)
 }
 
 // startBattle handles the "start" request message type from the client.
 // It starts a new battle game for a specified client, sends data (logs, eliminated players, and result)
 // back to the client after transforming it into the specified format, and resets the game.
-func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
+func (handler *MatchWSHandler) startBattle(clientID string) {
 	if handler.GamePlayers[clientID] == nil {
 		// if players not set don't play the game
 		// and send notify to user load random monster
 		// to play the game and start the match
 		handler.sendMessageToClient(
-			msgType, clientID, "error",
+			clientID, "error",
 			"Please press random button again!", nil)
 		return
 	}
@@ -114,7 +114,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	go func() {
 		for update := range updateBuffer {
 			handler.sendMessageToClient(
-				msgType, clientID, update["status"].(string),
+				clientID, update["status"].(string),
 				update["data_type"].(string), update["data"])
 		}
 	}()
@@ -152,7 +152,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 	gameResult := datatransform.TransformGameResultToBattle(<-result)
 	handler.BattleData[clientID] = gameResult
 	handler.sendMessageToClient(
-		msgType, clientID, "success",
+		clientID, "success",
 		"battle_result", gameResult)
 	// Reset the game
 	game.Reset()
@@ -167,7 +167,7 @@ func (handler *MatchWSHandler) startBattle(msgType int, clientID string) {
 // It finds the index of the player to be annulled increment/decrement-ing the rank and points of other players
 // after that make new log, sends the updated data to the client and schedules the save function
 // to be called after 10 seconds using time.AfterFunc
-func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data any) {
+func (handler *MatchWSHandler) annulledPlayer(clientID string, data any) {
 	// Find the index of the player to be annulled
 	var playerIndex int
 	for i, player := range handler.BattleData[clientID].Players {
@@ -198,12 +198,13 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 	)
 	// Send log message to the client
 	handler.sendMessageToClient(
-		msgType, clientID, "success",
+		clientID, "success",
 		"battle_logs", logMsg)
 	// Send updated data to the client
 	handler.sendMessageToClient(
-		msgType, clientID, "success",
-		"eliminated_result", handler.BattleData[clientID])
+		clientID, "success",
+		"eliminated_result",
+		handler.BattleData[clientID])
 }
 
 // save handles the "save" request message type from the client, or Schedule event from annulledPlayer
@@ -212,10 +213,10 @@ func (handler *MatchWSHandler) annulledPlayer(msgType int, clientID string, data
 // If the data stored or the maximum number of retries is reached,
 // the battle data and other related data for the client will be reset.
 func (handler *MatchWSHandler) save(clientID string) {
-	mu.Lock()
 	if isLastBattleSaved[clientID] && handler.BattleData[clientID] == nil {
 		return
 	}
+	mu.Lock()
 	// Set the maximum number of retries and
 	// the initial retry counter
 	maxRetries, retryCount := 3, 0
@@ -235,18 +236,22 @@ func (handler *MatchWSHandler) save(clientID string) {
 		// Sleep for a short period before retrying
 		time.Sleep(constants.SleepDuration)
 	}
-
 	// reset the data
 	isLastBattleSaved[clientID] = true
 	handler.BattleData[clientID] = nil
 	handler.Monsters[clientID] = nil
 	handler.GamePlayers[clientID] = nil
 	mu.Unlock()
+	// Send log message to the client
+	handler.sendMessageToClient(
+		clientID, "success",
+		"battle_logs", fmt.Sprintf(
+			"%d - battle saved!\n",
+			time.Now().UnixMicro()))
 }
 
 // sendMessageToClient helper function to send message to specified client by given id
 func (handler *MatchWSHandler) sendMessageToClient(
-	msgType int,
 	clientID, status, dt string,
 	data any,
 ) {
@@ -266,7 +271,7 @@ func (handler *MatchWSHandler) sendMessageToClient(
 				"data":      data,
 			})
 		}
-		_ = conn.WriteMessage(msgType, message)
+		_ = conn.WriteMessage(websocket.TextMessage, message)
 		mu.Unlock()
 	}
 }
@@ -284,7 +289,7 @@ func (handler *MatchWSHandler) Run(ctx *gin.Context) {
 	clients[idParams] = ws
 	// starts a loop that listens for incoming messages from the client and processes them.
 	for {
-		mt, message, err := ws.ReadMessage()
+		_, message, err := ws.ReadMessage()
 		if err != nil {
 			break
 		}
@@ -294,13 +299,13 @@ func (handler *MatchWSHandler) Run(ctx *gin.Context) {
 		_ = json.Unmarshal(message, &msg)
 		switch msg["action"] {
 		case "histories":
-			handler.battleHistory(mt, msg["id"].(string))
+			handler.battleHistory(msg["id"].(string))
 		case "prepare":
-			handler.prepareBattle(mt, msg["id"].(string))
+			handler.prepareBattle(msg["id"].(string))
 		case "start":
-			handler.startBattle(mt, msg["id"].(string))
+			handler.startBattle(msg["id"].(string))
 		case "annulled":
-			handler.annulledPlayer(mt, msg["id"].(string), msg["data"])
+			handler.annulledPlayer(msg["id"].(string), msg["data"])
 		case "save":
 			handler.save(msg["id"].(string))
 		}
