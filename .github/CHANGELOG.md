@@ -14,6 +14,16 @@ UPDATE VERSION:
 - XX(2) -> Updated when add functionality in a backwards compatible manner
 - XX(3) -> Updated when patch and improvement
 
+[0.0.3-dev]
+---
+
+- Fixing UI: 
+  - Battle action button section - hide when game started
+- Fixing WS Handler:
+  - save func - unlocked mutex can not be accessed
+  - save func - battle_logs when game saved
+  - sendMessage func - message type replace with lib const instead of inject
+
 [0.0.2-dev]
 ---
 
