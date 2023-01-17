@@ -18,11 +18,11 @@ UPDATE VERSION:
 ---
 
 - Fixing UI: 
-  - Battle action button section - hide when game started
+  - Battle - action button section, hide when game started
 - Fixing WS Handler:
   - save func - unlocked mutex can not be accessed
   - save func - battle_logs when game saved
-  - sendMessage func - message type replace with lib const instead of inject
+  - sendMessage func - message_type replace with lib const instead of inject
 
 [0.0.2-dev]
 ---
