@@ -40,7 +40,7 @@ func (handler *RankHTTPHandler) Fetch(ctx *gin.Context) {
 		host := ctx.Request.Host
 		path := "api/v1/ranks"
 		total, current, next, prev := utils.Paginate(limit, offset, monsterCount, host, path)
-		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev)
+		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev, monsterCount)
 		return
 	}
 

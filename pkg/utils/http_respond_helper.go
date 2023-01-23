@@ -16,6 +16,7 @@ type SuccessRespond struct {
 type SuccessRespondWithPagination struct {
 	Code     int    `json:"code"`
 	Status   string `json:"status"`
+	Count    int    `json:"total_data"`
 	Total    int    `json:"total_page"`
 	Current  int    `json:"current_page"`
 	Next     Paging `json:"next"`
@@ -44,6 +45,7 @@ func NewHTTPRespond(context *gin.Context, code int, data interface{}, args ...an
 				Current:  args[1].(int),
 				Next:     args[2].(Paging),
 				Previous: args[3].(Paging),
+				Count:    args[4].(int),
 				Status:   http.StatusText(code),
 				Data:     data,
 			})
