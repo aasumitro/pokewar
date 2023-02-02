@@ -13,7 +13,7 @@ deps: $(GOTESTSUM)
 deps:
 	@ echo "Required Tools Are Available"
 
-build: swag
+build: tests
 	@ echo "Build Binary"
 	@ mkdir ./build && mkdir ./build/db
 	@ cp ./db/local-data.db ./build/db/local-data.db && cp .example.env ./build/.env
