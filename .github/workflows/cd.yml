@@ -31,7 +31,7 @@ jobs:
       - name: copy .env file
         run: xcopy /y/a .example.env build\db\.env*
       - name: Install Deps
-        run: go mod install
+        run: go mod vendor
       - name: Build
         run: go build -o build/pokewar.exe cmd/web/main.go -v
       - name: Deploy to Azure
