@@ -50,7 +50,7 @@ func init() {
 	docs.SwaggerInfo.Title = configs.Instance.AppName
 	docs.SwaggerInfo.Description = "Pocket Monster Battleroyale API Spec"
 	docs.SwaggerInfo.Version = configs.Instance.AppVersion
-	docs.SwaggerInfo.Host = configs.Instance.AppURL
+	docs.SwaggerInfo.Host = "pokewar.azurewebsites.net"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 }
 
@@ -73,12 +73,12 @@ func main() {
 	}
 
 	port := os.Getenv("HTTP_PLATFORM_PORT")
-	getUrl := func() string {
+	getURL := func() string {
 		if port == "" {
 			return configs.Instance.AppURL
 		}
 		return fmt.Sprintf("127.0.0.1:%s", port)
 	}
 
-	log.Fatal(appEngine.Run(getUrl()))
+	log.Fatal(appEngine.Run(getURL()))
 }

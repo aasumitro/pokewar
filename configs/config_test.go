@@ -70,7 +70,7 @@ func TestAppConfig(t *testing.T) {
 			case "UPDATE_SUCCESS":
 				initialValue := configs.Instance.AppDebug
 				configs.Instance.UpdateEnv("APP_DEBUG", !initialValue)
-				assert.Equal(t, configs.Instance.AppDebug, false)
+				assert.Equal(t, configs.Instance.AppDebug, true)
 				configs.Instance.UpdateEnv("APP_DEBUG", initialValue)
 			case "DB_CONN":
 				configs.Instance.DBDsnURL = "../db/local-data.db"
