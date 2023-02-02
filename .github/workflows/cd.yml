@@ -29,7 +29,7 @@ jobs:
       - name: Copy .db file
         run: xcopy /h db\local-data.db build\db
       - name: copy .env file
-        run: xcopy /y/a .example.env build\db\.env*
+        run: xcopy /y/a .example.env build\.env*
       - name: Install Deps
         run: go mod vendor
       - name: Build
