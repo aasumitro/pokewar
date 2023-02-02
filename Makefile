@@ -15,11 +15,10 @@ deps:
 
 build: tests
 	@ echo "Build Binary"
-	@ mkdir ./build && mkdir ./build/db
+	@ mkdir ./build/db
 	@ cp ./db/local-data.db ./build/db/local-data.db && cp .example.env ./build/.env
 	@ go mod tidy -compat=1.19
-	@ go build -o ./build/pokewar-app ./cmd/web/main.go
-	# GOOS=windows GOARCH=amd64 go build -o ./build/pokewar.exe ./cmd/web/main.go
+	@ go build -o ./build/pokewar.exe ./cmd/web/main.go -v
 	@ echo "generate binary done"
 
 swag: tests
