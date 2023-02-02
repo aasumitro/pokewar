@@ -32,6 +32,7 @@ func TestNewHttpRespond(t *testing.T) {
 				1,
 				utils.Paging{URL: "http://example.com/next", Path: "/next"},
 				utils.Paging{URL: "http://example.com/prev", Path: "/prev"},
+				100,
 			},
 			expected: utils.SuccessRespondWithPagination{
 				Code:     http.StatusOK,

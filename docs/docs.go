@@ -501,6 +501,9 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
+                "total_data": {
+                    "type": "integer"
+                },
                 "total_page": {
                     "type": "integer"
                 }

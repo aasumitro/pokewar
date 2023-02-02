@@ -90,20 +90,6 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnData
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), res)
 }
-func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromQuery() {
-	q := "SELECT b.id as id, b.started_at as started_at, b.ended_at as ended_at, "
-	q += "CAST((SELECT json_group_array(json_object('id', bl.id, 'battle_id', bl.battle_id, 'description', bl.description, "
-	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
-	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
-	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
-	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
-	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
-	expectedQuery := regexp.QuoteMeta(q)
-	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
-	res, err := suite.repo.All(context.TODO())
-	require.NotNil(suite.T(), err)
-	require.Nil(suite.T(), res)
-}
 func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromScan() {
 	data := suite.mock.
 		NewRows([]string{"id", "started_at", "ended_at", "players", "logs"}).
@@ -121,6 +107,20 @@ func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErro
 	res, err := suite.repo.All(context.TODO())
 	require.Nil(suite.T(), res)
 	require.NotNil(suite.T(), err)
+}
+func (suite *battleSQLRepositoryTestSuite) TestRepository_All_ExpectedReturnErrorFromQuery() {
+	q := "SELECT b.id as id, b.started_at as started_at, b.ended_at as ended_at, "
+	q += "CAST((SELECT json_group_array(json_object('id', bl.id, 'battle_id', bl.battle_id, 'description', bl.description, "
+	q += "'created_at', bl.created_at)) FROM battle_logs as bl where bl.battle_id = b.id) AS CHAR) as battle_logs, "
+	q += "CAST((SELECT json_group_array(json_object('id', bp.id, 'battle_id', bp.battle_id, 'monster_id', bp.monster_id, "
+	q += "'eliminated_at', bp.eliminated_at, 'annulled_at', bp.annulled_at, 'rank', bp.rank, 'point', bp.point, "
+	q += "'name', m.name, 'avatar', m.avatar)) FROM battle_players as bp join monsters as m on bp.monster_id = "
+	q += "m.id where bp.battle_id = b.id) AS CHAR) as battle_players FROM battles as b ORDER BY b.id DESC "
+	expectedQuery := regexp.QuoteMeta(q)
+	suite.mock.ExpectQuery(expectedQuery).WillReturnError(errors.New(""))
+	res, err := suite.repo.All(context.TODO())
+	require.NotNil(suite.T(), err)
+	require.Nil(suite.T(), res)
 }
 
 // =========== Create
