@@ -11,8 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 // @contact.name 	@aasumitro
@@ -33,6 +35,12 @@ func init() {
 
 	if !configs.Instance.AppDebug {
 		gin.SetMode(gin.ReleaseMode)
+
+		accessLogFile, _ := os.Create("./temps/access.log")
+		gin.DefaultWriter = io.MultiWriter(accessLogFile, os.Stdout)
+
+		errorLogFile, _ := os.Create("./temps/errors.log")
+		gin.DefaultErrorWriter = io.MultiWriter(errorLogFile, os.Stdout)
 	}
 
 	appEngine = gin.Default()
