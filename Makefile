@@ -17,7 +17,7 @@ build: tests
 	@ echo "Build Binary"
 	@ mkdir ./build/db
 	@ cp ./db/local-data.db ./build/db/local-data.db && cp .example.env ./build/.env
-	@ go mod tidy -compat=1.19
+	@ go mod tidy
 	@ go build -o ./build/pokewar.exe ./cmd/web/main.go -v
 	@ echo "generate binary done"
 
