@@ -36,11 +36,11 @@ func (handler *BattleHTTPHandler) Fetch(ctx *gin.Context) {
 
 	if len(paging) > 0 && paging[0] != 0 {
 		limit, offset := paging[0], paging[1]
-		monsterCount := handler.Svc.BattlesCount()
+		battleCount := handler.Svc.BattlesCount()
 		host := ctx.Request.Host
 		path := "api/v1/battles"
-		total, current, next, prev := utils.Paginate(limit, offset, monsterCount, host, path)
-		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev)
+		total, current, next, prev := utils.Paginate(limit, offset, battleCount, host, path)
+		utils.NewHTTPRespond(ctx, http.StatusOK, data, total, current, next, prev, battleCount)
 		return
 	}
 

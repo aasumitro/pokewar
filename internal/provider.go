@@ -6,6 +6,7 @@ import (
 	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/internal/delivery/handler/http"
 	"github.com/aasumitro/pokewar/internal/delivery/handler/ws"
+	"github.com/aasumitro/pokewar/internal/delivery/middleware"
 	restRepo "github.com/aasumitro/pokewar/internal/repository/rest"
 	sqlRepo "github.com/aasumitro/pokewar/internal/repository/sql"
 	"github.com/aasumitro/pokewar/internal/service"
@@ -24,6 +25,7 @@ func NewAPIProvider(ctx context.Context, router *gin.Engine) {
 		pokewarService.SyncMonsters(true)
 	}
 
+	router.Use(middleware.CORS())
 	v1 := router.Group("/api/v1")
 	http.NewMonsterHTTPHandler(pokewarService, v1)
 	http.NewRankHTTPHandler(pokewarService, v1)

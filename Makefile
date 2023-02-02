@@ -13,13 +13,13 @@ deps: $(GOTESTSUM)
 deps:
 	@ echo "Required Tools Are Available"
 
-build: swag
+build: tests
 	@ echo "Build Binary"
 	@ mkdir ./build && mkdir ./build/db
-	@ cp ./db/fresh.db ./build/db/local-data.db && cp .example.env ./build/.env
+	@ cp ./db/local-data.db ./build/db/local-data.db && cp .example.env ./build/.env
 	@ go mod tidy -compat=1.19
-	@ go build -o ./build/pokewar ./cmd/web/main.go
-	@ GOOS=windows GOARCH=amd64 go build -o ./build/pokewar.exe ./cmd/web/main.go
+	@ go build -o ./build/pokewar-app ./cmd/web/main.go
+	# GOOS=windows GOARCH=amd64 go build -o ./build/pokewar.exe ./cmd/web/main.go
 	@ echo "generate binary done"
 
 swag: tests
