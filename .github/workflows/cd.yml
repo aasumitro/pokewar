@@ -33,7 +33,7 @@ jobs:
       - name: Install Deps
         run: go mod vendor
       - name: Build
-        run: go build -o build/pokewar.exe cmd/web/main.go -v
+        run: go build -o build\pokewar.exe cmd\web\main.go -v
       - name: Deploy to Azure
         uses: Azure/webapps-deploy@v2
         with:
