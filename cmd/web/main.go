@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aasumitro/pokewar/configs"
 	"github.com/aasumitro/pokewar/constants"
 	"github.com/aasumitro/pokewar/docs"
@@ -71,5 +72,13 @@ func main() {
 		middleware.RegisterPPROF(appEngine)
 	}
 
-	log.Fatal(appEngine.Run(configs.Instance.AppURL))
+	port := os.Getenv("HTTP_PLATFORM_PORT")
+	getUrl := func() string {
+		if port == "" {
+			return configs.Instance.AppURL
+		}
+		return fmt.Sprintf("127.0.0.1:%s", port)
+	}
+
+	log.Fatal(appEngine.Run(getUrl()))
 }
