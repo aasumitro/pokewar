@@ -16,6 +16,11 @@ func ParseParam(ctx *gin.Context, filterBetween bool) ([]int, []string) {
 	var args []string
 
 	if len(params) > 0 {
+		if name := params.Get("name"); name != "" {
+			args = append(args, fmt.Sprintf(
+				"WHERE name LIKE '%%%s%%'", name))
+		}
+
 		if filterBetween {
 			between := params.Get("between")
 			if between != "" {
