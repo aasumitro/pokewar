@@ -54,4 +54,14 @@ func TestParseParam(t *testing.T) {
 			t.Errorf("ParseParam: expected args slice [WHERE started_at BETWEEN 1671552000 AND 1671724800], got %v", args)
 		}
 	})
+
+	t.Run("Check that name is parsed correctly", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/?name=lorem", nil)
+		ctx, _ := gin.CreateTestContext(nil)
+		ctx.Request = req
+		_, args := utils.ParseParam(ctx, true)
+		if !reflect.DeepEqual(args, []string{"WHERE name LIKE '%lorem%'"}) {
+			t.Errorf("ParseParam: WHERE name LIKE %%lorem%%, got %v", args)
+		}
+	})
 }
