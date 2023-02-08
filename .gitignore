@@ -15,7 +15,6 @@
 vendor/
 bin/
 coverage.txt
-oryxBuildBinary
 .idea
 .env
 .DS_Store
