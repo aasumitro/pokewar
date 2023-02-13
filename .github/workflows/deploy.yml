@@ -3,10 +3,10 @@ name: Build Go & Push to Azure
 on:
   push:
     branches:
-      - main
+      - release
   pull_request:
     branches:
-      - main
+      - release
     types: [closed]
 
 jobs:
